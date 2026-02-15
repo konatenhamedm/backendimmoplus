@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+      Télécharger notre application
+    </title>
+    <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #e6e9ec;
+      animation: fadeIn 0.7s ease-out;
+      text-align: center;
+    }
+
+    .header {
+      background: #f0f9fa;
+      padding: 20px;
+      border-bottom: 2px solid #53B0B7;
+    }
+
+    .header img {
+      max-width: 140px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #53B0B7;
+    }
+
+    .content {
+      padding: 30px 25px;
+      font-size: 15px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .content h2 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      color: #222;
+    }
+
+    .qr-code {
+      margin: 25px 0;
+    }
+
+    .qr-code img {
+      border: 2px solid #53B0B7;
+      border-radius: 10px;
+      padding: 8px;
+      background: #f9fdfd;
+    }
+
+    .stores {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stores img {
+      height: 55px;
+      transition: transform 0.2s;
+    }
+
+    .stores img:hover {
+      transform: scale(1.05);
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      padding: 15px;
+      border-top: 1px solid #e6e9ec;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <img src="http://backend.ateliya.com/logo_text.png" alt="ATELIYA">
+        <h1>
+          🚀 Bienvenue sur ATELIYA
+        </h1>
+      </div>
+
+      <!-- CONTENT -->
+      <div class="content">
+        <h2>
+          Bonjour
+          <b>
+            {{ "user.nom" }}
+          </b>
+          👋
+        </h2>
+        <p>
+          Merci pour votre inscription !
+          Pour profiter de toutes nos fonctionnalités, téléchargez dès maintenant notre application mobile :
+        </p>
+
+        <!-- QR Code -->
+        <div class="qr-code">
+          {#  <img src="{{ qr_code_url }}" alt="QR Code" width="150"> #}
+          <img src="{{ qr_code_data_uri('Bienvenue utilisateur !') }}" alt="QR Code de bienvenue">
+        </div>
+
+        <!-- Boutons Store -->
+     <div class="stores">
+    <a href="https://apps.apple.com/your-app">
+        <img src="http://backend.ateliya.com/appstore.png" 
+             alt="Télécharger sur App Store"
+             style="height: 45px; width: auto;">
+    </a>
+    <a href="https://play.google.com/store/apps/details?id=your.app">
+        <img src="http://backend.ateliya.com/playstore.png" 
+             alt="Disponible sur Google Play"
+             style="height: 57px; margin-top: -6px;width: auto;">
+    </a>
+</div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        © ATELIYA — Votre application de confiance
+      </div>
+    </div>
+  </body>
+</html>

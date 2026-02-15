@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Journal des Paiements</title>
+		<style>
+			@page {
+				margin: 120px 40px 80px;
+			}
+			header {
+				position: fixed;
+				top: -100px;
+				left: 0;
+				right: 0;
+				height: 100px;
+				border-bottom: 2px solid #ff6600;
+				padding-bottom: 5px;
+			}
+			footer {
+				position: fixed;
+				bottom: -60px;
+				left: 0;
+				right: 0;
+				height: 40px;
+				border-top: 1px solid #eee;
+				text-align: center;
+				font-size: 8px;
+				color: #999;
+				padding-top: 5px;
+			}
+			body {
+				font-family: DejaVu Sans, sans-serif;
+				font-size: 9px;
+				color: #333;
+				margin: 0;
+			}
+
+			.logo-container {
+				float: left;
+				width: 150px;
+			}
+			.logo-container img {
+				max-width: 140px;
+				max-height: 50px;
+			}
+			.company-info {
+				float: right;
+				text-align: right;
+				width: 350px;
+				font-size: 9px;
+				line-height: 1.3;
+			}
+			.company-name {
+				color: #ff6600;
+				font-size: 16px;
+				font-weight: bold;
+				margin-bottom: 2px;
+			}
+
+			.report-title {
+				clear: both;
+				text-align: center;
+				margin-top: 20px;
+				text-transform: uppercase;
+				font-size: 16px;
+				font-weight: bold;
+				color: #444;
+			}
+			.report-period {
+				text-align: center;
+				color: #777;
+				font-style: italic;
+				margin-bottom: 20px;
+			}
+
+			table.data-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 10px;
+			}
+			table.data-table th {
+				background: #ff6600;
+				color: #fff;
+				padding: 8px;
+				text-align: left;
+				text-transform: uppercase;
+				font-size: 8px;
+			}
+			table.data-table td {
+				border-bottom: 1px solid #eee;
+				padding: 8px;
+				vertical-align: top;
+			}
+			.row-even {
+				background: #fcfcfc;
+			}
+			.amount {
+				text-align: right;
+				font-weight: bold;
+			}
+
+			.total-row {
+				background: #f5f5f5;
+				font-weight: bold;
+				font-size: 11px;
+			}
+			.clear {
+				clear: both;
+			}
+			.pagenum:before {
+				content: counter(page);
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<div class="logo-container">
+				{% if logo %}
+					<img src="{{ logo }}" alt="Logo">
+				{% else %}
+					<div style="font-size: 24px; font-weight: bold; color: #ff6600;">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				{% endif %}
+			</div>
+			<div class="company-info">
+				<div class="company-name">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				<div>{{ entreprise.adresse|default('') }}
+					{{ entreprise.ville|default('') }}</div>
+				<div>Tél:
+					{{ entreprise.contacts|default('') }}
+					/
+					{{ entreprise.mobile|default('') }}</div>
+				<div>Email:
+					{{ entreprise.email|default('') }}</div>
+			</div>
+			<div class="clear"></div>
+		</header>
+
+		<footer>
+			<div>Document généré par ImmoPlus System le
+				{{ "now"|date("d/m/Y H:i") }}</div>
+			<div style="margin-top: 2px;">Page
+				<span class="pagenum"></span>
+			</div>
+		</footer>
+
+		<main>
+			<div class="report-title">Journal des Paiements</div>
+			<div class="report-period">Période du
+				{{ startDate|date('d/m/Y') }}
+				au
+				{{ endDate|date('d/m/Y') }}</div>
+
+			<table class="data-table" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Référence</th>
+						<th>Locataire</th>
+						<th>Mode</th>
+						<th>Facture</th>
+						<th class="amount">Montant (FCFA)</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for t in transactions %}
+						<tr class="{{ loop.index is even ? 'row-even' : '' }}">
+							<td>{{ t.date|date("d/m/Y H:i") }}</td>
+							<td style="font-family: monospace;">{{ t.reference }}</td>
+							<td>{{ t.locataire.nom }}
+								{{ t.locataire.prenoms }}</td>
+							<td>
+								<span style="background: #eee; padding: 2px 4px; border-radius: 3px;">{{ t.mode }}</span>
+							</td>
+							<td>{{ t.factureLocation.libFacture|default('N/A') }}</td>
+							<td class="amount">{{ t.amount|number_format(0, ',', ' ') }}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6" style="text-align: center; padding: 40px; color: #999;">Aucune transaction trouvée sur cette période.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+				{% if transactions|length > 0 %}
+					<tfoot>
+						<tr class="total-row">
+							<td colspan="5" style="text-align: right; padding: 10px;">TOTAL GENERAL</td>
+							<td class="amount" style="padding: 10px; color: #ff6600;">{{ total_amount|number_format(0, ',', ' ') }}</td>
+						</tr>
+					</tfoot>
+				{% endif %}
+			</table>
+		</main>
+	</body>
+</html>

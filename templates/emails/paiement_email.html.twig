@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification de Vente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 30px 15px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #e6e9ec;
+      animation: fadeIn 0.7s ease-out;
+    }
+
+    .header {
+      background: #f0f9fa;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #53B0B7;
+    }
+
+    .header img {
+      max-width: 140px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #53B0B7;
+    }
+
+    .content {
+      padding: 30px 25px;
+      font-size: 15px;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .content h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+      color: #222;
+    }
+
+    .vente {
+      background: #eaf7f8;
+      border: 1px solid #53B0B7;
+      border-radius: 8px;
+      text-align: center;
+      padding: 18px;
+      margin: 20px auto;
+      font-size: 20px;
+      font-weight: bold;
+      color: #53B0B7;
+      display: inline-block;
+      min-width: 220px;
+    }
+
+    .details {
+      margin-top: 15px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.8;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      padding: 15px;
+      border-top: 1px solid #e6e9ec;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <img src="http://backend.ateliya.com/logo_text.png" alt="Logo Ateliya">
+      <h1>💰 Notification de Vente</h1>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>Nouveau paiement reçu ✅</h2>
+      <p>Un nouveau paiement vient d’être effectué dans la succursale :</p>
+
+      <!-- Nom boutique -->
+      <div class="vente">
+        {{ boutique_libelle }}
+      </div>
+
+      <!-- Montant si disponible -->
+      {% if montant is defined %}
+      <div class="details">
+        💵 <strong>Montant :</strong> {{ montant }} FCFA
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      © ATELIYA — Gestion des ventes
+    </div>
+  </div>
+</body>
+</html>

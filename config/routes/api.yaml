@@ -1,0 +1,10 @@
+# config/routes/api.yaml
+api_reset_password_request:
+    path: /api/reset-password/request
+    controller: App\Controller\ResetPasswordController::request
+    methods: POST
+
+api_reset_password:
+    path: /api/reset-password/reset
+    controller: App\Controller\ResetPasswordController::reset
+    methods: POST

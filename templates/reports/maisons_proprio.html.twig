@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Répertoire Patrimoine</title>
+		<style>
+			@page {
+				margin: 120px 40px 80px;
+			}
+			header {
+				position: fixed;
+				top: -100px;
+				left: 0;
+				right: 0;
+				height: 100px;
+				border-bottom: 2px solid #ff6600;
+				padding-bottom: 5px;
+			}
+			footer {
+				position: fixed;
+				bottom: -60px;
+				left: 0;
+				right: 0;
+				height: 40px;
+				border-top: 1px solid #eee;
+				text-align: center;
+				font-size: 8px;
+				color: #999;
+				padding-top: 5px;
+			}
+			body {
+				font-family: DejaVu Sans, sans-serif;
+				font-size: 10px;
+				color: #333;
+				margin: 0;
+			}
+
+			.logo-container {
+				float: left;
+				width: 150px;
+			}
+			.logo-container img {
+				max-width: 140px;
+				max-height: 50px;
+			}
+			.company-info {
+				float: right;
+				text-align: right;
+				width: 350px;
+				font-size: 9px;
+				line-height: 1.3;
+			}
+			.company-name {
+				color: #ff6600;
+				font-size: 16px;
+				font-weight: bold;
+				margin-bottom: 2px;
+			}
+
+			.report-title {
+				clear: both;
+				text-align: center;
+				margin-top: 20px;
+				text-transform: uppercase;
+				font-size: 16px;
+				font-weight: bold;
+				color: #444;
+			}
+			.report-subtitle {
+				text-align: center;
+				color: #777;
+				margin-bottom: 30px;
+			}
+
+			.proprio-section {
+				margin-top: 20px;
+				page-break-inside: avoid;
+				border: 1px solid #eee;
+				border-radius: 6px;
+				overflow: hidden;
+			}
+			.proprio-header {
+				background: #f8f9fa;
+				padding: 10px;
+				border-bottom: 1px solid #eee;
+			}
+			.proprio-name {
+				color: #ff6600;
+				font-weight: bold;
+				font-size: 12px;
+			}
+			.maisons-count {
+				float: right;
+				background: #ff6600;
+				color: #fff;
+				padding: 2px 8px;
+				border-radius: 10px;
+				font-size: 9px;
+			}
+
+			table.data-table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			table.data-table th {
+				background: #fdfdfd;
+				color: #666;
+				padding: 8px;
+				text-align: left;
+				font-size: 9px;
+				border-bottom: 1px solid #eee;
+			}
+			table.data-table td {
+				padding: 8px;
+				border-bottom: 1px solid #f9f9f9;
+				font-size: 9px;
+			}
+
+			.badge {
+				background: #fff3e0;
+				color: #ef6c00;
+				padding: 2px 5px;
+				border-radius: 4px;
+				font-size: 8px;
+				font-weight: bold;
+			}
+
+			.clear {
+				clear: both;
+			}
+			.pagenum:before {
+				content: counter(page);
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<div class="logo-container">
+				{% if logo %}
+					<img src="{{ logo }}" alt="Logo">
+				{% else %}
+					<div style="font-size: 24px; font-weight: bold; color: #ff6600;">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				{% endif %}
+			</div>
+			<div class="company-info">
+				<div class="company-name">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				<div>{{ entreprise.adresse|default('') }}
+					{{ entreprise.ville|default('') }}</div>
+				<div>Tél:
+					{{ entreprise.contacts|default('') }}
+					/
+					{{ entreprise.mobile|default('') }}</div>
+				<div>Email:
+					{{ entreprise.email|default('') }}</div>
+			</div>
+			<div class="clear"></div>
+		</header>
+
+		<footer>
+			<div>Document généré par ImmoPlus System le
+				{{ "now"|date("d/m/Y H:i") }}</div>
+			<div style="margin-top: 2px;">Page
+				<span class="pagenum"></span>
+			</div>
+		</footer>
+
+		<main>
+			<div class="report-title">{{ title|default('Répertoire du Patrimoine') }}</div>
+			<div class="report-subtitle">Détails des propriétés par propriétaire</div>
+
+			{% for item in data %}
+				<div class="proprio-section">
+					<div class="proprio-header">
+						<span class="maisons-count">{{ item.maisons_count }}
+							Maison(s)</span>
+						<div class="proprio-name">{{ item.proprio.nom }}
+							{{ item.proprio.prenoms }}</div>
+					</div>
+					<table class="data-table" cellspacing="0">
+						<thead>
+							<tr>
+								<th style="width: 40%;">Nom de la Maison</th>
+								<th>Adresse / Localisation</th>
+								<th style="width: 25%;">Infos / Lot</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for m in item.maisons %}
+								<tr>
+									<td>
+										<strong>{{ m.nom }}</strong>
+									</td>
+									<td style="color: #666;">{{ m.adresse|default('Non renseignée') }}</td>
+									<td>
+										<span class="badge">LOT:
+											{{ m.lot|default('N/A') }}</span>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% else %}
+				<div style="text-align: center; padding: 60px; color: #ccc;">
+					<div style="font-size: 40px; margin-bottom: 10px;">🏘️</div>
+					Aucune donnée à afficher.
+				</div>
+			{% endfor %}
+		</main>
+	</body>
+</html>

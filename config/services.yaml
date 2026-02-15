@@ -1,0 +1,68 @@
+# config/services.yaml
+parameters:
+    # Configuration JWT
+    upload_dir: "%kernel.project_dir%/public/uploads"
+    jwt.secret: '%env(JWT_SECRET)%'
+    jwt.ttl: '%env(JWT_TTL)%'
+    app.jwt.secret: '%env(string:JWT_SECRET)%'
+    app.jwt.ttl: '%env(int:JWT_TTL)%'
+    mail_dsn: '%env(MAILER_DSN)%'
+    api_key: '%env(API_KEY)%'
+    merchant_id: '%env(MERCHANT_ID)%'
+    paiement_url: '%env(PAIEMENT_URL)%'
+    send_mail: '%env(SEND_MAIL)%'
+    super_admin: '%env(SUPER_ADMIN)%'
+    
+    # Configuration des bases de données pour le switch dynamique
+    database.dev.url: "mysql://root:@127.0.0.1:3306/app_couture_dev?serverVersion=8.0.32&charset=utf8mb4"
+    database.prod.url: "mysql://root:@127.0.0.1:3306/app_couture_prod?serverVersion=8.0.32&charset=utf8mb4"
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        bind:
+            string $jwtSecret: '%app.jwt.secret%'
+            int $jwtTtl: '%app.jwt.ttl%'
+
+
+    App\Controller\Apis\Config\ApiInterface:
+        arguments:
+            $sendMail: '%send_mail%'
+            $superAdmin: '%super_admin%'
+
+    App\helpers\laravel_helper: ~
+    
+    # Listener pour basculer dynamiquement entre les bases de données
+    App\EventListener\DatabaseSwitchListener:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+            $devDatabaseUrl: '%database.dev.url%'
+            $prodDatabaseUrl: '%database.prod.url%'
+        tags:
+            - { name: kernel.event_subscriber }
+    
+    # Déclaration ABSOLUMENT EXPLICITE
+    App\Service\JwtService:
+        arguments:
+            $secret: '%jwt.secret%'
+            $ttl: '%jwt.ttl%'
+            $params: '@parameter_bag'
+            $cache: '@cache.app'  # Utilise le cache système par défaut de Symfony
+        autowire: false  # Important pour forcer l'utilisation des arguments
+
+    # Faker service configuration for database seeding
+    faker.generator:
+        class: Faker\Generator
+        factory: ['Faker\Factory', 'create']
+        arguments: ['fr_FR']  # French locale for realistic French data
+
+    # Alias Faker\Generator to faker.generator for autowiring
+    Faker\Generator: '@faker.generator'
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'

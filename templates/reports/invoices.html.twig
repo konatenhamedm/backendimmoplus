@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>{{ title }}</title>
+		<style>
+			@page {
+				margin: 120px 40px 80px;
+			}
+			header {
+				position: fixed;
+				top: -100px;
+				left: 0;
+				right: 0;
+				height: 100px;
+				border-bottom: 2px solid #ff6600;
+				padding-bottom: 5px;
+			}
+			footer {
+				position: fixed;
+				bottom: -60px;
+				left: 0;
+				right: 0;
+				height: 40px;
+				border-top: 1px solid #eee;
+				text-align: center;
+				font-size: 8px;
+				color: #999;
+				padding-top: 5px;
+			}
+			body {
+				font-family: DejaVu Sans, sans-serif;
+				font-size: 9px;
+				color: #333;
+				margin: 0;
+			}
+
+			.logo-container {
+				float: left;
+				width: 150px;
+			}
+			.logo-container img {
+				max-width: 140px;
+				max-height: 50px;
+			}
+			.company-info {
+				float: right;
+				text-align: right;
+				width: 350px;
+				font-size: 9px;
+				line-height: 1.3;
+			}
+			.company-name {
+				color: #ff6600;
+				font-size: 16px;
+				font-weight: bold;
+				margin-bottom: 2px;
+			}
+
+			.report-title {
+				clear: both;
+				text-align: center;
+				margin-top: 20px;
+				text-transform: uppercase;
+				font-size: 16px;
+				font-weight: bold;
+				color: #444;
+			}
+			.report-period {
+				text-align: center;
+				color: #777;
+				font-style: italic;
+				margin-bottom: 20px;
+			}
+
+			table.data-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 10px;
+			}
+			table.data-table th {
+				background: #ff6600;
+				color: #fff;
+				padding: 6px;
+				text-align: left;
+				text-transform: uppercase;
+				font-size: 8px;
+				border: 1px solid #e65c00;
+			}
+			table.data-table td {
+				border: 1px solid #eee;
+				padding: 6px;
+				vertical-align: top;
+			}
+			.row-even {
+				background: #fcfcfc;
+			}
+			.amount {
+				text-align: right;
+				font-weight: bold;
+			}
+
+			.status-paid {
+				color: #2a9d8f;
+			}
+			.status-unpaid {
+				color: #e63946;
+			}
+
+			.summary-box {
+				background: #f8f9fa;
+				border: 1px solid #eee;
+				padding: 10px;
+				margin-top: 20px;
+				border-radius: 5px;
+			}
+			.summary-table {
+				width: 100%;
+			}
+			.summary-table td {
+				padding: 4px;
+				font-size: 10px;
+			}
+			.summary-table .val {
+				text-align: right;
+				font-weight: bold;
+			}
+
+			.clear {
+				clear: both;
+			}
+			.pagenum:before {
+				content: counter(page);
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<div class="logo-container">
+				{% if logo %}
+					<img src="{{ logo }}" alt="Logo">
+				{% else %}
+					<div style="font-size: 24px; font-weight: bold; color: #ff6600;">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				{% endif %}
+			</div>
+			<div class="company-info">
+				<div class="company-name">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				<div>{{ entreprise.adresse|default('') }}
+					{{ entreprise.ville|default('') }}</div>
+				<div>Tél:
+					{{ entreprise.contacts|default('') }}
+					/
+					{{ entreprise.mobile|default('') }}</div>
+				<div>Email:
+					{{ entreprise.email|default('') }}</div>
+			</div>
+			<div class="clear"></div>
+		</header>
+
+		<footer>
+			<div>Document généré par ImmoPlus System le
+				{{ "now"|date("d/m/Y H:i") }}</div>
+			<div style="margin-top: 2px;">Page
+				<span class="pagenum"></span>
+			</div>
+		</footer>
+
+		<main>
+			<div class="report-title">{{ title }}</div>
+			<div class="report-period">Analyse du
+				{{ startDate|date('d/m/Y') }}
+				au
+				{{ endDate|date('d/m/Y') }}</div>
+
+			<table class="data-table" cellspacing="0">
+				<thead>
+					<tr>
+						<th>Date</th>
+						<th>Locataire</th>
+						<th>Facture/Libellé</th>
+						<th class="amount">Montant HT</th>
+						<th class="amount">Encaissements</th>
+						<th class="amount">Reste à Payer</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for f in factures %}
+						<tr class="{{ loop.index is even ? 'row-even' : '' }}">
+							<td>{{ f.DateEmission|date("d/m/Y") }}</td>
+							<td>
+								<strong>{{ f.locataire.nom }}
+									{{ f.locataire.prenoms }}</strong>
+							</td>
+							<td style="font-size: 8px;">{{ f.libFacture }}</td>
+							<td class="amount">{{ f.MntFact|number_format(0, ',', ' ') }}</td>
+							<td class="amount status-paid">{{ (f.MntFact - f.SoldeFactLoc)|number_format(0, ',', ' ') }}</td>
+							<td class="amount status-unpaid">{{ f.SoldeFactLoc|number_format(0, ',', ' ') }}</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6" style="text-align: center; padding: 40px; color: #999;">Aucune facture trouvée.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+
+			<div class="summary-box">
+				<table class="summary-table">
+					<tr>
+						<td>Total Emissions de la période :</td>
+						<td class="val">{{ summary.total_billed|number_format(0, ',', ' ') }}
+							FCFA</td>
+					</tr>
+					<tr>
+						<td style="color: #2a9d8f;">Total Recouvrements :</td>
+						<td class="val" style="color: #2a9d8f;">{{ summary.total_paid|number_format(0, ',', ' ') }}
+							FCFA</td>
+					</tr>
+					<tr>
+						<td style="color: #e63946;">Total Créances Restantes :</td>
+						<td class="val" style="color: #e63946;">{{ summary.total_outstanding|number_format(0, ',', ' ') }}
+							FCFA</td>
+					</tr>
+					<tr style="border-top: 1px solid #ccc;">
+						<td style="font-weight: bold;">Taux de recouvrement :</td>
+						<td class="val" style="font-size: 12px; color: #ff6600;">{{ summary.collection_rate }}%</td>
+					</tr>
+				</table>
+			</div>
+		</main>
+	</body>
+</html>

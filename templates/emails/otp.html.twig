@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Code OTP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e6e9ec;
+    }
+
+    .header {
+      background: #f0f9fa;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #53B0B7;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: #222;
+    }
+
+    .header small {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 30px 25px;
+      font-size: 15px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .content h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #222;
+    }
+
+    .otp-box {
+      background: #eaf7f8;
+      border: 1px solid #53B0B7;
+      border-radius: 8px;
+      text-align: center;
+      padding: 25px 15px;
+      margin: 25px 0;
+    }
+
+    .otp-box strong {
+      display: block;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .otp-code {
+      font-size: 34px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: #53B0B7;
+    }
+
+    .alert {
+      background: #fff7e6;
+      border: 1px solid #ffe08a;
+      color: #aa7c00;
+      padding: 12px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      padding: 15px;
+      border-top: 1px solid #e6e9ec;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+     <img src="http://backend.ateliya.com/logo_text.png" alt="Logo Ateliya">
+      <small>Sécurité avant tout</small>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>🔐 Code de vérification</h2>
+      <p>Bonjour <b>{{ info_user.nom ? info_user.nom : info_user.login }}</b>,</p>
+      <p>Vous avez demandé un code de vérification pour réinitialiser votre mot de passe.</p>
+
+      <!-- OTP BLOCK -->
+      <div class="otp-box">
+        <strong>Votre code de vérification :</strong>
+        <div class="otp-code">{{ otp_code }}</div>
+        <small>⏳ Ce code expire dans <b>15 minutes</b>.</small>
+      </div>
+
+      <div class="alert">
+        ⚠️ Important : Ne partagez jamais ce code avec qui que ce soit.
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      © ATELIYA — Tous droits réservés
+    </div>
+  </div>
+</body>
+</html>

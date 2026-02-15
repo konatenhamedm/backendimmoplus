@@ -1,0 +1,71 @@
+# config/packages/security.yaml
+security:
+    password_hashers:
+        App\Entity\User:
+            algorithm: auto
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: login  # Champ utilisé pour l'authentification (email/téléphone)
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        login:
+            pattern: ^/api/login
+            stateless: true
+            security: false  # Route publique
+            json_login:
+                check_path: /api/login
+                username_path: login
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\JwtAuthenticator
+            entry_point: App\Security\JwtEntryPoint  # Nouvelle classe à créer
+            user_checker: App\Security\UserChecker  # Vérifie isActive
+
+    access_control:
+            # Routes publiques (API)
+            - { path: ^/api/login, roles: PUBLIC_ACCESS }
+            - { path: ^/api/pays, roles: PUBLIC_ACCESS }
+            - { path: ^/api/pays/actif, roles: PUBLIC_ACCESS }
+            - { path: ^/api/logout, roles: PUBLIC_ACCESS }
+            - { path: ^/api/user/create, roles: PUBLIC_ACCESS }
+            - { path: ^/api/user/qr-code, roles: PUBLIC_ACCESS }
+            #- { path: ^/api/device-token, roles: PUBLIC_ACCESS }
+            - { path: ^/api/paiement/webhook, roles: PUBLIC_ACCESS }
+            - { path: ^/api/reset-password, roles: PUBLIC_ACCESS }
+            - { path: ^/api/reset-password/request, roles: PUBLIC_ACCESS }
+            - { path: ^/api/reset-password/reset, roles: PUBLIC_ACCESS }
+            - { path: ^/api/user/create, roles: PUBLIC_ACCESS }
+            - { path: ^/login, roles: PUBLIC_ACCESS }
+            - { path: ^/$, roles: PUBLIC_ACCESS }  
+            - { path: ^/public/, roles: PUBLIC_ACCESS }
+            - { path: ^/assets/, roles: PUBLIC_ACCESS }
+            - { path: ^/admin, roles: ROLE_ADMIN }
+           # - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+            - { path: ^/, roles: PUBLIC_ACCESS }  
+      
+
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
+
+when@test:
+    security:
+        password_hashers:
+            App\Entity\User:
+                algorithm: auto
+                cost: 4
+                time_cost: 3
+                memory_cost: 10
