@@ -129,7 +129,8 @@ class AppFixtures extends Fixture
 
         // 3. Create Proprio
         $proprio = new Proprio();
-        $proprio->setNomPrenoms('Propriétaire Test');
+        $proprio->setNom('Propriétaire');
+        $proprio->setPrenoms('Test');
         $proprio->setContacts('0708091011');
         $proprio->setEmail('proprio@test.com');
         $proprio->setAddresse('Abidjan Cocody');
@@ -158,7 +159,8 @@ class AppFixtures extends Fixture
         
         // 5. Create Locataire
         $locataire = new Locataire();
-        $locataire->setPrenoms('Locataire Test');
+        $locataire->setNom('Locataire');
+        $locataire->setPrenoms('Test');
         $locataire->setDateNaiss(new \DateTime('1990-01-01'));
         $locataire->setLieuNaiss('Abidjan');
         $locataire->setProfession('Informaticien');
