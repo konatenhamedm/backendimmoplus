@@ -47,7 +47,7 @@ class Transaction
     #[Groups(['group1'])]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(inversedBy: 'transactions')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Locataire $locataire = null;
 

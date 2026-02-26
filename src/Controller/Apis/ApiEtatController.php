@@ -301,9 +301,9 @@ class ApiEtatController extends ApiInterface
                 $sheet->setCellValue('A1', 'Rapport des Impayés - ' . ($entreprise ? $entreprise->getNom() : ''));
                 $sheet->setCellValue('A3', 'Locataire');
                 $sheet->setCellValue('B3', 'Facture');
-                $sheet->setCellValue('C3', 'Date');
-                $sheet->setCellValue('D3', 'Montant');
-                $sheet->setCellValue('E3', 'Solde');
+                $sheet->setCellValue('C3', 'date');
+                $sheet->setCellValue('D3', 'montant');
+                $sheet->setCellValue('E3', 'solde');
                 
                 $row = 4;
                 foreach ($data['items'] as $f) {
@@ -320,11 +320,11 @@ class ApiEtatController extends ApiInterface
             case 'pay_daily':
                 $transactions = $this->fetchTransactions($startDate, $endDate, $entreprise);
                 $sheet->setCellValue('A1', 'Journal des Paiements');
-                $sheet->setCellValue('A3', 'Date');
+                $sheet->setCellValue('A3', 'date');
                 $sheet->setCellValue('B3', 'Référence');
                 $sheet->setCellValue('C3', 'Locataire');
                 $sheet->setCellValue('D3', 'Mode');
-                $sheet->setCellValue('E3', 'Montant');
+                $sheet->setCellValue('E3', 'montant');
                 
                 $row = 4;
                 foreach ($transactions as $t) {
@@ -343,7 +343,7 @@ class ApiEtatController extends ApiInterface
                 $sheet->setCellValue('A3', 'Propriétaire');
                 $sheet->setCellValue('B3', 'Maison');
                 $sheet->setCellValue('C3', 'Adresse');
-                $sheet->setCellValue('D3', 'Lot');
+                $sheet->setCellValue('D3', 'lot');
                 
                 $row = 4;
                 foreach ($data as $item) {
@@ -360,12 +360,12 @@ class ApiEtatController extends ApiInterface
             case 'invoice_status':
                 $data = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise);
                 $sheet->setCellValue('A1', 'Rapport des Factures & Règlements');
-                $sheet->setCellValue('A3', 'Date');
+                $sheet->setCellValue('A3', 'date');
                 $sheet->setCellValue('B3', 'Locataire');
                 $sheet->setCellValue('C3', 'Libellé');
                 $sheet->setCellValue('D3', 'Facturé');
                 $sheet->setCellValue('E3', 'Encaissé');
-                $sheet->setCellValue('F3', 'Solde');
+                $sheet->setCellValue('F3', 'solde');
                 $row = 4;
                 foreach ($data['items'] as $f) {
                     $sheet->setCellValue('A' . $row, $f->getDateEmission()->format('d/m/Y'));
@@ -381,11 +381,11 @@ class ApiEtatController extends ApiInterface
             case 'owner_payments':
                 $data = $this->fetchOwnerPayouts($startDate, $endDate, $entreprise);
                 $sheet->setCellValue('A1', 'Versements Propriétaires');
-                $sheet->setCellValue('A3', 'Date');
+                $sheet->setCellValue('A3', 'date');
                 $sheet->setCellValue('B3', 'Propriétaire');
                 $sheet->setCellValue('C3', 'Libellé');
                 $sheet->setCellValue('D3', 'Maison');
-                $sheet->setCellValue('E3', 'Montant');
+                $sheet->setCellValue('E3', 'montant');
                 $row = 4;
                 foreach ($data as $p) {
                     $sheet->setCellValue('A' . $row, $p->getDateVersement()->format('d/m/Y'));
@@ -528,7 +528,7 @@ class ApiEtatController extends ApiInterface
     {
         $sheet->setCellValue('A1', 'État Financier - ' . ($entreprise ? $entreprise->getNom() : ''));
         $sheet->setCellValue('A3', 'Libellé');
-        $sheet->setCellValue('B3', 'Montant');
+        $sheet->setCellValue('B3', 'montant');
         $sheet->setCellValue('A4', 'Total Facturé');
         $sheet->setCellValue('B4', $data['total_billed']);
         $sheet->setCellValue('A5', 'Total Encaissé');

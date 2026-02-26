@@ -21,14 +21,14 @@ class Nature
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibNature = null;
+    private ?string $libNature = null;
 
-    #[ORM\OneToMany(mappedBy: 'Nature', targetEntity: ContratLocation::class)]
-    private Collection $ContratLocations;
+    #[ORM\OneToMany(mappedBy: 'nature', targetEntity: ContratLocation::class)]
+    private Collection $contratLocations;
 
     public function __construct()
     {
-        $this->ContratLocations = new ArrayCollection();
+        $this->contratLocations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -38,12 +38,12 @@ class Nature
 
     public function getLibNature(): ?string
     {
-        return $this->LibNature;
+        return $this->libNature;
     }
 
-    public function setLibNature(string $LibNature): static
+    public function setLibNature(string $libNature): static
     {
-        $this->LibNature = $LibNature;
+        $this->libNature = $libNature;
 
         return $this;
     }
@@ -53,13 +53,13 @@ class Nature
      */
     public function getContratLocations(): Collection
     {
-        return $this->ContratLocations;
+        return $this->contratLocations;
     }
 
     public function addContratLocation(ContratLocation $ContratLocation): static
     {
-        if (!$this->ContratLocations->contains($ContratLocation)) {
-            $this->ContratLocations->add($ContratLocation);
+        if (!$this->contratLocations->contains($ContratLocation)) {
+            $this->contratLocations->add($ContratLocation);
             $ContratLocation->setNature($this);
         }
 
@@ -68,7 +68,7 @@ class Nature
 
     public function removeContratLocation(ContratLocation $ContratLocation): static
     {
-        if ($this->ContratLocations->removeElement($ContratLocation)) {
+        if ($this->contratLocations->removeElement($ContratLocation)) {
             // set the owning side to null (unless already changed)
             if ($ContratLocation->getNature() === $this) {
                 $ContratLocation->setNature(null);

@@ -16,7 +16,7 @@ class LigneDepense
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $Montant = null;
+    private ?int $montant = null;
 
     #[ORM\ManyToOne(inversedBy: 'ligneDepenses')]
     private ?depenses $depenses = null;
@@ -28,12 +28,12 @@ class LigneDepense
 
     public function getMontant(): ?int
     {
-        return $this->Montant;
+        return $this->montant;
     }
 
-    public function setMontant(int $Montant): static
+    public function setMontant(int $montant): static
     {
-        $this->Montant = $Montant;
+        $this->montant = $montant;
 
         return $this;
     }

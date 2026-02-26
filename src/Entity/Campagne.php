@@ -24,19 +24,19 @@ class Campagne
 
     #[ORM\Column(length: 255, nullable: false)]
     #[Groups(['group1'])]
-    private ?string $LibCampagne = null;
+    private ?string $libCampagne = null;
 
     #[ORM\Column]
-    private ?int $NbreProprio = null;
+    private ?int $nbreProprio = null;
 
     #[ORM\Column]
-    private ?int $NbreLocataire = null;
+    private ?int $nbreLocataire = null;
 
     #[ORM\Column]
-    private ?int $MntTotal = null;
+    private ?int $mntTotal = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $MntPaye = null;
+    private ?string $mntPaye = null;
 
     #[ORM\ManyToOne(inversedBy: 'campagnes')]
     private ?Annee $annee = null;
@@ -71,60 +71,60 @@ class Campagne
 
     public function getLibCampagne(): ?string
     {
-        return $this->LibCampagne;
+        return $this->libCampagne;
     }
 
-    public function setLibCampagne(string $LibCampagne): static
+    public function setLibCampagne(string $libCampagne): static
     {
-        $this->LibCampagne = $LibCampagne;
+        $this->libCampagne = $libCampagne;
 
         return $this;
     }
 
     public function getNbreProprio(): ?int
     {
-        return $this->NbreProprio;
+        return $this->nbreProprio;
     }
 
-    public function setNbreProprio(int $NbreProprio): static
+    public function setNbreProprio(int $nbreProprio): static
     {
-        $this->NbreProprio = $NbreProprio;
+        $this->nbreProprio = $nbreProprio;
 
         return $this;
     }
 
     public function getNbreLocataire(): ?int
     {
-        return $this->NbreLocataire;
+        return $this->nbreLocataire;
     }
 
-    public function setNbreLocataire(int $NbreLocataire): static
+    public function setNbreLocataire(int $nbreLocataire): static
     {
-        $this->NbreLocataire = $NbreLocataire;
+        $this->nbreLocataire = $nbreLocataire;
 
         return $this;
     }
 
     public function getMntTotal(): ?int
     {
-        return $this->MntTotal;
+        return $this->mntTotal;
     }
 
-    public function setMntTotal(int $MntTotal): static
+    public function setMntTotal(int $mntTotal): static
     {
-        $this->MntTotal = $MntTotal;
+        $this->mntTotal = $mntTotal;
 
         return $this;
     }
 
     public function getMntPaye(): ?string
     {
-        return $this->MntPaye;
+        return $this->mntPaye;
     }
 
-    public function setMntPaye(string $MntPaye): static
+    public function setMntPaye(string $mntPaye): static
     {
-        $this->MntPaye = $MntPaye;
+        $this->mntPaye = $mntPaye;
 
         return $this;
     }

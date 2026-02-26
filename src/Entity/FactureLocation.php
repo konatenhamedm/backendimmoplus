@@ -16,7 +16,7 @@ class FactureLocation
 {
     use TraitEntity;
 
-    #[ORM\ManyToOne(inversedBy: 'factureLocations')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
     private ?Entreprise $entreprise = null;
@@ -60,24 +60,24 @@ class FactureLocation
 
     #[ORM\Column(length: 255, name: 'libFacture')]
     #[Groups(['group1'])]
-    private ?string $LibFacture = null;
+    private ?string $libFacture = null;
 
     #[ORM\Column(name: 'mntFact')]
     #[Groups(['group1'])]
-    private ?int $MntFact = null;
+    private ?int $mntFact = null;
 
     #[ORM\Column(name: 'soldeFactLoc')]
     #[Groups(['group1'])]
-    private ?int $SoldeFactLoc = null;
+    private ?int $soldeFactLoc = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateEmission')]
     #[Groups(['group1'])]
-    private ?\DateTimeInterface $DateEmission = null;
+    private ?\DateTimeInterface $dateEmission = null;
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateLimite')]
     #[Groups(['group1'])]
-    private ?\DateTimeInterface $DateLimite = null;
+    private ?\DateTimeInterface $dateLimite = null;
 
     #[ORM\OneToMany(mappedBy: 'numFact', targetEntity: Reglements::class)]
     #[Groups(['group1'])]
@@ -164,60 +164,60 @@ class FactureLocation
 
     public function getLibFacture(): ?string
     {
-        return $this->LibFacture;
+        return $this->libFacture;
     }
 
-    public function setLibFacture(string $LibFacture): static
+    public function setLibFacture(string $libFacture): static
     {
-        $this->LibFacture = $LibFacture;
+        $this->libFacture = $libFacture;
 
         return $this;
     }
 
     public function getMntFact(): ?int
     {
-        return $this->MntFact;
+        return $this->mntFact;
     }
 
-    public function setMntFact(int $MntFact): static
+    public function setMntFact(int $mntFact): static
     {
-        $this->MntFact = $MntFact;
+        $this->mntFact = $mntFact;
 
         return $this;
     }
 
     public function getSoldeFactLoc(): ?int
     {
-        return $this->SoldeFactLoc;
+        return $this->soldeFactLoc;
     }
 
-    public function setSoldeFactLoc(int $SoldeFactLoc): static
+    public function setSoldeFactLoc(int $soldeFactLoc): static
     {
-        $this->SoldeFactLoc = $SoldeFactLoc;
+        $this->soldeFactLoc = $soldeFactLoc;
 
         return $this;
     }
 
     public function getDateEmission(): ?\DateTimeInterface
     {
-        return $this->DateEmission;
+        return $this->dateEmission;
     }
 
-    public function setDateEmission(\DateTimeInterface $DateEmission): static
+    public function setDateEmission(\DateTimeInterface $dateEmission): static
     {
-        $this->DateEmission = $DateEmission;
+        $this->dateEmission = $dateEmission;
 
         return $this;
     }
 
     public function getDateLimite(): ?\DateTimeInterface
     {
-        return $this->DateLimite;
+        return $this->dateLimite;
     }
 
-    public function setDateLimite(\DateTimeInterface $DateLimite): static
+    public function setDateLimite(\DateTimeInterface $dateLimite): static
     {
-        $this->DateLimite = $DateLimite;
+        $this->dateLimite = $dateLimite;
 
         return $this;
     }

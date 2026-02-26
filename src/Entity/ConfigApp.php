@@ -45,7 +45,7 @@ class ConfigApp
     #[ORM\Column(length: 255, nullable: false)]
     private ?string $defaultColorLogin = null;
 
-    #[ORM\ManyToOne(inversedBy: 'configApps')]
+    #[ORM\ManyToOne]
     private ?Entreprise $entreprise = null;
 
     public function getFavicon(): ?Fichier

@@ -19,10 +19,10 @@ class Nationalite
     private ?string $libelle = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Observations = null;
+    private ?string $observations = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Abrege = null;
+    private ?string $abrege = null;
 
     public function getId(): ?int
     {
@@ -43,24 +43,24 @@ class Nationalite
 
     public function getObservations(): ?string
     {
-        return $this->Observations;
+        return $this->observations;
     }
 
-    public function setObservations(string $Observations): static
+    public function setObservations(string $observations): static
     {
-        $this->Observations = $Observations;
+        $this->observations = $observations;
 
         return $this;
     }
 
     public function getAbrege(): ?string
     {
-        return $this->Abrege;
+        return $this->abrege;
     }
 
-    public function setAbrege(string $Abrege): static
+    public function setAbrege(string $abrege): static
     {
-        $this->Abrege = $Abrege;
+        $this->abrege = $abrege;
 
         return $this;
     }

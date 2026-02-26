@@ -67,9 +67,9 @@ class ApiQuartierController extends ApiInterface
         required: true,
         content: new OA\JsonContent(
             type: "object",
-            required: ["LibQuartier", "ville_id"],
+            required: ["libQuartier", "ville_id"],
             properties: [
-                new OA\Property(property: "LibQuartier", type: "string", example: "Cocody"),
+                new OA\Property(property: "libQuartier", type: "string", example: "Cocody"),
                 new OA\Property(property: "ville_id", type: "integer", example: 1)
             ]
         )
@@ -80,7 +80,7 @@ class ApiQuartierController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $quartier = new Quartier();
             
-            if (isset($data['LibQuartier'])) $quartier->setLibQuartier($data['LibQuartier']);
+            if (isset($data['libQuartier'])) $quartier->setLibQuartier($data['libQuartier']);
             
             if (isset($data['ville_id'])) {
                 $ville = $villeRepository->find($data['ville_id']);
@@ -116,7 +116,7 @@ class ApiQuartierController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['LibQuartier'])) $quartier->setLibQuartier($data['LibQuartier']);
+            if (isset($data['libQuartier'])) $quartier->setLibQuartier($data['libQuartier']);
 
             if (isset($data['ville_id'])) {
                 $ville = $villeRepository->find($data['ville_id']);

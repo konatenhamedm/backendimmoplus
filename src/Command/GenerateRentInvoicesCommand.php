@@ -46,7 +46,7 @@ class GenerateRentInvoicesCommand extends Command
         // Récupérer les contrats actifs où JourGenerationFacture (jour de paiement) correspond au jour cible
         $contratRepository = $this->entityManager->getRepository(ContratLocation::class);
         
-        // On suppose que 'Etat' = 1 signifie actif. Ajustez si nécessaire selon votre logique.
+        // On suppose que 'etat' = 1 signifie actif. Ajustez si nécessaire selon votre logique.
         // Filtrage également par JourGenerationFacture (jour du mois)
         $contracts = $contratRepository->createQueryBuilder('c')
             ->where('c.JourGenerationFacture = :day')
@@ -128,14 +128,14 @@ class GenerateRentInvoicesCommand extends Command
 
     private function getMois(int $monthNum): ?TabMois
     {
-        return $this->entityManager->getRepository(TabMois::class)->findOneBy(['NumMois' => $monthNum]);
+        return $this->entityManager->getRepository(TabMois::class)->findOneBy(['numMois' => $monthNum]);
     }
 
     private function getOrCreateCampagne(string $libelle, Annee $annee, TabMois $mois, Entreprise $entreprise): Campagne
     {
         $repo = $this->entityManager->getRepository(Campagne::class);
         $campagne = $repo->findOneBy([
-            'LibCampagne' => $libelle, 
+            'libCampagne' => $libelle, 
             'entreprise' => $entreprise
         ]);
 

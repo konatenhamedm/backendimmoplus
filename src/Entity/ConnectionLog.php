@@ -18,7 +18,7 @@ class ConnectionLog
     #[OA\Property(description: 'ID unique du log', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'connectionLogs')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 

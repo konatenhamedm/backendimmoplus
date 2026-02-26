@@ -22,7 +22,7 @@ class SituationMatrimoniale
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibSituation = null;
+    private ?string $libSituation = null;
 
     #[ORM\OneToMany(mappedBy: 'situationMatri', targetEntity: Locataire::class)]
     private Collection $locataires;
@@ -39,12 +39,12 @@ class SituationMatrimoniale
 
     public function getLibSituation(): ?string
     {
-        return $this->LibSituation;
+        return $this->libSituation;
     }
 
-    public function setLibSituation(string $LibSituation): static
+    public function setLibSituation(string $libSituation): static
     {
-        $this->LibSituation = $LibSituation;
+        $this->libSituation = $libSituation;
 
         return $this;
     }

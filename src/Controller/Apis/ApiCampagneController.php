@@ -107,7 +107,7 @@ class ApiCampagneController extends ApiInterface
             $campagne = new Campagne();
             $campagne->setEntreprise($entreprise);
             
-            if (isset($data['LibCampagne'])) $campagne->setLibCampagne($data['LibCampagne']);
+            if (isset($data['libCampagne'])) $campagne->setLibCampagne($data['libCampagne']);
              // We need a Mois linked to campagne usually? Original code linked 'mois' to Factureloc, not Campagne directly?
              // Actually Campagne entity has relations? Let's check Campagne entity.
              // I'll assume standard processing.
@@ -211,7 +211,7 @@ class ApiCampagneController extends ApiInterface
                          if ($maison) $versement->setMaison($maison);
                          if ($locataire) $versement->setLocataire($locataire);
                          
-                         $typeEsp = $typeVersmtRepo->findOneBy(['CodTyp' => 'ESP']); 
+                         $typeEsp = $typeVersmtRepo->findOneBy(['codTyp' => 'ESP']); 
                          if ($typeEsp) $versement->setTypeVersement($typeEsp);
                          
                          $versement->setDateVersement(new \DateTime());

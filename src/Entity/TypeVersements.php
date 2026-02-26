@@ -21,11 +21,11 @@ class TypeVersements
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibType = null;
+    private ?string $libType = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $CodTyp = null;
+    private ?string $codTyp = null;
 
     #[ORM\OneToMany(mappedBy: 'type_versement', targetEntity: VersementProprio::class)]
     private Collection $versmtProprios;
@@ -46,24 +46,24 @@ class TypeVersements
 
     public function getLibType(): ?string
     {
-        return $this->LibType;
+        return $this->libType;
     }
 
-    public function setLibType(string $LibType): static
+    public function setLibType(string $libType): static
     {
-        $this->LibType = $LibType;
+        $this->libType = $libType;
 
         return $this;
     }
 
     public function getCodTyp(): ?string
     {
-        return $this->CodTyp;
+        return $this->codTyp;
     }
 
-    public function setCodTyp(string $CodTyp): static
+    public function setCodTyp(string $codTyp): static
     {
-        $this->CodTyp = $CodTyp;
+        $this->codTyp = $codTyp;
 
         return $this;
     }

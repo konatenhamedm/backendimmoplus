@@ -55,78 +55,78 @@ class Locataire
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateNaiss')]
     #[Assert\NotNull(message: "Le champs date de naissance est requis")]
     #[Groups(['group1'])]
-    private ?DateTimeInterface $DateNaiss = null;
+    private ?DateTimeInterface $dateNaiss = null;
 
     #[ORM\Column(length: 255, name: 'lieuNaiss')]
     #[Assert\NotNull(message: "Le champs  lieu de naissance est requis")]
     #[Groups(['group1'])]
-    private ?string $LieuNaiss = null;
+    private ?string $lieuNaiss = null;
 
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
-    private ?Fichier $InfoPiece = null;
+    private ?Fichier $infoPiece = null;
 
 
     #[ORM\Column(length: 255, name: 'profession')]
     #[Assert\NotNull(message: "Le champs profession est requis")]
     #[Groups(['group1'])]
-    private ?string $Profession = null;
+    private ?string $profession = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'ethnie')]
     #[Groups(['group1'])]
-    private ?string $Ethnie = null;
+    private ?string $ethnie = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nbEnfts')]
     #[Groups(['group1'])]
-    private ?string $NbEnfts = null;
+    private ?string $nbEnfts = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nbPersChge')]
     #[Groups(['group1'])]
-    private ?string $NbPersChge = null;
+    private ?string $nbPersChge = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'pere')]
     #[Groups(['group1'])]
-    private ?string $Pere = null;
+    private ?string $pere = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'mere')]
     #[Groups(['group1'])]
-    private ?string $Mere = null;
+    private ?string $mere = null;
 
     #[ORM\Column(length: 255, name: 'contacts')]
     #[Assert\NotNull(message: "Le champs contact est requis")]
     #[Groups(['group1'])]
-    private ?string $Contacts = null;
+    private ?string $contacts = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'email')]
     #[Groups(['group1'])]
-    private ?string $Email = null;
+    private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nPConjointe')]
     #[Groups(['group1'])]
-    private ?string $NPConjointe = null;
+    private ?string $nPConjointe = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'profConj')]
     #[Groups(['group1'])]
-    private ?string $ProfConj = null;
+    private ?string $profConj = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'ethnieConj')]
     #[Groups(['group1'])]
-    private ?string $EthnieConj = null;
+    private ?string $ethnieConj = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'contactConj')]
     #[Groups(['group1'])]
-    private ?string $ContactConj = null;
+    private ?string $contactConj = null;
 
     #[ORM\Column(length: 255, name: 'genre')]
     #[Assert\NotNull(message: "Le champs genre est requis")]
     #[Groups(['group1'])]
-    private ?string $Genre = null;
+    private ?string $genre = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'vivezAvec')]
     #[Groups(['group1'])]
-    private ?string $VivezAvec = null;
+    private ?string $vivezAvec = null;
 
     #[ORM\ManyToOne(inversedBy: 'locataires')]
     #[ORM\JoinColumn(nullable: true)]
@@ -135,7 +135,7 @@ class Locataire
 
     #[ORM\OneToMany(mappedBy: 'locataire', targetEntity: ContratLocation::class)]
     #[Ignore]
-    private Collection $ContratLocations;
+    private Collection $contratLocations;
 
 
     #[ORM\OneToMany(mappedBy: 'locataire', targetEntity: FactureLocation::class)]
@@ -158,7 +158,7 @@ class Locataire
     private Collection $versmtProprios;
     public function __construct()
     {
-        $this->ContratLocations = new ArrayCollection();
+        $this->contratLocations = new ArrayCollection();
         $this->facturelocs = new ArrayCollection();
         $this->versmtProprios = new ArrayCollection();
     }
@@ -206,36 +206,36 @@ class Locataire
 
     public function getDateNaiss(): ?\DateTimeInterface
     {
-        return $this->DateNaiss;
+        return $this->dateNaiss;
     }
 
-    public function setDateNaiss(\DateTimeInterface $DateNaiss): static
+    public function setDateNaiss(\DateTimeInterface $dateNaiss): static
     {
-        $this->DateNaiss = $DateNaiss;
+        $this->dateNaiss = $dateNaiss;
 
         return $this;
     }
 
     public function getLieuNaiss(): ?string
     {
-        return $this->LieuNaiss;
+        return $this->lieuNaiss;
     }
 
-    public function setLieuNaiss(string $LieuNaiss): static
+    public function setLieuNaiss(string $lieuNaiss): static
     {
-        $this->LieuNaiss = $LieuNaiss;
+        $this->lieuNaiss = $lieuNaiss;
 
         return $this;
     }
 
     public function getInfoPiece(): ?Fichier
     {
-        return $this->InfoPiece;
+        return $this->infoPiece;
     }
 
-    public function setInfoPiece(Fichier $InfoPiece): static
+    public function setInfoPiece(Fichier $infoPiece): static
     {
-        $this->InfoPiece = $InfoPiece;
+        $this->infoPiece = $infoPiece;
 
         return $this;
     }
@@ -244,168 +244,168 @@ class Locataire
 
     public function getProfession(): ?string
     {
-        return $this->Profession;
+        return $this->profession;
     }
 
-    public function setProfession(string $Profession): static
+    public function setProfession(string $profession): static
     {
-        $this->Profession = $Profession;
+        $this->profession = $profession;
 
         return $this;
     }
 
     public function getEthnie(): ?string
     {
-        return $this->Ethnie;
+        return $this->ethnie;
     }
 
-    public function setEthnie(string $Ethnie): static
+    public function setEthnie(string $ethnie): static
     {
-        $this->Ethnie = $Ethnie;
+        $this->ethnie = $ethnie;
 
         return $this;
     }
 
     public function getNbEnfts(): ?string
     {
-        return $this->NbEnfts;
+        return $this->nbEnfts;
     }
 
-    public function setNbEnfts(string $NbEnfts): static
+    public function setNbEnfts(string $nbEnfts): static
     {
-        $this->NbEnfts = $NbEnfts;
+        $this->nbEnfts = $nbEnfts;
 
         return $this;
     }
 
     public function getNbPersChge(): ?string
     {
-        return $this->NbPersChge;
+        return $this->nbPersChge;
     }
 
-    public function setNbPersChge(string $NbPersChge): static
+    public function setNbPersChge(string $nbPersChge): static
     {
-        $this->NbPersChge = $NbPersChge;
+        $this->nbPersChge = $nbPersChge;
 
         return $this;
     }
 
     public function getPere(): ?string
     {
-        return $this->Pere;
+        return $this->pere;
     }
 
-    public function setPere(string $Pere): static
+    public function setPere(string $pere): static
     {
-        $this->Pere = $Pere;
+        $this->pere = $pere;
 
         return $this;
     }
 
     public function getMere(): ?string
     {
-        return $this->Mere;
+        return $this->mere;
     }
 
-    public function setMere(string $Mere): static
+    public function setMere(string $mere): static
     {
-        $this->Mere = $Mere;
+        $this->mere = $mere;
 
         return $this;
     }
 
     public function getContacts(): ?string
     {
-        return $this->Contacts;
+        return $this->contacts;
     }
 
-    public function setContacts(string $Contacts): static
+    public function setContacts(string $contacts): static
     {
-        $this->Contacts = $Contacts;
+        $this->contacts = $contacts;
 
         return $this;
     }
 
     public function getEmail(): ?string
     {
-        return $this->Email;
+        return $this->email;
     }
 
-    public function setEmail(string $Email): static
+    public function setEmail(string $email): static
     {
-        $this->Email = $Email;
+        $this->email = $email;
 
         return $this;
     }
 
     public function getNPConjointe(): ?string
     {
-        return $this->NPConjointe;
+        return $this->nPConjointe;
     }
 
-    public function setNPConjointe(string $NPConjointe): static
+    public function setNPConjointe(string $nPConjointe): static
     {
-        $this->NPConjointe = $NPConjointe;
+        $this->nPConjointe = $nPConjointe;
 
         return $this;
     }
 
     public function getProfConj(): ?string
     {
-        return $this->ProfConj;
+        return $this->profConj;
     }
 
-    public function setProfConj(string $ProfConj): static
+    public function setProfConj(string $profConj): static
     {
-        $this->ProfConj = $ProfConj;
+        $this->profConj = $profConj;
 
         return $this;
     }
 
     public function getEthnieConj(): ?string
     {
-        return $this->EthnieConj;
+        return $this->ethnieConj;
     }
 
-    public function setEthnieConj(string $EthnieConj): static
+    public function setEthnieConj(string $ethnieConj): static
     {
-        $this->EthnieConj = $EthnieConj;
+        $this->ethnieConj = $ethnieConj;
 
         return $this;
     }
 
     public function getContactConj(): ?string
     {
-        return $this->ContactConj;
+        return $this->contactConj;
     }
 
-    public function setContactConj(string $ContactConj): static
+    public function setContactConj(string $contactConj): static
     {
-        $this->ContactConj = $ContactConj;
+        $this->contactConj = $contactConj;
 
         return $this;
     }
 
     public function getGenre(): ?string
     {
-        return $this->Genre;
+        return $this->genre;
     }
 
-    public function setGenre(string $Genre): static
+    public function setGenre(string $genre): static
     {
-        $this->Genre = $Genre;
+        $this->genre = $genre;
 
         return $this;
     }
 
     public function getVivezAvec(): ?string
     {
-        return $this->VivezAvec;
+        return $this->vivezAvec;
     }
 
-    public function setVivezAvec(string $VivezAvec): static
+    public function setVivezAvec(string $vivezAvec): static
     {
-        $this->VivezAvec = $VivezAvec;
+        $this->vivezAvec = $vivezAvec;
 
         return $this;
     }
@@ -427,13 +427,13 @@ class Locataire
      */
     public function getContratLocations(): Collection
     {
-        return $this->ContratLocations;
+        return $this->contratLocations;
     }
 
     public function addContratLocation(ContratLocation $ContratLocation): static
     {
-        if (!$this->ContratLocations->contains($ContratLocation)) {
-            $this->ContratLocations->add($ContratLocation);
+        if (!$this->contratLocations->contains($ContratLocation)) {
+            $this->contratLocations->add($ContratLocation);
             $ContratLocation->setLocataire($this);
         }
 
@@ -442,7 +442,7 @@ class Locataire
 
     public function removeContratLocation(ContratLocation $ContratLocation): static
     {
-        if ($this->ContratLocations->removeElement($ContratLocation)) {
+        if ($this->contratLocations->removeElement($ContratLocation)) {
             // set the owning side to null (unless already changed)
             if ($ContratLocation->getLocataire() === $this) {
                 $ContratLocation->setLocataire(null);

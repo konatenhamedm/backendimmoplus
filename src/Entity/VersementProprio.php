@@ -19,7 +19,7 @@ class VersementProprio
 
 
     #[ORM\ManyToOne(inversedBy: 'versmtProprios')]
-    private ?Proprio $Proprio = null;
+    private ?Proprio $proprio = null;
 
     #[ORM\ManyToOne(inversedBy: 'versmtProprios')]
     private ?TypeVersements $type_versement = null;
@@ -53,12 +53,12 @@ class VersementProprio
 
     public function getProprio(): ?Proprio
     {
-        return $this->Proprio;
+        return $this->proprio;
     }
 
-    public function setProprio(?Proprio $Proprio): static
+    public function setProprio(?Proprio $proprio): static
     {
-        $this->Proprio = $Proprio;
+        $this->proprio = $proprio;
 
         return $this;
     }

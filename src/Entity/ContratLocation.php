@@ -24,102 +24,102 @@ class ContratLocation
     #[Groups(['group1'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ContratLocations')]
+    #[ORM\ManyToOne(inversedBy: 'contratLocations')]
     #[Groups(['group1'])]
     private ?Locataire $locataire = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateDebut')]
     #[Groups(['group1'])]
-    private ?DateTimeInterface $DateDebut = null;
+    private ?DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateFin')]
     #[Groups(['group1'])]
-    private ?DateTimeInterface $DateFin = null;
+    private ?DateTimeInterface $dateFin = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 1, name: 'nbMoisCaution')]
     #[Groups(['group1'])]
-    private ?string $NbMoisCaution = null;
+    private ?string $nbMoisCaution = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntCaution')]
     #[Assert\PositiveOrZero(message: 'Le montant de la caution doit être > 0')]
     #[Groups(['group1'])]
-    private ?string $MntCaution = null;
+    private ?string $mntCaution = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 1, nullable: true, name: 'nbMoisAvance')]
     #[Groups(['group1'])]
-    private ?string $NbMoisAvance = null;
+    private ?string $nbMoisAvance = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntAvance')]
     #[Assert\PositiveOrZero(message: 'Le montant avance doit être > 0')]
     #[Groups(['group1'])]
-    private ?string $MntAvance = null;
+    private ?string $mntAvance = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyer')]
     #[Groups(['group1'])]
-    private ?string $MntLoyer = null;
+    private ?string $mntLoyer = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'autreInfos')]
     #[Groups(['group1'])]
-    private ?string $AutreInfos = null;
+    private ?string $autreInfos = null;
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
-    private ?Fichier $ScanContrat = null;
+    private ?Fichier $scanContrat = null;
 
-    #[ORM\ManyToOne(targetEntity: Regime::class, inversedBy: 'Contratlocs')]
+    #[ORM\ManyToOne(targetEntity: Regime::class, inversedBy: 'contratlocs')]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
-    private ?Regime $Regime = null;
+    private ?Regime $regime = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateEntree')]
     #[Groups(['group1'])]
-    private ?DateTimeInterface $DateEntree = null;
+    private ?DateTimeInterface $dateEntree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateProchVers')]
     #[Groups(['group1'])]
-    private ?DateTimeInterface $DateProchVers = null;
+    private ?DateTimeInterface $dateProchVers = null;
 
-    #[ORM\ManyToOne(targetEntity: Nature::class, inversedBy: 'ContratLocations')]
+    #[ORM\ManyToOne(targetEntity: Nature::class, inversedBy: 'contratLocations')]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
-    private ?Nature $Nature = null;
+    private ?Nature $nature = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerPrec')]
     #[Groups(['group1'])]
-    private ?string $MntLoyerPrec = null;
+    private ?string $mntLoyerPrec = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerIni')]
     #[Groups(['group1'])]
-    private ?string $MntLoyerIni = null;
+    private ?string $mntLoyerIni = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerActu')]
     #[Groups(['group1'])]
-    private ?string $MntLoyerActu = null;
+    private ?string $mntLoyerActu = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntArriere')]
     #[Groups(['group1'])]
-    private ?string $MntArriere = null;
+    private ?string $mntArriere = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'dejaLocataire')]
     #[Groups(['group1'])]
-    private ?string $DejaLocataire = null;
+    private ?string $dejaLocataire = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'statutLoc')]
     #[Groups(['group1'])]
-    private ?string $StatutLoc = null;
+    private ?string $statutLoc = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, name: 'fraisAnex')]
     #[Groups(['group1'])]
-    private ?string $Fraisanex = null;
+    private ?string $fraisanex = null;
 
     #[ORM\Column(nullable: true, name: 'etat')]
     #[Groups(['group1'])]
-    private ?int $Etat = null;
+    private ?int $etat = null;
 
     #[ORM\Column(nullable: true, name: 'totVerse')]
     #[Groups(['group1'])]
-    private ?string $TotVerse = null;
+    private ?string $totVerse = null;
 
     #[ORM\OneToMany(mappedBy: 'contrat', targetEntity: FactureLocation::class)]
     private Collection $facturelocs;
@@ -135,7 +135,7 @@ class ContratLocation
     #[Groups(['group1'])]
     private ?Campagne $campagne = null;
 
-    #[ORM\ManyToOne(inversedBy: 'appartContratlocs')]
+    #[ORM\ManyToOne(inversedBy: 'appartContratLocations')]
     #[Groups(['group1'])]
     private ?Appartement $appart = null;
 
@@ -145,7 +145,7 @@ class ContratLocation
     private ?Motif $motif = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'cautionRemise')]
-    private ?string $CautionRemise = null;
+    private ?string $cautionRemise = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $details = null;
@@ -153,11 +153,11 @@ class ContratLocation
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[Groups(["group1"])]
     #[ORM\JoinColumn(nullable: true)]
-    private ?Fichier $FichierResiliation = null;
+    private ?Fichier $fichierResiliation = null;
 
     #[ORM\Column(nullable: true, name: 'jourGenerationFacture')]
     #[Groups(['group1'])]
-    private ?int $JourGenerationFacture = null;
+    private ?int $jourGenerationFacture = null;
 
     public function __construct()
     {
@@ -183,243 +183,243 @@ class ContratLocation
 
     public function getDateDebut(): ?\DateTimeInterface
     {
-        return $this->DateDebut;
+        return $this->dateDebut;
     }
 
-    public function setDateDebut(?\DateTimeInterface $DateDebut): static
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static
     {
-        $this->DateDebut = $DateDebut;
+        $this->dateDebut = $dateDebut;
         return $this;
     }
 
     public function getDateFin(): ?\DateTimeInterface
     {
-        return $this->DateFin;
+        return $this->dateFin;
     }
 
-    public function setDateFin(?\DateTimeInterface $DateFin): static
+    public function setDateFin(?\DateTimeInterface $dateFin): static
     {
-        $this->DateFin = $DateFin;
+        $this->dateFin = $dateFin;
         return $this;
     }
 
     public function getNbMoisCaution(): ?string
     {
-        return $this->NbMoisCaution;
+        return $this->nbMoisCaution;
     }
 
-    public function setNbMoisCaution(?string $NbMoisCaution): static
+    public function setNbMoisCaution(?string $nbMoisCaution): static
     {
-        $this->NbMoisCaution = $NbMoisCaution;
+        $this->nbMoisCaution = $nbMoisCaution;
         return $this;
     }
 
     public function getMntCaution(): ?string
     {
-        return $this->MntCaution;
+        return $this->mntCaution;
     }
 
-    public function setMntCaution(?string $MntCaution): static
+    public function setMntCaution(?string $mntCaution): static
     {
-        $this->MntCaution = $MntCaution;
+        $this->mntCaution = $mntCaution;
         return $this;
     }
 
     public function getNbMoisAvance(): ?string
     {
-        return $this->NbMoisAvance;
+        return $this->nbMoisAvance;
     }
 
-    public function setNbMoisAvance(?string $NbMoisAvance): static
+    public function setNbMoisAvance(?string $nbMoisAvance): static
     {
-        $this->NbMoisAvance = $NbMoisAvance;
+        $this->nbMoisAvance = $nbMoisAvance;
         return $this;
     }
 
     public function getMntAvance(): ?string
     {
-        return $this->MntAvance;
+        return $this->mntAvance;
     }
 
-    public function setMntAvance(?string $MntAvance): static
+    public function setMntAvance(?string $mntAvance): static
     {
-        $this->MntAvance = $MntAvance;
+        $this->mntAvance = $mntAvance;
         return $this;
     }
 
     public function getMntLoyer(): ?string
     {
-        return $this->MntLoyer;
+        return $this->mntLoyer;
     }
 
-    public function setMntLoyer(?string $MntLoyer): static
+    public function setMntLoyer(?string $mntLoyer): static
     {
-        $this->MntLoyer = $MntLoyer;
+        $this->mntLoyer = $mntLoyer;
         return $this;
     }
 
     public function getAutreInfos(): ?string
     {
-        return $this->AutreInfos;
+        return $this->autreInfos;
     }
 
-    public function setAutreInfos(?string $AutreInfos): static
+    public function setAutreInfos(?string $autreInfos): static
     {
-        $this->AutreInfos = $AutreInfos;
+        $this->autreInfos = $autreInfos;
         return $this;
     }
 
     public function getScanContrat(): ?Fichier
     {
-        return $this->ScanContrat;
+        return $this->scanContrat;
     }
 
-    public function setScanContrat(?Fichier $ScanContrat): static
+    public function setScanContrat(?Fichier $scanContrat): static
     {
-        $this->ScanContrat = $ScanContrat;
+        $this->scanContrat = $scanContrat;
         return $this;
     }
 
     public function getRegime(): ?Regime
     {
-        return $this->Regime;
+        return $this->regime;
     }
 
-    public function setRegime(?Regime $Regime): static
+    public function setRegime(?Regime $regime): static
     {
-        $this->Regime = $Regime;
+        $this->regime = $regime;
         return $this;
     }
 
     public function getDateEntree(): ?\DateTimeInterface
     {
-        return $this->DateEntree;
+        return $this->dateEntree;
     }
 
-    public function setDateEntree(?\DateTimeInterface $DateEntree): static
+    public function setDateEntree(?\DateTimeInterface $dateEntree): static
     {
-        $this->DateEntree = $DateEntree;
+        $this->dateEntree = $dateEntree;
         return $this;
     }
 
     public function getDateProchVers(): ?\DateTimeInterface
     {
-        return $this->DateProchVers;
+        return $this->dateProchVers;
     }
 
-    public function setDateProchVers(?\DateTimeInterface $DateProchVers): static
+    public function setDateProchVers(?\DateTimeInterface $dateProchVers): static
     {
-        $this->DateProchVers = $DateProchVers;
+        $this->dateProchVers = $dateProchVers;
         return $this;
     }
 
     public function getNature(): ?Nature
     {
-        return $this->Nature;
+        return $this->nature;
     }
 
-    public function setNature(?Nature $Nature): static
+    public function setNature(?Nature $nature): static
     {
-        $this->Nature = $Nature;
+        $this->nature = $nature;
         return $this;
     }
 
     public function getMntLoyerPrec(): ?string
     {
-        return $this->MntLoyerPrec;
+        return $this->mntLoyerPrec;
     }
 
-    public function setMntLoyerPrec(?string $MntLoyerPrec): static
+    public function setMntLoyerPrec(?string $mntLoyerPrec): static
     {
-        $this->MntLoyerPrec = $MntLoyerPrec;
+        $this->mntLoyerPrec = $mntLoyerPrec;
         return $this;
     }
 
     public function getMntLoyerIni(): ?string
     {
-        return $this->MntLoyerIni;
+        return $this->mntLoyerIni;
     }
 
-    public function setMntLoyerIni(?string $MntLoyerIni): static
+    public function setMntLoyerIni(?string $mntLoyerIni): static
     {
-        $this->MntLoyerIni = $MntLoyerIni;
+        $this->mntLoyerIni = $mntLoyerIni;
         return $this;
     }
 
     public function getMntLoyerActu(): ?string
     {
-        return $this->MntLoyerActu;
+        return $this->mntLoyerActu;
     }
 
-    public function setMntLoyerActu(?string $MntLoyerActu): static
+    public function setMntLoyerActu(?string $mntLoyerActu): static
     {
-        $this->MntLoyerActu = $MntLoyerActu;
+        $this->mntLoyerActu = $mntLoyerActu;
         return $this;
     }
 
     public function getMntArriere(): ?string
     {
-        return $this->MntArriere;
+        return $this->mntArriere;
     }
 
-    public function setMntArriere(?string $MntArriere): static
+    public function setMntArriere(?string $mntArriere): static
     {
-        $this->MntArriere = $MntArriere;
+        $this->mntArriere = $mntArriere;
         return $this;
     }
 
     public function getDejaLocataire(): ?string
     {
-        return $this->DejaLocataire;
+        return $this->dejaLocataire;
     }
 
-    public function setDejaLocataire(?string $DejaLocataire): static
+    public function setDejaLocataire(?string $dejaLocataire): static
     {
-        $this->DejaLocataire = $DejaLocataire;
+        $this->dejaLocataire = $dejaLocataire;
         return $this;
     }
 
     public function getStatutLoc(): ?string
     {
-        return $this->StatutLoc;
+        return $this->statutLoc;
     }
 
-    public function setStatutLoc(?string $StatutLoc): static
+    public function setStatutLoc(?string $statutLoc): static
     {
-        $this->StatutLoc = $StatutLoc;
+        $this->statutLoc = $statutLoc;
         return $this;
     }
 
     public function getFraisanex(): ?string
     {
-        return $this->Fraisanex;
+        return $this->fraisanex;
     }
 
-    public function setFraisanex(?string $Fraisanex): static
+    public function setFraisanex(?string $fraisanex): static
     {
-        $this->Fraisanex = $Fraisanex;
+        $this->fraisanex = $fraisanex;
         return $this;
     }
 
     public function getEtat(): ?int
     {
-        return $this->Etat;
+        return $this->etat;
     }
 
-    public function setEtat(?int $Etat): static
+    public function setEtat(?int $etat): static
     {
-        $this->Etat = $Etat;
+        $this->etat = $etat;
         return $this;
     }
 
     public function getTotVerse(): ?string
     {
-        return $this->TotVerse;
+        return $this->totVerse;
     }
 
-    public function setTotVerse(?string $TotVerse): static
+    public function setTotVerse(?string $totVerse): static
     {
-        $this->TotVerse = $TotVerse;
+        $this->totVerse = $totVerse;
         return $this;
     }
 
@@ -517,12 +517,12 @@ class ContratLocation
 
     public function getCautionRemise(): ?string
     {
-        return $this->CautionRemise;
+        return $this->cautionRemise;
     }
 
-    public function setCautionRemise(?string $CautionRemise): static
+    public function setCautionRemise(?string $cautionRemise): static
     {
-        $this->CautionRemise = $CautionRemise;
+        $this->cautionRemise = $cautionRemise;
         return $this;
     }
 
@@ -539,22 +539,22 @@ class ContratLocation
 
     public function getFichierResiliation(): ?Fichier
     {
-        return $this->FichierResiliation;
+        return $this->fichierResiliation;
     }
 
-    public function setFichierResiliation(?Fichier $FichierResiliation): static
+    public function setFichierResiliation(?Fichier $fichierResiliation): static
     {
-        $this->FichierResiliation = $FichierResiliation;
+        $this->fichierResiliation = $fichierResiliation;
         return $this;
     }
     public function getJourGenerationFacture(): ?int
     {
-        return $this->JourGenerationFacture;
+        return $this->jourGenerationFacture;
     }
 
-    public function setJourGenerationFacture(?int $JourGenerationFacture): static
+    public function setJourGenerationFacture(?int $jourGenerationFacture): static
     {
-        $this->JourGenerationFacture = $JourGenerationFacture;
+        $this->jourGenerationFacture = $jourGenerationFacture;
         return $this;
     }
 }

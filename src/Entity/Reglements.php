@@ -27,7 +27,7 @@ class Reglements
 
     #[ORM\Column]
     #[Groups(['group1'])]
-    private ?int $MontantVerse = null;
+    private ?int $montantVerse = null;
 
     #[ORM\Column]
     #[Groups(['group1'])]
@@ -72,12 +72,12 @@ class Reglements
 
     public function getMontantVerse(): ?int
     {
-        return $this->MontantVerse;
+        return $this->montantVerse;
     }
 
-    public function setMontantVerse(int $MontantVerse): static
+    public function setMontantVerse(int $montantVerse): static
     {
-        $this->MontantVerse = $MontantVerse;
+        $this->montantVerse = $montantVerse;
 
         return $this;
     }

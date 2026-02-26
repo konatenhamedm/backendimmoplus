@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/proprio')]
-#[OA\Tag(name: 'Proprio', description: 'Gestion des propriétaires')]
+#[OA\Tag(name: 'proprio', description: 'Gestion des propriétaires')]
 class ApiProprioController extends ApiInterface
 {
     /**
@@ -29,7 +29,7 @@ class ApiProprioController extends ApiInterface
         path: "/api/proprio/",
         summary: "Lister les propriétaires",
         description: "Retourne la liste des propriétaires.",
-        tags: ['Proprio']
+        tags: ['proprio']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
     public function index(Request $request, ProprioRepository $repository): Response
@@ -59,7 +59,7 @@ class ApiProprioController extends ApiInterface
         path: "/api/proprio/create",
         summary: "Créer un propriétaire",
         description: "Ajoute un nouveau propriétaire.",
-        tags: ['Proprio']
+        tags: ['proprio']
     )]
     public function create(Request $request, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository): Response
     {
@@ -147,7 +147,7 @@ class ApiProprioController extends ApiInterface
         path: "/api/proprio/{id}",
         summary: "Modifier un propriétaire",
         description: "Met à jour un propriétaire existant.",
-        tags: ['Proprio']
+        tags: ['proprio']
     )]
     public function update(Request $request, Proprio $proprio, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository): Response
     {
@@ -226,7 +226,7 @@ class ApiProprioController extends ApiInterface
         path: "/api/proprio/{id}",
         summary: "Supprimer un propriétaire",
         description: "Supprime un propriétaire.",
-        tags: ['Proprio']
+        tags: ['proprio']
     )]
     public function delete(Proprio $proprio, ProprioRepository $repository): Response
     {

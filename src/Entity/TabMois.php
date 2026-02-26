@@ -22,17 +22,17 @@ class TabMois
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibMois = null;
+    private ?string $libMois = null;
 
     #[ORM\Column]
     #[Groups(['group1'])]
-    private ?int $NumMois = null;
+    private ?int $numMois = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Debut = null;
+    private ?string $debut = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Fin = null;
+    private ?string $fin = null;
 
     #[ORM\OneToMany(mappedBy: 'mois', targetEntity: Campagne::class)]
     private Collection $campagnes;
@@ -53,48 +53,48 @@ class TabMois
 
     public function getLibMois(): ?string
     {
-        return $this->LibMois;
+        return $this->libMois;
     }
 
-    public function setLibMois(string $LibMois): static
+    public function setLibMois(string $libMois): static
     {
-        $this->LibMois = $LibMois;
+        $this->libMois = $libMois;
 
         return $this;
     }
 
     public function getNumMois(): ?int
     {
-        return $this->NumMois;
+        return $this->numMois;
     }
 
-    public function setNumMois(int $NumMois): static
+    public function setNumMois(int $numMois): static
     {
-        $this->NumMois = $NumMois;
+        $this->numMois = $numMois;
 
         return $this;
     }
 
     public function getDebut(): ?string
     {
-        return $this->Debut;
+        return $this->debut;
     }
 
-    public function setDebut(string $Debut): static
+    public function setDebut(string $debut): static
     {
-        $this->Debut = $Debut;
+        $this->debut = $debut;
 
         return $this;
     }
 
     public function getFin(): ?string
     {
-        return $this->Fin;
+        return $this->fin;
     }
 
-    public function setFin(string $Fin): static
+    public function setFin(string $fin): static
     {
-        $this->Fin = $Fin;
+        $this->fin = $fin;
 
         return $this;
     }

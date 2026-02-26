@@ -22,7 +22,7 @@ class Notification
      #[Groups(["group1", "group_type"])]
     private ?bool $etat = null;
 
-    #[ORM\ManyToOne(inversedBy: 'notifications')]
+    #[ORM\ManyToOne]
     private ?Entreprise $entreprise = null;
 
     #[ORM\Column(length: 255)]

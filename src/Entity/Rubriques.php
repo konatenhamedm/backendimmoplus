@@ -16,10 +16,10 @@ class Rubriques
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $NumCompte = null;
+    private ?string $numCompte = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $LibRubrique = null;
+    private ?string $libRubrique = null;
 
     public function getId(): ?int
     {
@@ -28,24 +28,24 @@ class Rubriques
 
     public function getNumCompte(): ?string
     {
-        return $this->NumCompte;
+        return $this->numCompte;
     }
 
-    public function setNumCompte(string $NumCompte): static
+    public function setNumCompte(string $numCompte): static
     {
-        $this->NumCompte = $NumCompte;
+        $this->numCompte = $numCompte;
 
         return $this;
     }
 
     public function getLibRubrique(): ?string
     {
-        return $this->LibRubrique;
+        return $this->libRubrique;
     }
 
-    public function setLibRubrique(string $LibRubrique): static
+    public function setLibRubrique(string $libRubrique): static
     {
-        $this->LibRubrique = $LibRubrique;
+        $this->libRubrique = $libRubrique;
 
         return $this;
     }

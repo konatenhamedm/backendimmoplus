@@ -22,7 +22,7 @@ class Motif
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibMotif = null;
+    private ?string $libMotif = null;
 
     #[ORM\OneToMany(mappedBy: 'motif', targetEntity: Fincontrat::class)]
     private Collection $fincontrats;
@@ -43,12 +43,12 @@ class Motif
 
     public function getLibMotif(): ?string
     {
-        return $this->LibMotif;
+        return $this->libMotif;
     }
 
-    public function setLibMotif(string $LibMotif): static
+    public function setLibMotif(string $libMotif): static
     {
-        $this->LibMotif = $LibMotif;
+        $this->libMotif = $libMotif;
 
         return $this;
     }

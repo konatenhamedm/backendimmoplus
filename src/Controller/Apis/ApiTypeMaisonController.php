@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/type-maison')]
-#[OA\Tag(name: 'TypeMaison', description: 'Gestion des types de maison')]
+#[OA\Tag(name: 'typeMaison', description: 'Gestion des types de maison')]
 class ApiTypeMaisonController extends ApiInterface
 {
     #[Route('/', methods: ['GET'])]
@@ -20,7 +20,7 @@ class ApiTypeMaisonController extends ApiInterface
         path: "/api/type-maison/",
         summary: "Lister les types de maison",
         description: "Retourne la liste des types de maison.",
-        tags: ['TypeMaison']
+        tags: ['typeMaison']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
     public function index(Request $request, TypeMaisonRepository $repository): Response
@@ -45,15 +45,15 @@ class ApiTypeMaisonController extends ApiInterface
         path: "/api/type-maison/create",
         summary: "Créer un type de maison",
         description: "Ajoute un nouveau type de maison.",
-        tags: ['TypeMaison']
+        tags: ['typeMaison']
     )]
     #[OA\RequestBody(
         required: true,
         content: new OA\JsonContent(
             type: "object",
-            required: ["LibType"],
+            required: ["libType"],
             properties: [
-                new OA\Property(property: "LibType", type: "string", example: "Villa")
+                new OA\Property(property: "libType", type: "string", example: "Villa")
             ]
         )
     )]
@@ -63,7 +63,7 @@ class ApiTypeMaisonController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $typeMaison = new TypeMaison();
             
-            if (isset($data['LibType'])) $typeMaison->setLibType($data['LibType']);
+            if (isset($data['libType'])) $typeMaison->setLibType($data['libType']);
 
             $repository->save($typeMaison, true);
 
@@ -79,7 +79,7 @@ class ApiTypeMaisonController extends ApiInterface
         path: "/api/type-maison/{id}",
         summary: "Modifier un type de maison",
         description: "Met à jour un type de maison existant.",
-        tags: ['TypeMaison']
+        tags: ['typeMaison']
     )]
     public function update(Request $request, TypeMaison $typeMaison, TypeMaisonRepository $repository): Response
     {
@@ -88,7 +88,7 @@ class ApiTypeMaisonController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['LibType'])) $typeMaison->setLibType($data['LibType']);
+            if (isset($data['libType'])) $typeMaison->setLibType($data['libType']);
 
             $repository->save($typeMaison, true);
 
@@ -104,7 +104,7 @@ class ApiTypeMaisonController extends ApiInterface
         path: "/api/type-maison/{id}",
         summary: "Supprimer un type de maison",
         description: "Supprime un type de maison.",
-        tags: ['TypeMaison']
+        tags: ['typeMaison']
     )]
     public function delete(TypeMaison $typeMaison, TypeMaisonRepository $repository): Response
     {

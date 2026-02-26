@@ -51,9 +51,9 @@ class ApiMotifController extends ApiInterface
         required: true,
         content: new OA\JsonContent(
             type: "object",
-            required: ["LibMotif"],
+            required: ["libMotif"],
             properties: [
-                new OA\Property(property: "LibMotif", type: "string", example: "Demande de congé")
+                new OA\Property(property: "libMotif", type: "string", example: "Demande de congé")
             ]
         )
     )]
@@ -63,7 +63,7 @@ class ApiMotifController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $motif = new Motif();
             
-            if (isset($data['LibMotif'])) $motif->setLibMotif($data['LibMotif']);
+            if (isset($data['libMotif'])) $motif->setLibMotif($data['libMotif']);
 
             $repository->save($motif, true);
 
@@ -88,7 +88,7 @@ class ApiMotifController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['LibMotif'])) $motif->setLibMotif($data['LibMotif']);
+            if (isset($data['libMotif'])) $motif->setLibMotif($data['libMotif']);
 
             $repository->save($motif, true);
 

@@ -101,14 +101,14 @@ class ApiFactureLocationController extends ApiInterface
                 $facture->setMois($mois);
             }
 
-            if (isset($data['LibFacture'])) $facture->setLibFacture($data['LibFacture']);
-            if (isset($data['MntFact'])) $facture->setMntFact($data['MntFact']);
-            if (isset($data['SoldeFactLoc'])) $facture->setSoldeFactLoc($data['SoldeFactLoc']);
+            if (isset($data['libFacture'])) $facture->setLibFacture($data['libFacture']);
+            if (isset($data['mntFact'])) $facture->setMntFact($data['mntFact']);
+            if (isset($data['soldeFactLoc'])) $facture->setSoldeFactLoc($data['soldeFactLoc']);
             if (isset($data['statut'])) $facture->setStatut($data['statut']);
             if (isset($data['encaisse'])) $facture->setEncaisse($data['encaisse']);
             
-            if (isset($data['DateEmission'])) $facture->setDateEmission(new \DateTime($data['DateEmission']));
-            if (isset($data['DateLimite'])) $facture->setDateLimite(new \DateTime($data['DateLimite']));
+            if (isset($data['dateEmission'])) $facture->setDateEmission(new \DateTime($data['dateEmission']));
+            if (isset($data['dateLimite'])) $facture->setDateLimite(new \DateTime($data['dateLimite']));
 
             $this->updateAuditFields($facture, true);
 
@@ -165,15 +165,15 @@ class ApiFactureLocationController extends ApiInterface
                 $facture->setMois($mois);
             }
 
-            if (isset($data['LibFacture'])) $facture->setLibFacture($data['LibFacture']);
-            if (isset($data['MntFact'])) $facture->setMntFact($data['MntFact']);
-            if (isset($data['SoldeFactLoc'])) $facture->setSoldeFactLoc($data['SoldeFactLoc']);
+            if (isset($data['libFacture'])) $facture->setLibFacture($data['libFacture']);
+            if (isset($data['mntFact'])) $facture->setMntFact($data['mntFact']);
+            if (isset($data['soldeFactLoc'])) $facture->setSoldeFactLoc($data['soldeFactLoc']);
             
             if (isset($data['statut'])) $facture->setStatut($data['statut']);
             if (isset($data['encaisse'])) $facture->setEncaisse($data['encaisse']);
             
-            if (isset($data['DateEmission'])) $facture->setDateEmission(new \DateTime($data['DateEmission']));
-            if (isset($data['DateLimite'])) $facture->setDateLimite(new \DateTime($data['DateLimite']));
+            if (isset($data['dateEmission'])) $facture->setDateEmission(new \DateTime($data['dateEmission']));
+            if (isset($data['dateLimite'])) $facture->setDateLimite(new \DateTime($data['dateLimite']));
 
             $this->updateAuditFields($facture);
 
@@ -259,7 +259,7 @@ class ApiFactureLocationController extends ApiInterface
                 return $this->errorResponse(null, "Profil locataire non trouvé", 404);
             }
             
-            $factures = $repository->findBy(['locataire' => $user->getLocataire()->getId()], ['DateEmission' => 'DESC']);
+            $factures = $repository->findBy(['locataire' => $user->getLocataire()->getId()], ['dateEmission' => 'DESC']);
             return $this->responseData($factures, 'group1');
         } catch (\Exception $exception) {
              $this->setStatusCode(500);

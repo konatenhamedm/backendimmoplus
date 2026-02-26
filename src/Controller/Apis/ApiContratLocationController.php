@@ -58,7 +58,7 @@ class ApiContratLocationController extends ApiInterface
             } else {
                 $criteria = [];
                 if ($etat !== null && $etat !== '') {
-                    $criteria['Etat'] = $etat;
+                    $criteria['etat'] = $etat;
                 }
                 $contrats = $repository->findBy($criteria, ['id' => 'DESC']);
             }
@@ -110,19 +110,19 @@ class ApiContratLocationController extends ApiInterface
                  return $this->errorResponse(null, "L'ID de l'appartement est requis", 400);
             }
 
-            if (isset($data['DateDebut'])) $contrat->setDateDebut(new \DateTime($data['DateDebut']));
-            if (isset($data['DateFin'])) $contrat->setDateFin(new \DateTime($data['DateFin']));
-            if (isset($data['DateEntree'])) $contrat->setDateEntree(new \DateTime($data['DateEntree']));
+            if (isset($data['dateDebut'])) $contrat->setDateDebut(new \DateTime($data['dateDebut']));
+            if (isset($data['dateFin'])) $contrat->setDateFin(new \DateTime($data['dateFin']));
+            if (isset($data['dateEntree'])) $contrat->setDateEntree(new \DateTime($data['dateEntree']));
             
-            if (isset($data['NbMoisCaution'])) $contrat->setNbMoisCaution($data['NbMoisCaution']);
-            if (isset($data['MntCaution'])) $contrat->setMntCaution($data['MntCaution']);
+            if (isset($data['nbMoisCaution'])) $contrat->setNbMoisCaution($data['nbMoisCaution']);
+            if (isset($data['mntCaution'])) $contrat->setMntCaution($data['mntCaution']);
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
             
-            if (isset($data['NbMoisAvance'])) $contrat->setNbMoisAvance($data['NbMoisAvance']);
-            if (isset($data['MntAvance'])) $contrat->setMntAvance($data['MntAvance']);
+            if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);
+            if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
             
-            if (isset($data['Fraisanex'])) $contrat->setFraisanex($data['Fraisanex']);
-            if (isset($data['MntLoyer'])) $contrat->setMntLoyer($data['MntLoyer']); // Override allowed?
+            if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
+            if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']); // Override allowed?
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
                 if ($nature) {
@@ -197,16 +197,16 @@ class ApiContratLocationController extends ApiInterface
             $oldAppart = $contrat->getAppart();
 
             // Update fields...
-             if (isset($data['DateDebut'])) $contrat->setDateDebut(new \DateTime($data['DateDebut']));
-            if (isset($data['DateFin'])) $contrat->setDateFin(new \DateTime($data['DateFin']));
-            if (isset($data['DateEntree'])) $contrat->setDateEntree(new \DateTime($data['DateEntree']));
+             if (isset($data['dateDebut'])) $contrat->setDateDebut(new \DateTime($data['dateDebut']));
+            if (isset($data['dateFin'])) $contrat->setDateFin(new \DateTime($data['dateFin']));
+            if (isset($data['dateEntree'])) $contrat->setDateEntree(new \DateTime($data['dateEntree']));
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
-            if (isset($data['NbMoisCaution'])) $contrat->setNbMoisCaution($data['NbMoisCaution']);
-            if (isset($data['MntCaution'])) $contrat->setMntCaution($data['MntCaution']);
-            if (isset($data['NbMoisAvance'])) $contrat->setNbMoisAvance($data['NbMoisAvance']);
-            if (isset($data['MntAvance'])) $contrat->setMntAvance($data['MntAvance']);
-            if (isset($data['Fraisanex'])) $contrat->setFraisanex($data['Fraisanex']);
-            if (isset($data['MntLoyer'])) $contrat->setMntLoyer($data['MntLoyer']);
+            if (isset($data['nbMoisCaution'])) $contrat->setNbMoisCaution($data['nbMoisCaution']);
+            if (isset($data['mntCaution'])) $contrat->setMntCaution($data['mntCaution']);
+            if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);
+            if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
+            if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
+            if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']);
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
                 if ($nature) {

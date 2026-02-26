@@ -14,7 +14,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: AppartementRepository::class)]
-#[UniqueEntity(fields: ['LibAppart', 'maisson_id'],  message: 'Cette campagne existe deja.')]
+#[UniqueEntity(fields: ['libAppart', 'maisson_id'],  message: 'Cette campagne existe deja.')]
 #[ORM\HasLifecycleCallbacks]
 class Appartement
 {
@@ -28,35 +28,35 @@ class Appartement
     #[ORM\Column(length: 255, name: 'libAppart')]
     #[Assert\NotBlank(message: 'Veuillez renseigner le libellé de la colonne', groups: ['colonne-groupe'])]
     #[Groups(['group1'])]
-    private ?string $LibAppart = null;
+    private ?string $libAppart = null;
 
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: '0', name: 'nbrePieces')]
     #[Groups(['group1'])]
-    private ?int $NbrePieces = null;
+    private ?string $nbrePieces = null;
 
     #[ORM\Column(name: 'numEtage')]
     #[Groups(['group1'])]
-    private ?int $NumEtage = null;
+    private ?int $numEtage = null;
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', name: 'loyer')]
     #[Assert\Positive(message: 'Le loyer payé doit être > à 0')]
     #[Groups(['group1'])]
-    private ?int $Loyer = null;
+    private ?string $loyer = null;
 
     #[ORM\Column(nullable: true, name: 'caution')]
     #[Groups(['group1'])]
-    private ?int $Caution = null;
+    private ?int $caution = null;
 
     #[ORM\Column(length: 255, name: 'details')]
     #[Groups(['group1'])]
-    private ?string $Details = null;
+    private ?string $details = null;
 
     #[ORM\Column(nullable: true, name: 'oqp')]
     #[Groups(['group1'])]
-    private ?int $Oqp = null;
+    private ?int $oqp = null;
 
     #[ORM\ManyToOne(inversedBy: 'appartements')]
     #[ORM\JoinColumn(nullable: false)]
@@ -79,12 +79,12 @@ class Appartement
         //$this->contratlocs = new ArrayCollection();
         /* $this->appartementContratLocations = new ArrayCollection();*/
         $this->appartContratLocations = new ArrayCollection();
-        $this->Oqp = 0;
+        $this->oqp = 0;
     }
 
     public function getNomComplet()
     {
-        return $this->maisson->getProprio()->getNom()." ".$this->maisson->getProprio()->getPrenoms() . " - " . $this->maisson->getLibMaison() . " - " . $this->LibAppart . " - " . $this->Loyer;
+        return $this->maisson->getProprio()->getNom()." ".$this->maisson->getProprio()->getPrenoms() . " - " . $this->maisson->getLibMaison() . " - " . $this->libAppart . " - " . $this->loyer;
     }
 
 
@@ -95,85 +95,85 @@ class Appartement
 
     public function getLibAppart(): ?string
     {
-        return $this->LibAppart;
+        return $this->libAppart;
     }
 
-    public function setLibAppart(string $LibAppart): static
+    public function setLibAppart(string $libAppart): static
     {
-        $this->LibAppart = $LibAppart;
+        $this->libAppart = $libAppart;
 
         return $this;
     }
 
 
-    public function getNbrePieces(): ?int
+    public function getNbrePieces(): ?string
     {
-        return $this->NbrePieces;
+        return $this->nbrePieces;
     }
 
-    public function setNbrePieces(int $NbrePieces): static
+    public function setNbrePieces(string $nbrePieces): static
     {
-        $this->NbrePieces = $NbrePieces;
+        $this->nbrePieces = $nbrePieces;
 
         return $this;
     }
 
     public function getNumEtage(): ?int
     {
-        return $this->NumEtage;
+        return $this->numEtage;
     }
 
-    public function setNumEtage(int $NumEtage): static
+    public function setNumEtage(int $numEtage): static
     {
-        $this->NumEtage = $NumEtage;
+        $this->numEtage = $numEtage;
 
         return $this;
     }
 
-    public function getLoyer(): ?int
+    public function getLoyer(): ?string
     {
-        return $this->Loyer;
+        return $this->loyer;
     }
 
-    public function setLoyer(int $Loyer): static
+    public function setLoyer(string $loyer): static
     {
-        $this->Loyer = $Loyer;
+        $this->loyer = $loyer;
 
         return $this;
     }
 
     public function getCaution(): ?int
     {
-        return $this->Caution;
+        return $this->caution;
     }
 
-    public function setCaution(int $Caution): static
+    public function setCaution(int $caution): static
     {
-        $this->Caution = $Caution;
+        $this->caution = $caution;
 
         return $this;
     }
 
     public function getDetails(): ?string
     {
-        return $this->Details;
+        return $this->details;
     }
 
-    public function setDetails(string $Details): static
+    public function setDetails(string $details): static
     {
-        $this->Details = $Details;
+        $this->details = $details;
 
         return $this;
     }
 
     public function getOqp(): ?int
     {
-        return $this->Oqp;
+        return $this->oqp;
     }
 
-    public function setOqp(int $Oqp): static
+    public function setOqp(int $oqp): static
     {
-        $this->Oqp = $Oqp;
+        $this->oqp = $oqp;
 
         return $this;
     }
@@ -272,7 +272,7 @@ class Appartement
     #[Groups(['group1'])]
     public function isDeletable(): bool
     {
-        return !$this->hasHistory() && $this->Oqp === 0;
+        return !$this->hasHistory() && $this->oqp === 0;
     }
 
     #[Groups(['group1'])]

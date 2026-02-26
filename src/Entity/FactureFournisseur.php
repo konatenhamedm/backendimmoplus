@@ -20,22 +20,22 @@ class FactureFournisseur
     private ?int $date = null;
 
     #[ORM\Column]
-    private ?int $Montant = null;
+    private ?int $montant = null;
 
     #[ORM\Column]
     private ?int $etat = null;
 
     #[ORM\Column]
-    private ?int $Objet = null;
+    private ?int $objet = null;
 
     #[ORM\Column]
-    private ?int $MtPaye = null;
+    private ?int $mtPaye = null;
 
     #[ORM\Column]
-    private ?int $Solde = null;
+    private ?int $solde = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $Details = null;
+    private ?string $details = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturesFournisseurs')]
     private ?Fournisseurs $fournisseur = null;
@@ -59,12 +59,12 @@ class FactureFournisseur
 
     public function getMontant(): ?int
     {
-        return $this->Montant;
+        return $this->montant;
     }
 
-    public function setMontant(int $Montant): static
+    public function setMontant(int $montant): static
     {
-        $this->Montant = $Montant;
+        $this->montant = $montant;
 
         return $this;
     }
@@ -83,48 +83,48 @@ class FactureFournisseur
 
     public function getObjet(): ?int
     {
-        return $this->Objet;
+        return $this->objet;
     }
 
-    public function setObjet(int $Objet): static
+    public function setObjet(int $objet): static
     {
-        $this->Objet = $Objet;
+        $this->objet = $objet;
 
         return $this;
     }
 
     public function getMtPaye(): ?int
     {
-        return $this->MtPaye;
+        return $this->mtPaye;
     }
 
-    public function setMtPaye(int $MtPaye): static
+    public function setMtPaye(int $mtPaye): static
     {
-        $this->MtPaye = $MtPaye;
+        $this->mtPaye = $mtPaye;
 
         return $this;
     }
 
     public function getSolde(): ?int
     {
-        return $this->Solde;
+        return $this->solde;
     }
 
-    public function setSolde(int $Solde): static
+    public function setSolde(int $solde): static
     {
-        $this->Solde = $Solde;
+        $this->solde = $solde;
 
         return $this;
     }
 
     public function getDetails(): ?string
     {
-        return $this->Details;
+        return $this->details;
     }
 
-    public function setDetails(string $Details): static
+    public function setDetails(string $details): static
     {
-        $this->Details = $Details;
+        $this->details = $details;
 
         return $this;
     }

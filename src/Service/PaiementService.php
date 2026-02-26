@@ -60,7 +60,7 @@ class PaiementService
         
         $reference = $this->generateReference('TRX');
         $transaction->setReference($reference);
-        $transaction->setType('Loyer'); 
+        $transaction->setType('loyer'); 
         $transaction->setMode($data['operateure'] ?? 'MOBILE_MONEY'); // Operateur code from frontend
         $transaction->setStatus('INITIE'); 
         $transaction->setDescription('Paiement Facture ' . $factureLocation->getLibFacture());
@@ -175,7 +175,7 @@ class PaiementService
                 $reglement->setNumchq($transaction->getReference());
                 
                 // Find or create TypeVersement 'MOBILE_MONEY'
-                $type = $this->typeVersementsRepository->findOneBy(['CodTyp' => 'MOBILE']);
+                $type = $this->typeVersementsRepository->findOneBy(['codTyp' => 'MOBILE']);
                 if (!$type) {
                     $type = new TypeVersements();
                     $type->setCodTyp('MOBILE');

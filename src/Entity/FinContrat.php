@@ -20,16 +20,16 @@ class FinContrat
     private ?ContratLocation $contrat = null;
 
     #[ORM\Column]
-    private ?int $DateFin = null;
+    private ?int $dateFin = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $Details = null;
+    private ?string $details = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Fichier = null;
+    private ?string $fichier = null;
 
     #[ORM\Column]
-    private ?int $CautionRemise = null;
+    private ?int $cautionRemise = null;
 
     #[ORM\ManyToOne(inversedBy: 'fincontrats')]
     private ?Motif $motif = null;
@@ -53,48 +53,48 @@ class FinContrat
 
     public function getDateFin(): ?int
     {
-        return $this->DateFin;
+        return $this->dateFin;
     }
 
-    public function setDateFin(int $DateFin): static
+    public function setDateFin(int $dateFin): static
     {
-        $this->DateFin = $DateFin;
+        $this->dateFin = $dateFin;
 
         return $this;
     }
 
     public function getDetails(): ?string
     {
-        return $this->Details;
+        return $this->details;
     }
 
-    public function setDetails(string $Details): static
+    public function setDetails(string $details): static
     {
-        $this->Details = $Details;
+        $this->details = $details;
 
         return $this;
     }
 
     public function getFichier(): ?string
     {
-        return $this->Fichier;
+        return $this->fichier;
     }
 
-    public function setFichier(string $Fichier): static
+    public function setFichier(string $fichier): static
     {
-        $this->Fichier = $Fichier;
+        $this->fichier = $fichier;
 
         return $this;
     }
 
     public function getCautionRemise(): ?int
     {
-        return $this->CautionRemise;
+        return $this->cautionRemise;
     }
 
-    public function setCautionRemise(int $CautionRemise): static
+    public function setCautionRemise(int $cautionRemise): static
     {
-        $this->CautionRemise = $CautionRemise;
+        $this->cautionRemise = $cautionRemise;
 
         return $this;
     }

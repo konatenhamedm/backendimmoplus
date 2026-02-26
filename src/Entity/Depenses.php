@@ -19,19 +19,19 @@ class Depenses
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $LibDepense = null;
+    private ?string $libDepense = null;
 
     #[ORM\Column]
-    private ?int $MontantTTC = null;
+    private ?int $montantTTC = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Date = null;
+    private ?string $date = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $Details = null;
+    private ?string $details = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Scan = null;
+    private ?string $scan = null;
 
     #[ORM\OneToMany(mappedBy: 'depenses', targetEntity: LigneDepense::class)]
     private Collection $ligneDepenses;
@@ -48,60 +48,60 @@ class Depenses
 
     public function getLibDepense(): ?string
     {
-        return $this->LibDepense;
+        return $this->libDepense;
     }
 
-    public function setLibDepense(string $LibDepense): static
+    public function setLibDepense(string $libDepense): static
     {
-        $this->LibDepense = $LibDepense;
+        $this->libDepense = $libDepense;
 
         return $this;
     }
 
     public function getMontantTTC(): ?int
     {
-        return $this->MontantTTC;
+        return $this->montantTTC;
     }
 
-    public function setMontantTTC(int $MontantTTC): static
+    public function setMontantTTC(int $montantTTC): static
     {
-        $this->MontantTTC = $MontantTTC;
+        $this->montantTTC = $montantTTC;
 
         return $this;
     }
 
     public function getDate(): ?string
     {
-        return $this->Date;
+        return $this->date;
     }
 
-    public function setDate(string $Date): static
+    public function setDate(string $date): static
     {
-        $this->Date = $Date;
+        $this->date = $date;
 
         return $this;
     }
 
     public function getDetails(): ?string
     {
-        return $this->Details;
+        return $this->details;
     }
 
-    public function setDetails(string $Details): static
+    public function setDetails(string $details): static
     {
-        $this->Details = $Details;
+        $this->details = $details;
 
         return $this;
     }
 
     public function getScan(): ?string
     {
-        return $this->Scan;
+        return $this->scan;
     }
 
-    public function setScan(string $Scan): static
+    public function setScan(string $scan): static
     {
-        $this->Scan = $Scan;
+        $this->scan = $scan;
 
         return $this;
     }

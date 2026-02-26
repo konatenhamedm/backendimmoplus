@@ -50,7 +50,7 @@ class Proprio
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
-    private ?Fichier $Cni = null;
+    private ?Fichier $cni = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group1'])]
@@ -139,7 +139,7 @@ class Proprio
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $totalPaye = null;
 
-    #[ORM\ManyToOne(inversedBy: 'Proprios')]
+    #[ORM\ManyToOne(inversedBy: 'proprios')]
     #[Groups(['group1'])]
     private ?Entreprise $entreprise = null;
 
@@ -153,10 +153,15 @@ class Proprio
     #[ORM\OneToMany(mappedBy: 'proprio', targetEntity: VersmtProprio::class)]
     private Collection $versmtProprios;
 
+    #[ORM\OneToMany(mappedBy: 'proprio', targetEntity: ChargeProprio::class)]
+    #[Groups(['group1'])]
+    private Collection $chargeProprios;
+
     public function __construct()
     {
         $this->proprioMaisons = new ArrayCollection();
         $this->versmtProprios = new ArrayCollection();
+        $this->chargeProprios = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -242,12 +247,12 @@ class Proprio
 
     public function getCni(): ?Fichier
     {
-        return $this->Cni;
+        return $this->cni;
     }
 
-    public function setCni(Fichier $Cni): static
+    public function setCni(Fichier $cni): static
     {
-        $this->Cni = $Cni;
+        $this->cni = $cni;
 
         return $this;
     }
@@ -647,5 +652,39 @@ class Proprio
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ChargeProprio>
+     */
+    public function getChargeProprios(): Collection
+    {
+        return $this->chargeProprios;
+    }
+
+    public function getTotalCharges(): float
+    {
+        $total = 0;
+        foreach ($this->chargeProprios as $charge) {
+            $total += (float) $charge->getMontant();
+        }
+        return $total;
+    }
+
+    public function getSoldeAPayer(): float
+    {
+        $encaisser = $this->getSommeEncaisser();
+        $charges = $this->getTotalCharges();
+        
+        $totalDejaPaye = 0;
+        foreach ($this->versmtProprios as $v) {
+            $totalDejaPaye += (float) $v->getMontant();
+        }
+
+        // Simplistic commission calculation (if stored as percentage string like "10")
+        $commRate = (float) ($this->getCommission() ?? 0);
+        $commAmount = $encaisser * ($commRate / 100);
+
+        return $encaisser - $commAmount - $charges - $totalDejaPaye;
     }
 }

@@ -34,15 +34,15 @@ class Entreprise
     private ?string $code = null;
 
     #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Proprio::class)]
-    private Collection $Proprios;
+    private Collection $proprios;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["group1"])]
-    private ?string $Sigle = null;
+    private ?string $sigle = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["group1"])]
-    private ?string $Agrements = null;
+    private ?string $agrements = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(["group1"])]
@@ -79,7 +79,7 @@ class Entreprise
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["group1"])]
-    private ?string $Directeur = null;
+    private ?string $directeur = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["group1"])]
@@ -122,7 +122,7 @@ class Entreprise
     public function __construct()
     {
         $this->employes = new ArrayCollection();
-        $this->Proprios = new ArrayCollection();
+        $this->proprios = new ArrayCollection();
         $this->fonctions = new ArrayCollection();
         $this->locataires = new ArrayCollection();
         $this->contratlocs = new ArrayCollection();
@@ -185,23 +185,23 @@ class Entreprise
 
     public function getProprios(): Collection
     {
-        return $this->Proprios;
+        return $this->proprios;
     }
 
-    public function addProprio(Proprio $Proprio): static
+    public function addProprio(Proprio $proprio): static
     {
-        if (!$this->Proprios->contains($Proprio)) {
-            $this->Proprios->add($Proprio);
-            $Proprio->setEntreprise($this);
+        if (!$this->proprios->contains($proprio)) {
+            $this->proprios->add($proprio);
+            $proprio->setEntreprise($this);
         }
         return $this;
     }
 
-    public function removeProprio(Proprio $Proprio): static
+    public function removeProprio(Proprio $proprio): static
     {
-        if ($this->Proprios->removeElement($Proprio)) {
-            if ($Proprio->getEntreprise() === $this) {
-                $Proprio->setEntreprise(null);
+        if ($this->proprios->removeElement($proprio)) {
+            if ($proprio->getEntreprise() === $this) {
+                $proprio->setEntreprise(null);
             }
         }
         return $this;
@@ -209,23 +209,23 @@ class Entreprise
 
     public function getSigle(): ?string
     {
-        return $this->Sigle;
+        return $this->sigle;
     }
 
-    public function setSigle(string $Sigle): static
+    public function setSigle(string $sigle): static
     {
-        $this->Sigle = $Sigle;
+        $this->sigle = $sigle;
         return $this;
     }
 
     public function getAgrements(): ?string
     {
-        return $this->Agrements;
+        return $this->agrements;
     }
 
-    public function setAgrements(string $Agrements): static
+    public function setAgrements(string $agrements): static
     {
-        $this->Agrements = $Agrements;
+        $this->agrements = $agrements;
         return $this;
     }
 
@@ -330,12 +330,12 @@ class Entreprise
 
     public function getDirecteur(): ?string
     {
-        return $this->Directeur;
+        return $this->directeur;
     }
 
-    public function setDirecteur(string $Directeur): static
+    public function setDirecteur(string $directeur): static
     {
-        $this->Directeur = $Directeur;
+        $this->directeur = $directeur;
         return $this;
     }
 

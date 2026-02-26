@@ -101,13 +101,13 @@ class ApiAppartementController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $appartement = new Appartement();
             
-            if (isset($data['LibAppart'])) $appartement->setLibAppart($data['LibAppart']);
-            if (isset($data['NbrePieces'])) $appartement->setNbrePieces($data['NbrePieces']);
-            if (isset($data['NumEtage'])) $appartement->setNumEtage($data['NumEtage']);
-            if (isset($data['Loyer'])) $appartement->setLoyer($data['Loyer']);
-            if (isset($data['Caution'])) $appartement->setCaution($data['Caution']);
-            if (isset($data['Details'])) $appartement->setDetails($data['Details']);
-            if (isset($data['Oqp'])) $appartement->setOqp($data['Oqp']);
+            if (isset($data['libAppart'])) $appartement->setLibAppart($data['libAppart']);
+            if (isset($data['nbrePieces'])) $appartement->setNbrePieces($data['nbrePieces']);
+            if (isset($data['numEtage'])) $appartement->setNumEtage($data['numEtage']);
+            if (isset($data['loyer'])) $appartement->setLoyer($data['loyer']);
+            if (isset($data['caution'])) $appartement->setCaution($data['caution']);
+            if (isset($data['details'])) $appartement->setDetails($data['details']);
+            if (isset($data['oqp'])) $appartement->setOqp($data['oqp']);
 
             if (isset($data['maison_id'])) {
                 $maison = $maisonRepository->find($data['maison_id']);
@@ -140,13 +140,13 @@ class ApiAppartementController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['LibAppart'])) $appartement->setLibAppart($data['LibAppart']);
-            if (isset($data['NbrePieces'])) $appartement->setNbrePieces($data['NbrePieces']);
-            if (isset($data['NumEtage'])) $appartement->setNumEtage($data['NumEtage']);
-            if (isset($data['Loyer'])) $appartement->setLoyer($data['Loyer']);
-            if (isset($data['Caution'])) $appartement->setCaution($data['Caution']);
-            if (isset($data['Details'])) $appartement->setDetails($data['Details']);
-            if (isset($data['Oqp'])) $appartement->setOqp($data['Oqp']);
+            if (isset($data['libAppart'])) $appartement->setLibAppart($data['libAppart']);
+            if (isset($data['nbrePieces'])) $appartement->setNbrePieces($data['nbrePieces']);
+            if (isset($data['numEtage'])) $appartement->setNumEtage($data['numEtage']);
+            if (isset($data['loyer'])) $appartement->setLoyer($data['loyer']);
+            if (isset($data['caution'])) $appartement->setCaution($data['caution']);
+            if (isset($data['details'])) $appartement->setDetails($data['details']);
+            if (isset($data['oqp'])) $appartement->setOqp($data['oqp']);
 
              if (isset($data['maison_id'])) {
                 $maison = $maisonRepository->find($data['maison_id']);

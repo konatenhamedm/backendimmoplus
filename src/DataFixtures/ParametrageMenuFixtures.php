@@ -188,8 +188,13 @@ class ParametrageMenuFixtures extends Fixture
                 $manager->persist($grpMod);
 
                 // Assign Permissions
+                // SADM sees ALL menus
                 $this->assignPermission($manager, $groups['SADM'], $module, $grpMod, $perms['CRUD']);
-                $this->assignPermission($manager, $groups['ADMIN'], $module, $grpMod, $perms['CRUD']);
+
+                if ($modTitle !== 'Espace Locataire') {
+                    $this->assignPermission($manager, $groups['ADMIN'], $module, $grpMod, $perms['CRUD']);
+                }
+
 
                 if (in_array($modTitle, ['Tableau de bord', 'Gestion Immobilière', 'Gestion Locative'])) {
                     $this->assignPermission($manager, $groups['AGENT'], $module, $grpMod, $perms['CRUD']);
@@ -218,7 +223,7 @@ class ParametrageMenuFixtures extends Fixture
         $entreprise->setSituationGeo('Abidjan');
         $entreprise->setMobile('00000000');
         $entreprise->setSiteWeb('www.immoplus.com');
-        $entreprise->setDirecteur('Directeur');
+        $entreprise->setDirecteur('directeur');
         $entreprise->setVille('Abidjan');
         $manager->persist($entreprise);
 

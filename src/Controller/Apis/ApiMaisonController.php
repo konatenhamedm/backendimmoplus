@@ -70,12 +70,12 @@ class ApiMaisonController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $maison = new Maison();
             
-            if (isset($data['LibMaison'])) $maison->setLibMaison($data['LibMaison']);
-            if (isset($data['Lot'])) $maison->setLot($data['Lot']);
-            if (isset($data['Ilot'])) $maison->setIlot($data['Ilot']);
-            if (isset($data['MntCom'])) $maison->setMntCom($data['MntCom']);
-            if (isset($data['Localisation'])) $maison->setLocalisation($data['Localisation']);
-            if (isset($data['TFoncier'])) $maison->setTFoncier($data['TFoncier']);
+            if (isset($data['libMaison'])) $maison->setLibMaison($data['libMaison']);
+            if (isset($data['lot'])) $maison->setLot($data['lot']);
+            if (isset($data['ilot'])) $maison->setIlot($data['ilot']);
+            if (isset($data['mntCom'])) $maison->setMntCom($data['mntCom']);
+            if (isset($data['localisation'])) $maison->setLocalisation($data['localisation']);
+            if (isset($data['tFoncier'])) $maison->setTFoncier($data['tFoncier']);
 
             if (isset($data['quartier_id'])) {
                 $quartier = $quartierRepository->find($data['quartier_id']);
@@ -101,12 +101,12 @@ class ApiMaisonController extends ApiInterface
             if (isset($data['appartements']) && is_array($data['appartements'])) {
                 foreach ($data['appartements'] as $appartData) {
                     $appartement = new Appartement();
-                    if (isset($appartData['LibAppart'])) $appartement->setLibAppart($appartData['LibAppart']);
-                    if (isset($appartData['NbrePieces'])) $appartement->setNbrePieces($appartData['NbrePieces']);
-                    if (isset($appartData['NumEtage'])) $appartement->setNumEtage($appartData['NumEtage']);
-                    if (isset($appartData['Loyer'])) $appartement->setLoyer($appartData['Loyer']);
-                    if (isset($appartData['Details'])) $appartement->setDetails($appartData['Details']);
-                    //if (isset($appartData['Oqp'])) $appartement->setOqp($appartData['Oqp']);
+                    if (isset($appartData['libAppart'])) $appartement->setLibAppart($appartData['libAppart']);
+                    if (isset($appartData['nbrePieces'])) $appartement->setNbrePieces($appartData['nbrePieces']);
+                    if (isset($appartData['numEtage'])) $appartement->setNumEtage($appartData['numEtage']);
+                    if (isset($appartData['loyer'])) $appartement->setLoyer($appartData['loyer']);
+                    if (isset($appartData['details'])) $appartement->setDetails($appartData['details']);
+                    //if (isset($appartData['oqp'])) $appartement->setOqp($appartData['oqp']);
                     
                     $appartement->setMaisson($maison);
                     $this->updateAuditFields($appartement, true);
@@ -139,12 +139,12 @@ class ApiMaisonController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['LibMaison'])) $maison->setLibMaison($data['LibMaison']);
-            if (isset($data['Lot'])) $maison->setLot($data['Lot']);
-            if (isset($data['Ilot'])) $maison->setIlot($data['Ilot']);
-            if (isset($data['MntCom'])) $maison->setMntCom($data['MntCom']);
-            if (isset($data['Localisation'])) $maison->setLocalisation($data['Localisation']);
-            if (isset($data['TFoncier'])) $maison->setTFoncier($data['TFoncier']);
+            if (isset($data['libMaison'])) $maison->setLibMaison($data['libMaison']);
+            if (isset($data['lot'])) $maison->setLot($data['lot']);
+            if (isset($data['ilot'])) $maison->setIlot($data['ilot']);
+            if (isset($data['mntCom'])) $maison->setMntCom($data['mntCom']);
+            if (isset($data['localisation'])) $maison->setLocalisation($data['localisation']);
+            if (isset($data['tFoncier'])) $maison->setTFoncier($data['tFoncier']);
 
             if (isset($data['quartier_id'])) {
                 $quartier = $quartierRepository->find($data['quartier_id']);
@@ -169,25 +169,25 @@ class ApiMaisonController extends ApiInterface
                         // Update existing apartment if it belongs to this maison
                         $appartement = $appartementRepository->find($appartData['id']);
                         if ($appartement && $appartement->getMaisson() === $maison) {
-                            if (isset($appartData['LibAppart'])) $appartement->setLibAppart($appartData['LibAppart']);
-                            if (isset($appartData['NbrePieces'])) $appartement->setNbrePieces($appartData['NbrePieces']);
-                            if (isset($appartData['NumEtage'])) $appartement->setNumEtage($appartData['NumEtage']);
-                            if (isset($appartData['Loyer'])) $appartement->setLoyer($appartData['Loyer']);
-                            if (isset($appartData['Details'])) $appartement->setDetails($appartData['Details']);
-                             // Only update 'Oqp' if explicitely provided
-                            if (isset($appartData['Oqp'])) $appartement->setOqp($appartData['Oqp']);
+                            if (isset($appartData['libAppart'])) $appartement->setLibAppart($appartData['libAppart']);
+                            if (isset($appartData['nbrePieces'])) $appartement->setNbrePieces($appartData['nbrePieces']);
+                            if (isset($appartData['numEtage'])) $appartement->setNumEtage($appartData['numEtage']);
+                            if (isset($appartData['loyer'])) $appartement->setLoyer($appartData['loyer']);
+                            if (isset($appartData['details'])) $appartement->setDetails($appartData['details']);
+                             // Only update 'oqp' if explicitely provided
+                            if (isset($appartData['oqp'])) $appartement->setOqp($appartData['oqp']);
                             
                             $this->updateAuditFields($appartement);
                         }
                     } else {
                         // Create new apartment
                         $appartement = new Appartement();
-                        if (isset($appartData['LibAppart'])) $appartement->setLibAppart($appartData['LibAppart']);
-                        if (isset($appartData['NbrePieces'])) $appartement->setNbrePieces($appartData['NbrePieces']);
-                        if (isset($appartData['NumEtage'])) $appartement->setNumEtage($appartData['NumEtage']);
-                        if (isset($appartData['Loyer'])) $appartement->setLoyer($appartData['Loyer']);
-                        if (isset($appartData['Details'])) $appartement->setDetails($appartData['Details']);
-                        if (isset($appartData['Oqp'])) $appartement->setOqp($appartData['Oqp']);
+                        if (isset($appartData['libAppart'])) $appartement->setLibAppart($appartData['libAppart']);
+                        if (isset($appartData['nbrePieces'])) $appartement->setNbrePieces($appartData['nbrePieces']);
+                        if (isset($appartData['numEtage'])) $appartement->setNumEtage($appartData['numEtage']);
+                        if (isset($appartData['loyer'])) $appartement->setLoyer($appartData['loyer']);
+                        if (isset($appartData['details'])) $appartement->setDetails($appartData['details']);
+                        if (isset($appartData['oqp'])) $appartement->setOqp($appartData['oqp']);
                         
                         $this->updateAuditFields($appartement, true);
                         $maison->addAppartement($appartement);

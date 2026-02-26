@@ -18,14 +18,14 @@ class Regime
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $LibRegime = null;
+    private ?string $libRegime = null;
 
-    #[ORM\OneToMany(mappedBy: 'Regime', targetEntity: ContratLocation::class)]
-    private Collection $Contratlocs;
+    #[ORM\OneToMany(mappedBy: 'regime', targetEntity: ContratLocation::class)]
+    private Collection $contratlocs;
 
     public function __construct()
     {
-        $this->Contratlocs = new ArrayCollection();
+        $this->contratlocs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -35,12 +35,12 @@ class Regime
 
     public function getLibRegime(): ?string
     {
-        return $this->LibRegime;
+        return $this->libRegime;
     }
 
-    public function setLibRegime(string $LibRegime): static
+    public function setLibRegime(string $libRegime): static
     {
-        $this->LibRegime = $LibRegime;
+        $this->libRegime = $libRegime;
 
         return $this;
     }
@@ -50,13 +50,13 @@ class Regime
      */
     public function getContratlocs(): Collection
     {
-        return $this->Contratlocs;
+        return $this->contratlocs;
     }
 
     public function addContratloc(ContratLocation $Contratloc): static
     {
-        if (!$this->Contratlocs->contains($Contratloc)) {
-            $this->Contratlocs->add($Contratloc);
+        if (!$this->contratlocs->contains($Contratloc)) {
+            $this->contratlocs->add($Contratloc);
             $Contratloc->setRegime($this);
         }
 
@@ -65,7 +65,7 @@ class Regime
 
     public function removeContratloc(ContratLocation $Contratloc): static
     {
-        if ($this->Contratlocs->removeElement($Contratloc)) {
+        if ($this->contratlocs->removeElement($Contratloc)) {
             // set the owning side to null (unless already changed)
             if ($Contratloc->getRegime() === $this) {
                 $Contratloc->setRegime(null);

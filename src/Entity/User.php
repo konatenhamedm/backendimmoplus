@@ -109,7 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['group1'])]
     private ?string $prenoms = null;
 
-    #[ORM\OneToMany(mappedBy: 'IdAgent', targetEntity: Maison::class)]
+    #[ORM\OneToMany(mappedBy: 'idAgent', targetEntity: Maison::class)]
     private Collection $maisons;
 
     public function getLocataire(): ?Locataire

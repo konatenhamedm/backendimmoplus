@@ -21,17 +21,13 @@ class TypeMaison
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibType = null;
-
-    #[ORM\OneToMany(mappedBy: 'typeMaison', targetEntity: Maison::class)]
-    private Collection $maisons;
+    private ?string $libType = null;
 
     #[ORM\OneToMany(mappedBy: 'typeMaison', targetEntity: Maison::class)]
     private Collection $typeMaisonMaisons;
 
     public function __construct()
     {
-        $this->maisons = new ArrayCollection();
         $this->typeMaisonMaisons = new ArrayCollection();
     }
 
@@ -42,42 +38,12 @@ class TypeMaison
 
     public function getLibType(): ?string
     {
-        return $this->LibType;
+        return $this->libType;
     }
 
-    public function setLibType(string $LibType): static
+    public function setLibType(string $libType): static
     {
-        $this->LibType = $LibType;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Maison>
-     */
-    public function getMaisons(): Collection
-    {
-        return $this->maisons;
-    }
-
-    public function addMaison(Maison $maison): static
-    {
-        if (!$this->maisons->contains($maison)) {
-            $this->maisons->add($maison);
-            $maison->setTypeMaison($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMaison(Maison $maison): static
-    {
-        if ($this->maisons->removeElement($maison)) {
-            // set the owning side to null (unless already changed)
-            if ($maison->getTypeMaison() === $this) {
-                $maison->setTypeMaison(null);
-            }
-        }
+        $this->libType = $libType;
 
         return $this;
     }

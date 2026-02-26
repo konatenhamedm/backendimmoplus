@@ -58,7 +58,7 @@ class SeedLocataireDataCommand extends Command
             $this->entityManager->persist($annee);
         }
 
-        $moisJan = $this->entityManager->getRepository(TabMois::class)->findOneBy(['NumMois' => 1]);
+        $moisJan = $this->entityManager->getRepository(TabMois::class)->findOneBy(['numMois' => 1]);
         if (!$moisJan) {
             $moisJan = new TabMois();
             $moisJan->setNumMois(1);
@@ -67,7 +67,7 @@ class SeedLocataireDataCommand extends Command
             $moisJan->setFin('31');
             $this->entityManager->persist($moisJan);
         }
-        $moisFev = $this->entityManager->getRepository(TabMois::class)->findOneBy(['NumMois' => 2]);
+        $moisFev = $this->entityManager->getRepository(TabMois::class)->findOneBy(['numMois' => 2]);
         if (!$moisFev) {
             $moisFev = new TabMois();
             $moisFev->setNumMois(2);
@@ -104,7 +104,7 @@ class SeedLocataireDataCommand extends Command
         $this->entityManager->persist($contratOld);
 
         // 5. Create active contract (if not exists)
-        $contratActive = $this->entityManager->getRepository(ContratLocation::class)->findOneBy(['locataire' => $locataire, 'Etat' => 1]);
+        $contratActive = $this->entityManager->getRepository(ContratLocation::class)->findOneBy(['locataire' => $locataire, 'etat' => 1]);
         if (!$contratActive) {
             $contratActive = new ContratLocation();
             $contratActive->setLocataire($locataire);

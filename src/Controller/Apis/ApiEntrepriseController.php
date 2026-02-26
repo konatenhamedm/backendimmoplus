@@ -65,8 +65,8 @@ class ApiEntrepriseController extends ApiInterface
                 properties: [
                     new OA\Property(property: "denomination", type: "string"),
                     new OA\Property(property: "code", type: "string"),
-                    new OA\Property(property: "Sigle", type: "string"),
-                    new OA\Property(property: "Agrements", type: "string"),
+                    new OA\Property(property: "sigle", type: "string"),
+                    new OA\Property(property: "agrements", type: "string"),
                     new OA\Property(property: "situation_geo", type: "string"),
                     new OA\Property(property: "contacts", type: "string"),
                     new OA\Property(property: "adresse", type: "string"),
@@ -74,7 +74,7 @@ class ApiEntrepriseController extends ApiInterface
                     new OA\Property(property: "fax", type: "string"),
                     new OA\Property(property: "email", type: "string"),
                     new OA\Property(property: "site_web", type: "string"),
-                    new OA\Property(property: "Directeur", type: "string"),
+                    new OA\Property(property: "directeur", type: "string"),
                     new OA\Property(property: "ville", type: "string"),
                     new OA\Property(property: "numero", type: "string"),
                     new OA\Property(property: "pays_id", type: "integer"),
@@ -98,14 +98,14 @@ class ApiEntrepriseController extends ApiInterface
 
             // Génération forcée du code dans l'API
             $entreprise->setCode('ENT-' . strtoupper(substr(uniqid(), -6)));
-            $entreprise->setSigle($data['Sigle'] ?? '');
-            $entreprise->setAgrements($data['Agrements'] ?? '');
+            $entreprise->setSigle($data['sigle'] ?? '');
+            $entreprise->setAgrements($data['agrements'] ?? '');
             $entreprise->setSituationGeo($data['situation_geo'] ?? '');
             $entreprise->setContacts($data['contacts'] ?? 'Non renseigné');
             $entreprise->setMobile($data['mobile'] ?? '');
             $entreprise->setEmail($data['email'] ?? '');
             $entreprise->setSiteWeb($data['site_web'] ?? '');
-            $entreprise->setDirecteur($data['Directeur'] ?? '');
+            $entreprise->setDirecteur($data['directeur'] ?? '');
             $entreprise->setVille($data['ville'] ?? '');
             $entreprise->setNumero($data['numero'] ?? '');
             $entreprise->setIsActive(isset($data['isActive']) ? filter_var($data['isActive'], FILTER_VALIDATE_BOOLEAN) : true);
@@ -174,8 +174,8 @@ class ApiEntrepriseController extends ApiInterface
                 properties: [
                     new OA\Property(property: "denomination", type: "string"),
                     new OA\Property(property: "code", type: "string"),
-                    new OA\Property(property: "Sigle", type: "string"),
-                    new OA\Property(property: "Agrements", type: "string"),
+                    new OA\Property(property: "sigle", type: "string"),
+                    new OA\Property(property: "agrements", type: "string"),
                     new OA\Property(property: "situation_geo", type: "string"),
                     new OA\Property(property: "contacts", type: "string"),
                     new OA\Property(property: "adresse", type: "string"),
@@ -183,7 +183,7 @@ class ApiEntrepriseController extends ApiInterface
                     new OA\Property(property: "fax", type: "string"),
                     new OA\Property(property: "email", type: "string"),
                     new OA\Property(property: "site_web", type: "string"),
-                    new OA\Property(property: "Directeur", type: "string"),
+                    new OA\Property(property: "directeur", type: "string"),
                     new OA\Property(property: "ville", type: "string"),
                     new OA\Property(property: "numero", type: "string"),
                     new OA\Property(property: "pays_id", type: "integer"),
@@ -202,8 +202,8 @@ class ApiEntrepriseController extends ApiInterface
             
             if (isset($data['denomination'])) $entreprise->setDenomination($data['denomination']);
             // Le code ne peut pas être modifié manuellement
-            if (isset($data['Sigle'])) $entreprise->setSigle($data['Sigle']);
-            if (isset($data['Agrements'])) $entreprise->setAgrements($data['Agrements']);
+            if (isset($data['sigle'])) $entreprise->setSigle($data['sigle']);
+            if (isset($data['agrements'])) $entreprise->setAgrements($data['agrements']);
             if (isset($data['situation_geo'])) $entreprise->setSituationGeo($data['situation_geo']);
             if (isset($data['contacts'])) $entreprise->setContacts($data['contacts']);
             if (isset($data['adresse'])) $entreprise->setAdresse($data['adresse']);
@@ -211,7 +211,7 @@ class ApiEntrepriseController extends ApiInterface
             if (isset($data['fax'])) $entreprise->setFax($data['fax']);
             if (isset($data['email'])) $entreprise->setEmail($data['email']);
             if (isset($data['site_web'])) $entreprise->setSiteWeb($data['site_web']);
-            if (isset($data['Directeur'])) $entreprise->setDirecteur($data['Directeur']);
+            if (isset($data['directeur'])) $entreprise->setDirecteur($data['directeur']);
             if (isset($data['ville'])) $entreprise->setVille($data['ville']);
             if (isset($data['numero'])) $entreprise->setNumero($data['numero']);
             if (isset($data['isActive'])) $entreprise->setIsActive(filter_var($data['isActive'], FILTER_VALIDATE_BOOLEAN));

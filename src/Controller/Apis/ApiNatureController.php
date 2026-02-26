@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/nature')]
-#[OA\Tag(name: 'Nature', description: 'Gestion des natures')]
+#[OA\Tag(name: 'nature', description: 'Gestion des natures')]
 class ApiNatureController extends ApiInterface
 {
     #[Route('/', methods: ['GET'])]
@@ -20,7 +20,7 @@ class ApiNatureController extends ApiInterface
         path: "/api/nature/",
         summary: "Lister les natures",
         description: "Retourne la liste des types de maison.",
-        tags: ['Nature']
+        tags: ['nature']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
     public function index(Request $request, NatureRepository $repository): Response
@@ -45,7 +45,7 @@ class ApiNatureController extends ApiInterface
         path: "/api/type-maison/create",
         summary: "Créer un type de maison",
         description: "Ajoute un nouveau type de maison.",
-        tags: ['Nature']
+        tags: ['nature']
     )]
     #[OA\RequestBody(
         required: true,
@@ -79,7 +79,7 @@ class ApiNatureController extends ApiInterface
         path: "/api/type-maison/{id}",
         summary: "Modifier un type de maison",
         description: "Met à jour un type de maison existant.",
-        tags: ['Nature']
+        tags: ['nature']
     )]
     public function update(Request $request, Nature $nature, NatureRepository $repository): Response
     {
@@ -104,7 +104,7 @@ class ApiNatureController extends ApiInterface
         path: "/api/type-maison/{id}",
         summary: "Supprimer un type de maison",
         description: "Supprime un type de maison.",
-        tags: ['Nature']
+        tags: ['nature']
     )]
     public function delete(Nature $nature, NatureRepository $repository): Response
     {

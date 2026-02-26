@@ -26,31 +26,31 @@ class Maison
     #[ORM\Column(length: 255, name: 'libMaison')]
     #[Assert\NotNull(message: "Le champs libelle est requis")]
     #[Groups(['group1'])]
-    private ?string $LibMaison = null;
+    private ?string $libMaison = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'localisation')]
     #[Groups(['group1'])]
-    private ?string $Localisation = null;
+    private ?string $localisation = null;
 
     #[ORM\Column(length: 255, name: 'lot')]
     #[Assert\NotNull(message: "Le champs Lot est requis")]
     #[Groups(['group1'])]
-    private ?string $Lot = null;
+    private ?string $lot = null;
 
     #[ORM\Column(length: 255, name: 'ilot')]
     #[Assert\NotNull(message: "Le champs Ilot est requis")]
     #[Groups(['group1'])]
-    private ?string $Ilot = null;
+    private ?string $ilot = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'tFoncier')]
     #[Groups(['group1'])]
-    private ?string $TFoncier = null;
+    private ?string $tFoncier = null;
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: false, name: 'mntCom')]
     #[Assert\NotNull(message: "Le champs commission est requis")]
     #[Groups(['group1'])]
-    private ?int $MntCom = null;
+    private ?string $mntCom = null;
 
     #[ORM\OneToMany(mappedBy: 'maisson', targetEntity: Appartement::class, orphanRemoval: true, cascade: ['persist'])]
     #[Groups(['group1'])]
@@ -75,7 +75,7 @@ class Maison
     /* #[ORM\JoinColumn(nullable: false)]
     #[Gedmo\Blameable(on: 'create')]*/
     #[Groups(['group1'])]
-    private ?User $IdAgent = null;
+    private ?User $idAgent = null;
 
     #[ORM\OneToMany(mappedBy: 'maison', targetEntity: VersmtProprio::class)]
     private Collection $versmtProprios;
@@ -84,10 +84,10 @@ class Maison
     private ?Quartier $quartier = null;
 
     #[ORM\ManyToOne(inversedBy: 'maisons2')]
-    private ?Proprio $Proprio = null;
+    private ?Proprio $proprio = null;
 
     #[ORM\ManyToOne(inversedBy: 'maisons3')]
-    private ?TypeMaison $TypeMaison = null; */
+    private ?TypeMaison $typeMaison = null; */
 
     public function __construct()
     {
@@ -102,72 +102,72 @@ class Maison
 
     public function getLibMaison(): ?string
     {
-        return $this->LibMaison;
+        return $this->libMaison;
     }
 
-    public function setLibMaison(string $LibMaison): static
+    public function setLibMaison(string $libMaison): static
     {
-        $this->LibMaison = $LibMaison;
+        $this->libMaison = $libMaison;
 
         return $this;
     }
 
     public function getLocalisation(): ?string
     {
-        return $this->Localisation;
+        return $this->localisation;
     }
 
-    public function setLocalisation(string $Localisation): static
+    public function setLocalisation(string $localisation): static
     {
-        $this->Localisation = $Localisation;
+        $this->localisation = $localisation;
 
         return $this;
     }
 
     public function getLot(): ?string
     {
-        return $this->Lot;
+        return $this->lot;
     }
 
-    public function setLot(string $Lot): static
+    public function setLot(string $lot): static
     {
-        $this->Lot = $Lot;
+        $this->lot = $lot;
 
         return $this;
     }
 
     public function getIlot(): ?string
     {
-        return $this->Ilot;
+        return $this->ilot;
     }
 
-    public function setIlot(string $Ilot): static
+    public function setIlot(string $ilot): static
     {
-        $this->Ilot = $Ilot;
+        $this->ilot = $ilot;
 
         return $this;
     }
 
     public function getTFoncier(): ?string
     {
-        return $this->TFoncier;
+        return $this->tFoncier;
     }
 
-    public function setTFoncier(string $TFoncier): static
+    public function setTFoncier(string $tFoncier): static
     {
-        $this->TFoncier = $TFoncier;
+        $this->tFoncier = $tFoncier;
 
         return $this;
     }
 
-    public function getMntCom(): ?int
+    public function getMntCom(): ?string
     {
-        return $this->MntCom;
+        return $this->mntCom;
     }
 
-    public function setMntCom(int $MntCom): static
+    public function setMntCom(string $mntCom): static
     {
-        $this->MntCom = $MntCom;
+        $this->mntCom = $mntCom;
 
         return $this;
     }
@@ -217,24 +217,24 @@ class Maison
 
     public function getProprio(): ?Proprio
     {
-        return $this->Proprio;
+        return $this->proprio;
     }
 
-    public function setProprio(?Proprio $Proprio): static
+    public function setProprio(?Proprio $proprio): static
     {
-        $this->Proprio = $Proprio;
+        $this->proprio = $proprio;
 
         return $this;
     }
 
     public function getTypeMaison(): ?TypeMaison
     {
-        return $this->TypeMaison;
+        return $this->typeMaison;
     }
 
-    public function setTypeMaison(?TypeMaison $TypeMaison): static
+    public function setTypeMaison(?TypeMaison $typeMaison): static
     {
-        $this->TypeMaison = $TypeMaison;
+        $this->typeMaison = $typeMaison;
 
         return $this;
     } */
@@ -277,12 +277,12 @@ class Maison
 
     public function getIdAgent(): ?User
     {
-        return $this->IdAgent;
+        return $this->idAgent;
     }
 
-    public function setIdAgent(?User $IdAgent): static
+    public function setIdAgent(?User $idAgent): static
     {
-        $this->IdAgent = $IdAgent;
+        $this->idAgent = $idAgent;
 
         return $this;
     }

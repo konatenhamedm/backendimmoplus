@@ -235,10 +235,10 @@ class ApiDashboardController extends AbstractController
         
         $indexedResults = [];
         foreach ($results as $res) {
-             $date = $res['DateEmission'];
+             $date = $res['dateEmission'];
              if ($date instanceof \DateTimeInterface) {
                  $month = $date->format('Y-m');
-                 $amount = $res['MntFact'] - $res['SoldeFactLoc'];
+                 $amount = $res['mntFact'] - $res['soldeFactLoc'];
                  
                  if (!isset($indexedResults[$month])) {
                      $indexedResults[$month] = 0;
@@ -354,7 +354,7 @@ class ApiDashboardController extends AbstractController
             }
 
             // 2. Active Contract
-            $contrat = $this->em->getRepository(ContratLocation::class)->findOneBy(['locataire' => $locataire, 'Etat' => 1]);
+            $contrat = $this->em->getRepository(ContratLocation::class)->findOneBy(['locataire' => $locataire, 'etat' => 1]);
 
             // 3. Transactions
             $transactions = $this->em->getRepository(\App\Entity\Transaction::class)->findBy(
@@ -396,10 +396,10 @@ class ApiDashboardController extends AbstractController
                     'etat'       => $contrat->getEtat(),
                     'appart'     => $appart ? [
                         'id'        => $appart->getId(),
-                        'LibAppart' => $appart->getLibAppart(),
+                        'libAppart' => $appart->getLibAppart(),
                         'maisson'   => $maison ? [
                             'id'        => $maison->getId(),
-                            'LibMaison' => $maison->getLibMaison(),
+                            'libMaison' => $maison->getLibMaison(),
                         ] : null,
                     ] : null,
                 ];

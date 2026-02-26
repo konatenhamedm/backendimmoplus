@@ -75,13 +75,13 @@ class ApiLocataireController extends ApiInterface
             
             if (isset($data['nom'])) $locataire->setNom($data['nom']);
             if (isset($data['prenoms'])) $locataire->setPrenoms($data['prenoms']);
-            if (isset($data['DateNaiss'])) $locataire->setDateNaiss(new \DateTime($data['DateNaiss']));
-            if (isset($data['LieuNaiss'])) $locataire->setLieuNaiss($data['LieuNaiss']);
-            if (isset($data['Profession'])) $locataire->setProfession($data['Profession']);
-            if (isset($data['Contacts'])) $locataire->setContacts($data['Contacts']);
-            if (isset($data['Email'])) $locataire->setEmail($data['Email']);
+            if (isset($data['dateNaiss'])) $locataire->setDateNaiss(new \DateTime($data['dateNaiss']));
+            if (isset($data['lieuNaiss'])) $locataire->setLieuNaiss($data['lieuNaiss']);
+            if (isset($data['profession'])) $locataire->setProfession($data['profession']);
+            if (isset($data['contacts'])) $locataire->setContacts($data['contacts']);
+            if (isset($data['email'])) $locataire->setEmail($data['email']);
             if (isset($data['numpiece'])) $locataire->setNumpiece($data['numpiece']);
-            if (isset($data['Genre'])) $locataire->setGenre($data['Genre']);
+            if (isset($data['genre'])) $locataire->setGenre($data['genre']);
 
             if (isset($data['situation_matri_id'])) {
                 $sm = $situationRepo->find($data['situation_matri_id']);
@@ -90,16 +90,16 @@ class ApiLocataireController extends ApiInterface
             }
             
             // Optional fields
-            if (isset($data['Ethnie'])) $locataire->setEthnie($data['Ethnie']);
-            if (isset($data['NbEnfts'])) $locataire->setNbEnfts($data['NbEnfts']);
-            if (isset($data['NbPersChge'])) $locataire->setNbPersChge($data['NbPersChge']);
-            if (isset($data['Pere'])) $locataire->setPere($data['Pere']);
-            if (isset($data['Mere'])) $locataire->setMere($data['Mere']);
-            if (isset($data['NPConjointe'])) $locataire->setNPConjointe($data['NPConjointe']);
-            if (isset($data['ProfConj'])) $locataire->setProfConj($data['ProfConj']);
-            if (isset($data['EthnieConj'])) $locataire->setEthnieConj($data['EthnieConj']);
-            if (isset($data['ContactConj'])) $locataire->setContactConj($data['ContactConj']);
-            if (isset($data['VivezAvec'])) $locataire->setVivezAvec($data['VivezAvec']);
+            if (isset($data['ethnie'])) $locataire->setEthnie($data['ethnie']);
+            if (isset($data['nbEnfts'])) $locataire->setNbEnfts($data['nbEnfts']);
+            if (isset($data['nbPersChge'])) $locataire->setNbPersChge($data['nbPersChge']);
+            if (isset($data['pere'])) $locataire->setPere($data['pere']);
+            if (isset($data['mere'])) $locataire->setMere($data['mere']);
+            if (isset($data['nPConjointe'])) $locataire->setNPConjointe($data['nPConjointe']);
+            if (isset($data['profConj'])) $locataire->setProfConj($data['profConj']);
+            if (isset($data['ethnieConj'])) $locataire->setEthnieConj($data['ethnieConj']);
+            if (isset($data['contactConj'])) $locataire->setContactConj($data['contactConj']);
+            if (isset($data['vivezAvec'])) $locataire->setVivezAvec($data['vivezAvec']);
 
             // Upload InfoPiece
             $uploadedFile = $request->files->get('info_piece');
@@ -146,13 +146,13 @@ class ApiLocataireController extends ApiInterface
             
            if (isset($data['nom'])) $locataire->setNom($data['nom']);
             if (isset($data['prenoms'])) $locataire->setPrenoms($data['prenoms']);
-            if (isset($data['DateNaiss'])) $locataire->setDateNaiss(new \DateTime($data['DateNaiss']));
-            if (isset($data['LieuNaiss'])) $locataire->setLieuNaiss($data['LieuNaiss']);
-            if (isset($data['Profession'])) $locataire->setProfession($data['Profession']);
-            if (isset($data['Contacts'])) $locataire->setContacts($data['Contacts']);
-            if (isset($data['Email'])) $locataire->setEmail($data['Email']);
+            if (isset($data['dateNaiss'])) $locataire->setDateNaiss(new \DateTime($data['dateNaiss']));
+            if (isset($data['lieuNaiss'])) $locataire->setLieuNaiss($data['lieuNaiss']);
+            if (isset($data['profession'])) $locataire->setProfession($data['profession']);
+            if (isset($data['contacts'])) $locataire->setContacts($data['contacts']);
+            if (isset($data['email'])) $locataire->setEmail($data['email']);
             if (isset($data['numpiece'])) $locataire->setNumpiece($data['numpiece']);
-            if (isset($data['Genre'])) $locataire->setGenre($data['Genre']);
+            if (isset($data['genre'])) $locataire->setGenre($data['genre']);
 
             if (isset($data['situation_matri_id'])) {
                 $sm = $situationRepo->find($data['situation_matri_id']);
@@ -160,16 +160,16 @@ class ApiLocataireController extends ApiInterface
                 $locataire->setSituationMatri($sm);
             }
             
-            if (isset($data['Ethnie'])) $locataire->setEthnie($data['Ethnie']);
-            if (isset($data['NbEnfts'])) $locataire->setNbEnfts($data['NbEnfts']);
-            if (isset($data['NbPersChge'])) $locataire->setNbPersChge($data['NbPersChge']);
-            if (isset($data['Pere'])) $locataire->setPere($data['Pere']);
-            if (isset($data['Mere'])) $locataire->setMere($data['Mere']);
-            if (isset($data['NPConjointe'])) $locataire->setNPConjointe($data['NPConjointe']);
-            if (isset($data['ProfConj'])) $locataire->setProfConj($data['ProfConj']);
-            if (isset($data['EthnieConj'])) $locataire->setEthnieConj($data['EthnieConj']);
-            if (isset($data['ContactConj'])) $locataire->setContactConj($data['ContactConj']);
-            if (isset($data['VivezAvec'])) $locataire->setVivezAvec($data['VivezAvec']);
+            if (isset($data['ethnie'])) $locataire->setEthnie($data['ethnie']);
+            if (isset($data['nbEnfts'])) $locataire->setNbEnfts($data['nbEnfts']);
+            if (isset($data['nbPersChge'])) $locataire->setNbPersChge($data['nbPersChge']);
+            if (isset($data['pere'])) $locataire->setPere($data['pere']);
+            if (isset($data['mere'])) $locataire->setMere($data['mere']);
+            if (isset($data['nPConjointe'])) $locataire->setNPConjointe($data['nPConjointe']);
+            if (isset($data['profConj'])) $locataire->setProfConj($data['profConj']);
+            if (isset($data['ethnieConj'])) $locataire->setEthnieConj($data['ethnieConj']);
+            if (isset($data['contactConj'])) $locataire->setContactConj($data['contactConj']);
+            if (isset($data['vivezAvec'])) $locataire->setVivezAvec($data['vivezAvec']);
 
             // Upload InfoPiece
             $uploadedFile = $request->files->get('info_piece');

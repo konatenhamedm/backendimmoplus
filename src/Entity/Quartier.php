@@ -21,10 +21,8 @@ class Quartier
 
     #[ORM\Column(length: 255)]
     #[Groups(['group1'])]
-    private ?string $LibQuartier = null;
+    private ?string $libQuartier = null;
 
-    #[ORM\OneToMany(mappedBy: 'quartier', targetEntity: Maison::class)]
-    private Collection $maisons;
 
     #[ORM\ManyToOne(inversedBy: 'quartiers')]
     #[Groups(['group1'])]
@@ -38,7 +36,6 @@ class Quartier
 
     public function __construct()
     {
-        $this->maisons = new ArrayCollection();
         $this->quartierMaisons = new ArrayCollection();
     }
 
@@ -49,45 +46,16 @@ class Quartier
 
     public function getLibQuartier(): ?string
     {
-        return $this->LibQuartier;
+        return $this->libQuartier;
     }
 
-    public function setLibQuartier(string $LibQuartier): static
+    public function setLibQuartier(string $libQuartier): static
     {
-        $this->LibQuartier = $LibQuartier;
+        $this->libQuartier = $libQuartier;
 
         return $this;
     }
 
-    /**
-     * @return Collection<int, Maison>
-     */
-    public function getMaisons(): Collection
-    {
-        return $this->maisons;
-    }
-
-    public function addMaison(Maison $maison): static
-    {
-        if (!$this->maisons->contains($maison)) {
-            $this->maisons->add($maison);
-            $maison->setQuartier($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMaison(Maison $maison): static
-    {
-        if ($this->maisons->removeElement($maison)) {
-            // set the owning side to null (unless already changed)
-            if ($maison->getQuartier() === $this) {
-                $maison->setQuartier(null);
-            }
-        }
-
-        return $this;
-    }
 
     public function getVille(): ?Ville
     {
