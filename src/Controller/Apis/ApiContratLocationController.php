@@ -171,9 +171,13 @@ class ApiContratLocationController extends ApiInterface
             }
 
             return $this->responseData($contrat, 'group1');
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->setStatusCode(500);
-            return $this->response(['message' => $exception->getMessage()]);
+            return $this->response([
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine()
+            ]);
         }
     }
 

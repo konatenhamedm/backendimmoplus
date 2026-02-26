@@ -69,7 +69,7 @@ class ApiAppartementController extends ApiInterface
             $entreprise = ($this->getUser() && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise() : null;
             
             $qb = $repository->createQueryBuilder('a')
-                ->andWhere('a.Oqp = :status')
+                ->andWhere('a.oqp = :status')
                 ->setParameter('status', 0);
 
             if ($entreprise) {

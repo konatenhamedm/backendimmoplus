@@ -85,7 +85,7 @@ class AppartementRepository extends ServiceEntityRepository
 
         $qb2 = $this->createQueryBuilder('e');
         $qb2->select('e')
-            ->andWhere('e.Oqp = :etat')
+            ->andWhere('e.oqp = :etat')
             ->setParameter('etat', 0);
 
 
@@ -104,7 +104,7 @@ class AppartementRepository extends ServiceEntityRepository
             ->select('e')
             ->leftJoin('e.appartContratlocs', 'temp', 'WITH')
             ->orWhere('temp.id = :id')
-            ->orWhere('e.Oqp = :etat')
+            ->orWhere('e.oqp = :etat')
             ->setParameter('id', 12)
             ->setParameter('etat', 0)
             ->getQuery()
@@ -117,7 +117,7 @@ class AppartementRepository extends ServiceEntityRepository
             ->select('e')
             ->leftJoin('e.appartContratlocs', 'temp', 'WITH')
             ->andWhere('temp.id = :id')
-            ->andWhere('e.Oqp = :etat')
+            ->andWhere('e.oqp = :etat')
             ->andWhere('e.id = :appart')
             ->setParameter('id', $contrat)
             ->setParameter('etat', 1)
