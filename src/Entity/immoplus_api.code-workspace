@@ -1,12 +1,19 @@
 {
 	"folders": [
 		{
+			"name": "moomen_front",
+			"path": "../../../../YVES/moomen_front"
+		},
+		{
+			"name": "immoplus",
 			"path": "../../../immoplus"
 		},
 		{
+			"name": "immoplus_version_api",
 			"path": "../.."
 		},
 		{
+			"name": "immoplus_front",
 			"path": "../../../immoplus_front"
 		}
 	],

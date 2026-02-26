@@ -109,7 +109,7 @@ class AuthController extends ApiInterface
             'user' => [
                 'id' => $user->getId(),
                 'login' => $user->getLogin(),
-                'nom' => $user->getLocataire() ? $user->getLocataire()->getPrenoms() : ($user->getEmploye() ? $user->getEmploye()->getNom() : ''),
+                'nom' => $user->getLocataire() ? $user->getLocataire()->getNom() : ($user->getEmploye() ? $user->getEmploye()->getNom() : ''),
                 'prenoms' => $user->getLocataire() ? $user->getLocataire()->getPrenoms() : ($user->getEmploye() ? $user->getEmploye()->getPrenom() : ''),
                 'fcm_token' => $user->getFcmToken() ?? '',
                 'groupe' => $user->getGroupe() ? ["id" => $user->getGroupe()->getId(), "code" => $user->getGroupe()->getCode(), "name" => $user->getGroupe()->getName()] : null,

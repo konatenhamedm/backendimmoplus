@@ -306,7 +306,24 @@ class ApiDashboardController extends AbstractController
             /** @var User $user */
             $user = $this->security->getUser();
             if (!$user || !$user->getLocataire()) {
-                return $this->json(['message' => 'Profil locataire non trouvé'], 404);
+                // Retourner une structure vide plutôt qu'un 404 pour éviter l'erreur côté client
+                if (!$user) {
+                    return $this->json(['message' => 'Non authentifié'], 401);
+                }
+                return $this->json([
+                    'financials' => [
+                        'totalUnpaid'     => 0,
+                        'totalPaid'       => 0,
+                        'unpaidCount'     => 0,
+                        'paidCount'       => 0,
+                        'nextPaymentDate' => null,
+                        'totalInvested'   => 0,
+                        'lastPaymentDate' => null,
+                    ],
+                    'contract'           => null,
+                    'presenceDays'       => 0,
+                    'recentTransactions' => [],
+                ], 200);
             }
 
             $locataire = $user->getLocataire();
@@ -364,20 +381,54 @@ class ApiDashboardController extends AbstractController
                 $presenceDays = $diff->days;
             }
 
+            // ── Sérialisation manuelle pour éviter les références circulaires ──
+            $contratData = null;
+            if ($contrat) {
+                $appart = $contrat->getAppart();
+                $maison = $appart ? $appart->getMaisson() : null;
+                $contratData = [
+                    'id'         => $contrat->getId(),
+                    'dateDebut'  => $contrat->getDateDebut()  ? $contrat->getDateDebut()->format('Y-m-d')  : null,
+                    'dateFin'    => $contrat->getDateFin()    ? $contrat->getDateFin()->format('Y-m-d')    : null,
+                    'mntLoyer'   => $contrat->getMntLoyer(),
+                    'mntCaution' => $contrat->getMntCaution(),
+                    'dateEntree' => $contrat->getDateEntree() ? $contrat->getDateEntree()->format('Y-m-d') : null,
+                    'etat'       => $contrat->getEtat(),
+                    'appart'     => $appart ? [
+                        'id'        => $appart->getId(),
+                        'LibAppart' => $appart->getLibAppart(),
+                        'maisson'   => $maison ? [
+                            'id'        => $maison->getId(),
+                            'LibMaison' => $maison->getLibMaison(),
+                        ] : null,
+                    ] : null,
+                ];
+            }
+
+            $transactionsData = array_map(function ($t) {
+                return [
+                    'id'     => $t->getId(),
+                    'amount' => $t->getAmount(),
+                    'date'   => $t->getDate() ? $t->getDate()->format('Y-m-d H:i:s') : null,
+                    'mode'   => $t->getMode(),
+                    'status' => $t->getStatus(),
+                ];
+            }, $transactions);
+
             return $this->json([
                 'financials' => [
-                    'totalUnpaid' => $totalUnpaid,
-                    'totalPaid' => $totalPaid,
-                    'unpaidCount' => $unpaidCount,
-                    'paidCount' => $paidCount,
+                    'totalUnpaid'     => $totalUnpaid,
+                    'totalPaid'       => $totalPaid,
+                    'unpaidCount'     => $unpaidCount,
+                    'paidCount'       => $paidCount,
                     'nextPaymentDate' => $oldestUnpaidDate ? $oldestUnpaidDate->format('Y-m-d') : null,
-                    'totalInvested' => $totalInvested,
+                    'totalInvested'   => $totalInvested,
                     'lastPaymentDate' => $lastPaymentDate ? $lastPaymentDate->format('Y-m-d H:i:s') : null,
                 ],
-                'contract' => $contrat,
-                'presenceDays' => $presenceDays,
-                'recentTransactions' => $transactions,
-            ], 200, [], ['groups' => ['group1']]);
+                'contract'           => $contratData,
+                'presenceDays'       => $presenceDays,
+                'recentTransactions' => $transactionsData,
+            ], 200);
 
         } catch (\Exception $e) {
             return $this->json(['message' => 'Erreur: ' . $e->getMessage()], 500);
