@@ -49,7 +49,7 @@ class ApiContratLocationController extends ApiInterface
                     ->setParameter('entreprise', $this->getUser()->getEntreprise());
                 
                 if ($etat !== null && $etat !== '') {
-                    $qb->andWhere('c.Etat = :etat')
+                    $qb->andWhere('c.etat = :etat')
                        ->setParameter('etat', $etat);
                 }
                 

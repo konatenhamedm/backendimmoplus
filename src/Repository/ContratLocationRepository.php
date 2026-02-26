@@ -55,7 +55,7 @@ class ContratLocationRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->innerJoin('c.locataire', 'l')
             ->andWhere('l.entreprise = :entreprise')
-            ->andWhere('c.Etat = :etat')
+            ->andWhere('c.etat = :etat')
             ->setParameter('entreprise', $entreprise)
             ->setParameter('etat', 1)
             ->orderBy('c.id', 'ASC')

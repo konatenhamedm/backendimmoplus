@@ -50,7 +50,7 @@ class GenerateRentInvoicesCommand extends Command
         // Filtrage également par JourGenerationFacture (jour du mois)
         $contracts = $contratRepository->createQueryBuilder('c')
             ->where('c.JourGenerationFacture = :day')
-            ->andWhere('c.Etat = :active')
+            ->andWhere('c.etat = :active')
             ->setParameter('day', $targetDay)
             ->setParameter('active', 1)
             ->getQuery()
