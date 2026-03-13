@@ -7,6 +7,7 @@ use App\Entity\ContratLocation;
 use App\Repository\AppartementRepository;
 use App\Repository\ContratLocationRepository;
 use App\Repository\LocataireRepository;
+use App\Repository\MotifRepository;
 use App\Repository\NatureRepository;
 use App\Repository\RegimeRepository;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -291,7 +292,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Met fin au contrat et libère l'appartement. Permet l'upload du fichier de résiliation.",
         tags: ['ContratLocation']
     )]
-    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository): Response
+    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, MotifRepository $motifRepository): Response
     {
         try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
@@ -302,7 +303,24 @@ class ApiContratLocationController extends ApiInterface
                 $data = $request->request->all();
             }
 
-            $contrat->setEtat(0);
+            $contrat->setEtat(0); // 0 = Résilié
+
+            if (isset($data['motif_id'])) {
+                $motif = $motifRepository->find($data['motif_id']);
+                if ($motif) {
+                    $contrat->setMotif($motif);
+                }
+            }
+
+            if (isset($data['dateResiliation'])) {
+                $contrat->setDateFin(new \DateTime($data['dateResiliation']));
+            } else {
+                $contrat->setDateFin(new \DateTime());
+            }
+
+            if (isset($data['details'])) {
+                $contrat->setDetails($data['details']);
+            }
 
             // Upload FichierResiliation
             $uploadedResiliation = $request->files->get('fichier_resiliation');
@@ -319,7 +337,7 @@ class ApiContratLocationController extends ApiInterface
 
             $appartement = $contrat->getAppart();
             if ($appartement) {
-                $appartement->setOqp(0);
+                $appartement->setOqp(0); // Libérer l'appartement
                 $appartementRepository->save($appartement, true);
             }
 

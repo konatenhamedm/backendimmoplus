@@ -116,6 +116,7 @@ class AuthController extends ApiInterface
                 'logo' => $user->getLogo() ?? null,
                 'roles' => $user->getRoles(),
                 'is_active' => $user->isActive(),
+                'logo_entreprise' => $user->getEntreprise() ? $user->getEntreprise()->getLogo() : null,
                 'entreprise' => $user->getEntreprise() ? ["id" => $user->getEntreprise()->getId(), "denomination" => $user->getEntreprise()->getDenomination()] : null,
                 'pays' => $user->getEntreprise() ? ["id" => $user->getEntreprise()->getPays()->getId()] : null,
                 
