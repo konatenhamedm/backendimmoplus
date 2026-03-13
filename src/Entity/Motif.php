@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: MotifRepository::class)]
-#[ORM\Table(name: 'param_motif')]
 #[ORM\HasLifecycleCallbacks]
 class Motif
 {
