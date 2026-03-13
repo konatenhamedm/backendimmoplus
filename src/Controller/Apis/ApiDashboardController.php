@@ -140,23 +140,23 @@ class ApiDashboardController extends AbstractController
 
             // Apply time filters to invoices
             if ($startDate && $endDate) {
-                $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+                $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                    ->setParameter('start', new DateTime($startDate))
                    ->setParameter('end', new DateTime($endDate . ' 23:59:59'));
             } elseif ($month) {
                 $startOfMonth = new DateTime($month . '-01');
                 $endOfMonth = clone $startOfMonth;
                 $endOfMonth->modify('last day of this month');
-                $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+                $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                    ->setParameter('start', $startOfMonth)
                    ->setParameter('end', $endOfMonth);
             } elseif ($semester) {
                 if ($semester == '1') {
-                    $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+                    $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                        ->setParameter('start', new DateTime($year . '-01-01'))
                        ->setParameter('end', new DateTime($year . '-06-30 23:59:59'));
                 } else {
-                    $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+                    $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                        ->setParameter('start', new DateTime($year . '-07-01'))
                        ->setParameter('end', new DateTime($year . '-12-31 23:59:59'));
                 }
@@ -221,9 +221,9 @@ class ApiDashboardController extends AbstractController
         $end = new DateTime($year . '-12-31 23:59:59');
 
         $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
-        $qb->select('f.DateEmission', 'f.MntFact', 'f.SoldeFactLoc')
-           ->where('f.DateEmission >= :start')
-           ->andWhere('f.DateEmission <= :end')
+        $qb->select('f.dateEmission', 'f.mntFact', 'f.soldeFactLoc')
+           ->where('f.dateEmission >= :start')
+           ->andWhere('f.dateEmission <= :end')
            ->setParameter('start', $start)
            ->setParameter('end', $end);
 

@@ -43,7 +43,7 @@ class ApiEtatController extends ApiInterface
             }
 
             if ($startDate && $endDate) {
-                $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+                $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                    ->setParameter('start', new \DateTime($startDate))
                    ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
             }
@@ -421,7 +421,7 @@ class ApiEtatController extends ApiInterface
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
         }
         if ($startDate && $endDate) {
-            $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+            $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
         }
@@ -483,7 +483,7 @@ class ApiEtatController extends ApiInterface
         if ($entreprise) {
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
         }
-        $qb->andWhere('f.SoldeFactLoc > 0');
+        $qb->andWhere('f.soldeFactLoc > 0');
         $factures = $qb->getQuery()->getResult();
 
         $totalRevenue = 0; $totalOutstanding = 0; $paidAmount = 0;
@@ -562,7 +562,7 @@ class ApiEtatController extends ApiInterface
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
         }
         if ($startDate && $endDate) {
-            $qb->andWhere('f.DateEmission >= :start AND f.DateEmission <= :end')
+            $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
         }

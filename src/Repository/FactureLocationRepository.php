@@ -61,7 +61,7 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->andWhere('f.statut = :statut')
             ->setParameter('id', $value)
             ->setParameter('statut', 'impayer')
-            ->orderBy('f.DateEmission', 'DESC')
+            ->orderBy('f.dateEmission', 'DESC')
             ->getQuery()
             ->getResult();
     }
@@ -94,7 +94,7 @@ class FactureLocationRepository extends ServiceEntityRepository
     public function findAllFactureLocataireByAgentCampagneTotal($agent, $campagne): array
     {
         return $this->createQueryBuilder('f')
-            ->select('sum(f.MntFact) - sum(f.SoldeFactLoc) encaisse,sum(f.SoldeFactLoc) reste')
+            ->select('sum(f.mntFact) - sum(f.soldeFactLoc) encaisse,sum(f.soldeFactLoc) reste')
             ->innerJoin('f.locataire', 'l')
             ->innerJoin('f.compagne', 'c')
             ->innerJoin('f.appartement', 'a')
@@ -115,7 +115,7 @@ class FactureLocationRepository extends ServiceEntityRepository
     public function findAllFactureCampagne($value)
     {
         return $this->createQueryBuilder('f')
-            ->select('SUM(f.SoldeFactLoc) as somme')
+            ->select('SUM(f.soldeFactLoc) as somme')
             ->innerJoin('f.compagne', 'c')
             ->andWhere('c.id = :id')
             ->setParameter('id', $value)
@@ -139,13 +139,13 @@ class FactureLocationRepository extends ServiceEntityRepository
     public function findAllFactureLocataireImpayer($value): array
     {
         return $this->createQueryBuilder('f')
-            ->select('f.LibFacture', 'f.SoldeFactLoc', 'f.DateLimite')
+            ->select('f.libFacture', 'f.soldeFactLoc', 'f.dateLimite')
             ->innerJoin('f.locataire', 'l')
             ->andWhere('l.id = :id')
             ->andWhere('f.statut = :statut')
             ->setParameter('id', $value)
             ->setParameter('statut', 'impayer')
-            /* ->groupBy('f.LibFacture', 'f.DateLimite') */
+            /* ->groupBy('f.libFacture', 'f.dateLimite') */
             ->getQuery()
             ->getResult();
     }
