@@ -154,6 +154,15 @@ class ContratLocation
     #[Groups(["group1"])]
     private ?string $reglement = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    #[Groups(["group1"])]
+    private ?bool $isEcheance = null;
+
+    #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[Groups(["group1"])]
+    private ?int $nbEcheance = null;
+
+
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[Groups(["group1"])]
@@ -570,6 +579,30 @@ class ContratLocation
     public function setReglement(?string $reglement): static
     {
         $this->reglement = $reglement;
+        return $this;
+    }
+
+    public function isIsEcheance(): ?bool
+    {
+        return $this->isEcheance;
+    }
+
+    public function setIsEcheance(?bool $isEcheance): static
+    {
+        $this->isEcheance = $isEcheance;
+
+        return $this;
+    }
+
+    public function getNbEcheance(): ?int
+    {
+        return $this->nbEcheance;
+    }
+
+    public function setNbEcheance(?int $nbEcheance): static
+    {
+        $this->nbEcheance = $nbEcheance;
+
         return $this;
     }
 }

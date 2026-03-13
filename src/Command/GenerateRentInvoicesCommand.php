@@ -8,6 +8,7 @@ use App\Entity\FactureLocation;
 use App\Entity\TabMois;
 use App\Entity\Annee;
 use App\Entity\Entreprise;
+use App\Entity\Transaction;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -186,11 +187,11 @@ class GenerateRentInvoicesCommand extends Command
             $contract->setMntAvance((string)($avance - $montantLoyer));
             $this->entityManager->persist($contract);
 
-            $transaction = new \App\Entity\Transaction();
+            $transaction = new Transaction();
             $transaction->setAmount((string)$montantLoyer);
             $transaction->setFactureLocation($facture);
             $transaction->setLocataire($contract->getLocataire());
-            $transaction->setMode('AVANCE');
+            $transaction->setMode('ESPECE');
             $transaction->setType('RENTRÉE');
             $transaction->setStatus('SUCCESS');
             $transaction->setReference('TRX-AUTO-' . time() . rand(100, 999));

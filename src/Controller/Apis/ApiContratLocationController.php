@@ -122,6 +122,8 @@ class ApiContratLocationController extends ApiInterface
 
             if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
             if (isset($data['reglement'])) $contrat->setReglement($data['reglement']);
+            if (isset($data['isEcheance'])) $contrat->setIsEcheance(filter_var($data['isEcheance'], FILTER_VALIDATE_BOOLEAN));
+            if (isset($data['nbEcheance'])) $contrat->setNbEcheance((int)$data['nbEcheance']);
             if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']); // Override allowed?
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
@@ -211,6 +213,8 @@ class ApiContratLocationController extends ApiInterface
             if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
             if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
             if (isset($data['reglement'])) $contrat->setReglement($data['reglement']);
+            if (isset($data['isEcheance'])) $contrat->setIsEcheance(filter_var($data['isEcheance'], FILTER_VALIDATE_BOOLEAN));
+            if (isset($data['nbEcheance'])) $contrat->setNbEcheance((int)$data['nbEcheance']);
             if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']);
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
