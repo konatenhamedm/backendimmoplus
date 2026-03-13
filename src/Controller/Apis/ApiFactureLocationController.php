@@ -4,12 +4,14 @@ namespace App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\FactureLocation;
+use App\Entity\Transaction;
 use App\Repository\AppartementRepository;
 use App\Repository\CampagneRepository;
 use App\Repository\ContratLocationRepository;
 use App\Repository\FactureLocationRepository;
 use App\Repository\LocataireRepository;
 use App\Repository\TabMoisRepository;
+use App\Repository\TransactionRepository;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -278,7 +280,7 @@ class ApiFactureLocationController extends ApiInterface
         Request $request, 
         FactureLocation $facture, 
         FactureLocationRepository $repository,
-        \App\Repository\TransactionRepository $transactionRepository
+        TransactionRepository $transactionRepository
     ): Response {
         try {
             if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
@@ -296,13 +298,13 @@ class ApiFactureLocationController extends ApiInterface
             }
 
             // 1. Créer la Transaction
-            $transaction = new \App\Entity\Transaction();
+            $transaction = new Transaction();
             $transaction->setAmount($amount);
             $transaction->setFactureLocation($facture);
             $transaction->setLocataire($facture->getLocataire());
             $transaction->setMode($mode);
             $transaction->setType('RENTRÉE');
-            $transaction->setStatus('COMPLÉTÉ');
+            $transaction->setStatus('SUCCESS');
             $transaction->setReference('TRX-COLLECT-' . time());
             $transaction->setAgent($this->getUser());
             $transaction->setDate(new \DateTime());
