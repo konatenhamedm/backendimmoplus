@@ -6,7 +6,7 @@ use App\Repository\FincontratRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: FincontratRepository::class)]
+#[ORM\Entity(repositoryClass: FinContratRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class FinContrat
 {

@@ -25,7 +25,7 @@ class Motif
     #[Groups(['group1'])]
     private ?string $libMotif = null;
 
-    #[ORM\OneToMany(mappedBy: 'motif', targetEntity: Fincontrat::class)]
+    #[ORM\OneToMany(mappedBy: 'motif', targetEntity: FinContrat::class)]
     private Collection $fincontrats;
 
     #[ORM\OneToMany(mappedBy: 'motif', targetEntity: ContratLocation::class)]
@@ -55,14 +55,14 @@ class Motif
     }
 
     /**
-     * @return Collection<int, Fincontrat>
+     * @return Collection<int, FinContrat>
      */
     public function getFincontrats(): Collection
     {
         return $this->fincontrats;
     }
 
-    public function addFincontrat(Fincontrat $fincontrat): static
+    public function addFincontrat(FinContrat $fincontrat): static
     {
         if (!$this->fincontrats->contains($fincontrat)) {
             $this->fincontrats->add($fincontrat);
@@ -72,7 +72,7 @@ class Motif
         return $this;
     }
 
-    public function removeFincontrat(Fincontrat $fincontrat): static
+    public function removeFincontrat(FinContrat $fincontrat): static
     {
         if ($this->fincontrats->removeElement($fincontrat)) {
             // set the owning side to null (unless already changed)
