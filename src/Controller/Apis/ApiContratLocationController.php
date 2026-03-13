@@ -40,7 +40,7 @@ class ApiContratLocationController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            $etat = $request->query->get('etat', 1); // Default to active
+            $etat = $request->query->get('etat', null);
             
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
                 $qb = $repository->createQueryBuilder('c')
