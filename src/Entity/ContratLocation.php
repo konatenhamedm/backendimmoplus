@@ -150,6 +150,11 @@ class ContratLocation
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $details = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $reglement = null;
+
+
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[Groups(["group1"])]
     #[ORM\JoinColumn(nullable: true)]
@@ -555,6 +560,16 @@ class ContratLocation
     public function setJourGenerationFacture(?int $jourGenerationFacture): static
     {
         $this->jourGenerationFacture = $jourGenerationFacture;
+        return $this;
+    }
+    public function getReglement(): ?string
+    {
+        return $this->reglement;
+    }
+
+    public function setReglement(?string $reglement): static
+    {
+        $this->reglement = $reglement;
         return $this;
     }
 }

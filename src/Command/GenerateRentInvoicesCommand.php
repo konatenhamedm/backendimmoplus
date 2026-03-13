@@ -33,7 +33,7 @@ class GenerateRentInvoicesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $today = new \DateTime();
-        
+
         // La date cible est dans 3 jours
         $targetDate = (clone $today)->modify('+3 days');
         $targetDay = (int)$targetDate->format('d');
@@ -45,7 +45,7 @@ class GenerateRentInvoicesCommand extends Command
 
         // Récupérer les contrats actifs où JourGenerationFacture (jour de paiement) correspond au jour cible
         $contratRepository = $this->entityManager->getRepository(ContratLocation::class);
-        
+
         // On suppose que 'etat' = 1 signifie actif. Ajustez si nécessaire selon votre logique.
         // Filtrage également par JourGenerationFacture (jour du mois)
         $contracts = $contratRepository->createQueryBuilder('c')
@@ -77,8 +77,8 @@ class GenerateRentInvoicesCommand extends Command
             // 2. Trouver le MOIS
             $mois = $this->getMois($currentMonthNum);
             if (!$mois) {
-                 $io->error("Entité Mois pour le numéro $currentMonthNum introuvable en base de données.");
-                 continue;
+                $io->error("Entité Mois pour le numéro $currentMonthNum introuvable en base de données.");
+                continue;
             }
 
             // 3. Trouver ou créer la CAMPAGNE
@@ -116,7 +116,7 @@ class GenerateRentInvoicesCommand extends Command
         if (!$annee) {
             $annee = new Annee();
             $annee->setLibelle($yearVal);
-            $annee->setEtat(1); 
+            $annee->setEtat(1);
             $annee->setDateDebut(new \DateTime($yearVal . '-01-01'));
             $annee->setDateFin(new \DateTime($yearVal . '-12-31'));
             $this->entityManager->persist($annee);
@@ -135,7 +135,7 @@ class GenerateRentInvoicesCommand extends Command
     {
         $repo = $this->entityManager->getRepository(Campagne::class);
         $campagne = $repo->findOneBy([
-            'libCampagne' => $libelle, 
+            'libCampagne' => $libelle,
             'entreprise' => $entreprise
         ]);
 
@@ -149,7 +149,7 @@ class GenerateRentInvoicesCommand extends Command
             $campagne->setNbreLocataire(0);
             $campagne->setMntTotal(0);
             $campagne->setMntPaye('0');
-            
+
             $this->entityManager->persist($campagne);
             $this->entityManager->flush();
         }
@@ -174,10 +174,36 @@ class GenerateRentInvoicesCommand extends Command
         // Montants
         $montantLoyer = (int)$contract->getMntLoyer();
         $facture->setMntFact($montantLoyer);
-        $facture->setSoldeFactLoc($montantLoyer);
-        
-        $facture->setStatut('impayer');
-        $facture->setEncaisse('0');
+
+        $avance = (int)$contract->getMntAvance();
+
+        // Check if advance is sufficient exactly as requested by user
+        if ($avance >= $montantLoyer) {
+            $facture->setSoldeFactLoc(0);
+            $facture->setStatut('paye');
+            $facture->setEncaisse((string)$montantLoyer);
+
+            $contract->setMntAvance((string)($avance - $montantLoyer));
+            $this->entityManager->persist($contract);
+
+            $transaction = new \App\Entity\Transaction();
+            $transaction->setAmount((string)$montantLoyer);
+            $transaction->setFactureLocation($facture);
+            $transaction->setLocataire($contract->getLocataire());
+            $transaction->setMode('AVANCE');
+            $transaction->setType('RENTRÉE');
+            $transaction->setStatus('SUCCESS');
+            $transaction->setReference('TRX-AUTO-' . time() . rand(100, 999));
+            $transaction->setDate(new \DateTime());
+            $transaction->setDescription('Paiement automatique déduit de l\'avance');
+
+            // Transaction has no setEntreprise method according to the class file
+            $this->entityManager->persist($transaction);
+        } else {
+            $facture->setSoldeFactLoc($montantLoyer);
+            $facture->setStatut('impayer');
+            $facture->setEncaisse('0');
+        }
 
         // Dates
         $facture->setDateEmission(new \DateTime());
@@ -189,9 +215,18 @@ class GenerateRentInvoicesCommand extends Command
     private function getMonthName(int $monthNum): string
     {
         $months = [
-            1 => 'Janvier', 2 => 'Février', 3 => 'Mars', 4 => 'Avril',
-            5 => 'Mai', 6 => 'Juin', 7 => 'Juillet', 8 => 'Août',
-            9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre'
+            1 => 'Janvier',
+            2 => 'Février',
+            3 => 'Mars',
+            4 => 'Avril',
+            5 => 'Mai',
+            6 => 'Juin',
+            7 => 'Juillet',
+            8 => 'Août',
+            9 => 'Septembre',
+            10 => 'Octobre',
+            11 => 'Novembre',
+            12 => 'Décembre'
         ];
         return $months[$monthNum] ?? '';
     }

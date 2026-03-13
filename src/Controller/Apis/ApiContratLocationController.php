@@ -41,20 +41,19 @@ class ApiContratLocationController extends ApiInterface
         try {
             $withPagination = $request->get('with_pagination', "false");
             $etat = $request->query->get('etat', null);
-            
+
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
                 $qb = $repository->createQueryBuilder('c')
                     ->join('c.locataire', 'l')
                     ->andWhere('l.entreprise = :entreprise')
                     ->setParameter('entreprise', $this->getUser()->getEntreprise());
-                
+
                 if ($etat !== null && $etat !== '') {
                     $qb->andWhere('c.etat = :etat')
-                       ->setParameter('etat', $etat);
+                        ->setParameter('etat', $etat);
                 }
-                
-                $contrats = $qb->getQuery()->getResult();
 
+                $contrats = $qb->getQuery()->getResult();
             } else {
                 $criteria = [];
                 if ($etat !== null && $etat !== '') {
@@ -90,13 +89,13 @@ class ApiContratLocationController extends ApiInterface
             }
 
             $contrat = new ContratLocation();
-            
+
             if (isset($data['locataire_id'])) {
                 $locataire = $locataireRepository->find($data['locataire_id']);
                 if (!$locataire) return $this->errorResponse(null, "Locataire non trouvé", 404);
                 $contrat->setLocataire($locataire);
             }
-            
+
             $appartement = null;
             if (isset($data['appartement_id'])) {
                 $appartement = $appartementRepository->find($data['appartement_id']);
@@ -104,24 +103,25 @@ class ApiContratLocationController extends ApiInterface
                     $contrat->setAppart($appartement);
                     $contrat->setMntLoyer($appartement->getLoyer()); // Set rent from apartment
                 } else {
-                     return $this->errorResponse(null, "Appartement non trouvé", 404);
+                    return $this->errorResponse(null, "Appartement non trouvé", 404);
                 }
             } else {
-                 return $this->errorResponse(null, "L'ID de l'appartement est requis", 400);
+                return $this->errorResponse(null, "L'ID de l'appartement est requis", 400);
             }
 
             if (isset($data['dateDebut'])) $contrat->setDateDebut(new \DateTime($data['dateDebut']));
             if (isset($data['dateFin'])) $contrat->setDateFin(new \DateTime($data['dateFin']));
             if (isset($data['dateEntree'])) $contrat->setDateEntree(new \DateTime($data['dateEntree']));
-            
+
             if (isset($data['nbMoisCaution'])) $contrat->setNbMoisCaution($data['nbMoisCaution']);
             if (isset($data['mntCaution'])) $contrat->setMntCaution($data['mntCaution']);
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
-            
+
             if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);
             if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
-            
+
             if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
+            if (isset($data['reglement'])) $contrat->setReglement($data['reglement']);
             if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']); // Override allowed?
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
@@ -140,7 +140,7 @@ class ApiContratLocationController extends ApiInterface
             // Upload ScanContrat
             $uploadedFile = $request->files->get('scan_contrat');
             if ($uploadedFile) {
-                $filePrefix = $this->slugger->slug('scan_contrat_'.uniqid());
+                $filePrefix = $this->slugger->slug('scan_contrat_' . uniqid());
                 $filePath = $this->getUploadDir('contrats', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'contrats')) {
                     $contrat->setScanContrat($fichier);
@@ -201,7 +201,7 @@ class ApiContratLocationController extends ApiInterface
             $oldAppart = $contrat->getAppart();
 
             // Update fields...
-             if (isset($data['dateDebut'])) $contrat->setDateDebut(new \DateTime($data['dateDebut']));
+            if (isset($data['dateDebut'])) $contrat->setDateDebut(new \DateTime($data['dateDebut']));
             if (isset($data['dateFin'])) $contrat->setDateFin(new \DateTime($data['dateFin']));
             if (isset($data['dateEntree'])) $contrat->setDateEntree(new \DateTime($data['dateEntree']));
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
@@ -210,6 +210,7 @@ class ApiContratLocationController extends ApiInterface
             if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);
             if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
             if (isset($data['fraisanex'])) $contrat->setFraisanex($data['fraisanex']);
+            if (isset($data['reglement'])) $contrat->setReglement($data['reglement']);
             if (isset($data['mntLoyer'])) $contrat->setMntLoyer($data['mntLoyer']);
             if (isset($data['nature_id'])) {
                 $nature = $natureRepository->find($data['nature_id']);
@@ -225,28 +226,28 @@ class ApiContratLocationController extends ApiInterface
                 }
             }
 
-             // Recalculate Total
+            // Recalculate Total
             $caution = $contrat->getMntCaution() ?? 0;
             $avance = $contrat->getMntAvance() ?? 0;
             $frais = $contrat->getFraisanex() ?? 0;
             $somme = $caution + $avance + $frais;
             $contrat->setTotVerse((string)$somme);
 
-             // Upload ScanContrat
+            // Upload ScanContrat
             $uploadedFile = $request->files->get('scan_contrat');
             if ($uploadedFile) {
-                $filePrefix = $this->slugger->slug('scan_contrat_'.uniqid());
+                $filePrefix = $this->slugger->slug('scan_contrat_' . uniqid());
                 $filePath = $this->getUploadDir('contrats', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'contrats')) {
                     $contrat->setScanContrat($fichier);
                 }
             }
 
-             // Upload FichierResiliation
+            // Upload FichierResiliation
             $uploadedResiliation = $request->files->get('fichier_resiliation');
             if ($uploadedResiliation) {
-                $filePrefix = $this->slugger->slug('resiliation_'.uniqid());
-                 $filePath = $this->getUploadDir('contrats', true);
+                $filePrefix = $this->slugger->slug('resiliation_' . uniqid());
+                $filePath = $this->getUploadDir('contrats', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedResiliation, 'contrats')) {
                     $contrat->setFichierResiliation($fichier);
                 }
@@ -256,7 +257,7 @@ class ApiContratLocationController extends ApiInterface
             if (isset($data['appartement_id']) && $oldAppart && $oldAppart->getId() != $data['appartement_id']) {
                 $newAppart = $appartementRepository->find($data['appartement_id']);
                 if (!$newAppart) return $this->errorResponse(null, "Nouvel appartement non trouvé", 404);
-                
+
                 // Free old apartment
                 $oldAppart->setOqp(0);
                 $appartementRepository->save($oldAppart, true);
@@ -264,7 +265,7 @@ class ApiContratLocationController extends ApiInterface
                 // Occupy new apartment
                 $newAppart->setOqp(1);
                 $appartementRepository->save($newAppart, true);
-                
+
                 $contrat->setAppart($newAppart);
             }
 
@@ -278,7 +279,7 @@ class ApiContratLocationController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
-    
+
     #[Route('/{id}/resilier', methods: ['POST', 'PUT'])]
     #[OA\Post(
         path: "/api/contrat-location/{id}/resilier",
@@ -288,21 +289,21 @@ class ApiContratLocationController extends ApiInterface
     )]
     public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository): Response
     {
-         try {
+        try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
-            
-             // Allow processing JSON or Form Data
+
+            // Allow processing JSON or Form Data
             $data = json_decode($request->getContent(), true);
-             if (null === $data) {
+            if (null === $data) {
                 $data = $request->request->all();
             }
 
             $contrat->setEtat(0);
-            
-             // Upload FichierResiliation
+
+            // Upload FichierResiliation
             $uploadedResiliation = $request->files->get('fichier_resiliation');
             if ($uploadedResiliation) {
-                $filePrefix = $this->slugger->slug('resiliation_'.uniqid());
+                $filePrefix = $this->slugger->slug('resiliation_' . uniqid());
                 $filePath = $this->getUploadDir('contrats', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedResiliation, 'contrats')) {
                     $contrat->setFichierResiliation($fichier);
@@ -357,7 +358,7 @@ class ApiContratLocationController extends ApiInterface
             if (!$user || !$user->getLocataire()) {
                 return $this->errorResponse(null, "Profil locataire non trouvé", 404);
             }
-            
+
             $contrats = $repository->findBy(['locataire' => $user->getLocataire()->getId()], ['id' => 'DESC']);
             return $this->responseData($contrats, 'group1');
         } catch (\Exception $exception) {
@@ -379,7 +380,7 @@ class ApiContratLocationController extends ApiInterface
             if (!$user || !$user->getLocataire() || $contrat->getLocataire()->getId() !== $user->getLocataire()->getId()) {
                 return $this->errorResponse(null, "Accès non autorisé", 403);
             }
-            
+
             return $this->responseData($contrat, 'group1');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
