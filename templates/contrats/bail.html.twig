@@ -4,11 +4,20 @@
     <meta charset="UTF-8">
     <title>Bail d'habitation</title>
     <style>
+        @page {
+            margin: 50px 50px 60px 50px;
+            @bottom-center {
+                content: "Page " counter(page) " sur " counter(pages);
+                font-size: 10px;
+                color: #555;
+            }
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 13px;
-            line-height: 1.4;
+            line-height: 1.5;
             color: #000;
+            text-align: justify;
         }
         .header {
             text-align: center;
@@ -18,10 +27,6 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            width: 60px;
-            height: 40px;
-            background: linear-gradient(to right, #f77f00 33%, #ffffff 33%, #ffffff 66%, #008000 66%);
-            border: 1px solid #ddd;
         }
         .header .stamp {
             position: absolute;
@@ -82,8 +87,9 @@
             text-align: center;
         }
         p {
-            margin: 5px 0;
+            margin: 6px 0;
             text-align: justify;
+            text-justify: inter-word;
         }
         table {
             width: 100%;
@@ -107,12 +113,52 @@
         li {
             margin-bottom: 5px;
         }
+        .table-etat {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-top: 20px;
+        }
+        .table-etat th, .table-etat td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .table-etat th {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .table-etat .text-left {
+            text-align: left;
+        }
+        .table-etat .font-bold {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
+{% macro checkbox_cell() %}
+<div style="text-align: center; width: 100%;">
+    <div style="display: inline-block; width: 45%; text-align: center;">
+        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto;"></div>
+        <div style="font-size:8px; margin-top:2px;">BON</div>
+    </div>
+    <div style="display: inline-block; width: 45%; text-align: center;">
+        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto;"></div>
+        <div style="font-size:8px; margin-top:2px;">MAUVAIS</div>
+    </div>
+</div>
+{% endmacro %}
+
+
 <div class="header">
-    <div class="flags"></div>
+    <div class="flags">
+        <div style="background-color: #f77f00; width: 20px; height: 35px; display: inline-block;"></div>
+        <div style="background-color: transparent; width: 10px; height: 35px; display: inline-block;"></div>
+        <div style="background-color: #008000; width: 20px; height: 35px; display: inline-block;"></div>
+    </div>
     <div class="stamp">
         <div style="background-color: #00008b; color: white; padding: 5px; border-radius: 5px; font-weight: bold;">BAIL</div>
         <div>N°D17855</div>
@@ -130,11 +176,11 @@
 
 <p class="bold">ENTRE</p>
 
-<p><span class="bold">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom|default('')|upper }} {{ proprio.prenoms|default('')|upper }} ......................................................................................................................</p>
-<p>Référence identité (CNI - RC) N° {{ proprio.numCni|default('......................................') }} .......................................... établie le {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
-<p>Domicilié à {{ proprio.addresse|default('......................................................') }} .......................................................... Cel. : {{ proprio.contacts|default('.....................') }}</p>
+<p><span class="bold">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '......................................................................................................................' }}</p>
+<p>Référence identité (CNI - RC) N° {{ proprio.numCni|default('........................................................................') }} établie le {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
+<p>Domicilié à {{ proprio.addresse|default('........................................................................................') }} Cel. : {{ proprio.contacts|default('.....................') }}</p>
 <p>Email : {{ proprio.email|default('....................................................................................................................') }}</p>
-<p>Compte contribuable n° ....................................................................................................................</p>
+<p>Compte contribuable n° {{ proprio.compteContribuable|default('....................................................................................................................') }}</p>
 <table style="width: 100%;">
     <tr>
         <td style="width: 70%;">Dénommé au cours du présent acte &laquo; <span class="bold">LE BAILLEUR</span> &raquo;.</td>
@@ -144,10 +190,10 @@
 
 <p class="bold" style="margin-left: 20px;">ET</p>
 
-<p><span class="bold">LOCATAIRE :</span> {{ locataire.nom|default('')|upper }} {{ locataire.prenoms|default('')|upper }} ............................................................................................................................</p>
-<p>Référence identité (CNI - RC) N° {{ locataire.numpiece|default('...............................................') }} .............................................. établie le ................................</p>
-<p>Profession : {{ locataire.profession|default('..........................................................') }} ............................. Employeur : ..........................................................................</p>
-<p>Cel. : {{ locataire.contacts|default('.....................................') }} ............ Tél. Domicile : ........................................ Tél. Bureau : ...........................................</p>
+<p><span class="bold">LOCATAIRE :</span> {{ locataire.nom or locataire.prenoms ? (locataire.nom|default('')|upper ~ ' ' ~ locataire.prenoms|default('')|upper) : '............................................................................................................................' }}</p>
+<p>Référence identité (CNI - RC) N° {{ locataire.numpiece|default('.............................................................................') }} établie le ................................</p>
+<p>Profession : {{ locataire.profession|default('.........................................................................................') }} Employeur : ..........................................................................</p>
+<p>Cel. : {{ locataire.contacts|default('.....................................') }} Tél. Domicile : ........................................ Tél. Bureau : ...........................................</p>
 <p>Email : {{ locataire.email|default('..............................................................................................................................................................') }}</p>
 <table style="width: 100%;">
     <tr>
@@ -164,10 +210,12 @@
 
 <div class="section-title">DÉSIGNATION</div>
 
-<p>{{ (appartement.libAppart|default('')) ~ ' situé à ' ~ (appartement.maisson.localisation|default('')) ~ ', Lot ' ~ (appartement.maisson.lot|default('')) }} ........................................................................................................................................................................................</p>
+<p>{{ appartement.libAppart ? (appartement.libAppart ~ ' situé à ' ~ appartement.maisson.localisation|default('...') ~ ', Lot ' ~ appartement.maisson.lot|default('...')) : '........................................................................................................................................................................................' }}</p>
+{% if not appartement.libAppart %}
 <p>........................................................................................................................................................................................................</p>
 <p>........................................................................................................................................................................................................</p>
 <p>........................................................................................................................................................................................................</p>
+{% endif %}
 
 <p style="margin-top: 15px;">Le PRENEUR déclare connaître parfaitement le bien loué pour l'avoir vu et visité en vue du présent bail.</p>
 
@@ -190,7 +238,7 @@ A l'expiration de la première année, ledit bail se renouvellera par tacite rec
 
 <p><span class="bold">ARTICLE 2 - LOYER</span><br>
 Le présent bail est consenti et accepté moyennant un loyer mensuel de <span class="bold">(en lettres)</span> {{ montantLoyerLettres|default('......................................................') }}<br>
-....................................................................................................................................................................................................................................<br>
+{% if not montantLoyerLettres %}....................................................................................................................................................................................................................................<br>{% endif %}
 <span class="bold">(en chiffres)</span> {{ contrat.mntLoyer ? contrat.mntLoyer|number_format(0, ',', ' ') : '..............................' }} <span class="bold">FRANCS CFA</span> payable par mois et d'avance, au plus tard le {{ "%02d"|format(contrat.jourGenerationFacture|default(5)) }} du mois en cours, en espèces ou par chèque à l'ordre du BAILLEUR qui délivre immédiatement un reçu au locataire.</p>
 
 <p><span class="bold">ARTICLE 3 - REVISION DU LOYER</span><br>
@@ -198,8 +246,8 @@ Le loyer pourra être révisé tous les <span class="bold">TROIS (3) ans</span>.
 
 <p><span class="bold">ARTICLE 4 - DEPOT DE GARANTIE (ou CAUTION)</span><br>
 Pour la garantie de l'exécution des clauses du présent contrat, le PRENEUR a versé entre les mains du BAILLEUR, la somme de <span class="bold">(en lettres)</span> {{ montantCautionLettres|default('..........................................................................') }}<br>
-........................................................................................................................................................................................................................<br>
-........................................................................................ <span class="bold">(en chiffres)</span> {{ contrat.mntCaution ? contrat.mntCaution|number_format(0, ',', ' ') : '..............................' }}<br>
+{% if not montantCautionLettres %}........................................................................................................................................................................................................................<br>
+........................................................................................ {% endif %}<span class="bold">(en chiffres)</span> {{ contrat.mntCaution ? contrat.mntCaution|number_format(0, ',', ' ') : '..............................' }}<br>
 <span class="bold">FRANCS CFA</span> représentant <span class="bold">{{ contrat.nbMoisCaution|default('DEUX (2)') }} MOIS</span> de loyer en guise de dépôt de garantie (ou caution).</p>
 
 <p>Laquelle somme ne sera pas productive d'intérêts durant toute la durée du bail.</p>
@@ -319,6 +367,120 @@ Le PRENEUR s'acquittera, à partir du jour de l'entrée en jouissance, en sus du
 Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BAILLEUR fait constater l'abandon par voie d'huissier et doit demander l'autorisation d'ouverture des portes au juge des référés.</p>
 
 <p>A l'obtention de l'autorisation judiciaire d'ouverture des portes, le BAILLEUR établit par voie d'huissier de justice l'inventaire des biens trouvés dans le local loué, qui les remets à un commissaire-priseur, en vue de leur vente publique préalablement autorisé par le juge.</p>
+
+<div class="page-break"></div>
+
+<div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px; text-transform: uppercase;">
+    ÉTAT DES LIEUX D'ENTRÉE CONTRADICTOIRE
+</div>
+<div style="text-align: center; color: #cc0000; font-weight: bold; font-size: 12px; margin-bottom: 10px;">
+    (Cocher BON ou MAUVAIS)
+</div>
+<p style="text-align: center; font-size: 11px;">
+    Établi entre le BAILLEUR et le PRENEUR susnommés et portant sur les biens immobiliers, objet du présent bail. Il a été relevé ce qui suit :
+</p>
+
+<table class="table-etat">
+    <thead>
+        <tr>
+            <th style="width: 3%;">N°</th>
+            <th style="width: 17%;">DÉSIGNATION</th>
+            <th style="width: 12%;">SALON / SAM</th>
+            <th style="width: 12%;">CHAMBRE PRINCIPALE</th>
+            <th style="width: 12%;">CHAMBRE 2</th>
+            <th style="width: 12%;">CHAMBRE 3</th>
+            <th style="width: 12%;">CHAMBRE 4</th>
+            <th style="width: 20%;">OBSERVATIONS PARTICULIÈRES</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set table1_rows = [
+          'SOL',
+          'PEINTURE DES MURS',
+          'PEINTURE DES PLAFONDS',
+          'PORTES',
+          'FENÊTRES',
+          'ANTIVOLS',
+          'PLACARDS',
+          'ÉLECTRICITÉ',
+          'NOMBRE DE CLÉS'
+        ] %}
+        {% for row in table1_rows %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td class="text-left font-bold">{{ row }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="8" style="text-align: left; font-weight: bold; padding: 10px;">
+                OBSERVATIONS GÉNÉRALES : <span style="float: right;">TOTAL :</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<table class="table-etat">
+    <thead>
+        <tr>
+            <th style="width: 3%;">N°</th>
+            <th style="width: 17%;">DÉSIGNATION</th>
+            <th style="width: 12%;">CUISINE</th>
+            <th style="width: 12%;">SALLE D'EAU CH. PRINCIPALE</th>
+            <th style="width: 12%;">SALLES D'EAU AUTRES CHAMBRES</th>
+            <th style="width: 12%;">AUTRE PIÈCE</th>
+            <th style="width: 12%;">AUTRE PIÈCE</th>
+            <th style="width: 20%;">OBSERVATIONS PARTICULIÈRES</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set table2_rows = [
+          'SOL',
+          'PEINTURE DES MURS',
+          'PEINTURE DES PLAFONDS',
+          'PORTES',
+          'ÉLECTRICITÉ',
+          'ROBINETTERIE',
+          'ÉVIER INOX et LAVABO',
+          'DOUCHE ET SDB',
+          'NOMBRE DE CLÉS'
+        ] %}
+        {% for row in table2_rows %}
+        <tr>
+            <td>{{ loop.index + 9 }}</td>
+            <td class="text-left font-bold">{{ row }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td>{{ _self.checkbox_cell() }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="8" style="text-align: left; font-weight: bold; padding: 10px;">
+                OBSERVATIONS GÉNÉRALES : <span style="float: right;">TOTAL :</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="margin-top: 40px;">
+    <table style="width: 100%; border: none;">
+        <tr>
+            <td style="width: 33%; text-align: left; font-weight: bold; border: none;">BAILLEUR</td>
+            <td style="width: 33%; text-align: center; border: none;">Fait le ......................................</td>
+            <td style="width: 33%; text-align: right; font-weight: bold; border: none;">PRENEUR</td>
+        </tr>
+    </table>
+</div>
 
 </body>
 </html>
