@@ -1,10 +1,6 @@
 {
 	"folders": [
 		{
-			"name": "moomen_front",
-			"path": "../../../../YVES/moomen_front"
-		},
-		{
 			"name": "immoplus",
 			"path": "../../../immoplus"
 		},

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bail d'habitation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #000;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header .flags {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 40px;
+            background: linear-gradient(to right, #f77f00 33%, #ffffff 33%, #ffffff 66%, #008000 66%);
+            border: 1px solid #ddd;
+        }
+        .header .stamp {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            width: 80px;
+            text-align: center;
+            font-size: 10px;
+            color: #000;
+        }
+        .header .stamp img {
+            width: 50px;
+            margin-bottom: 5px;
+        }
+        .header .reproduction {
+            font-style: italic;
+            font-size: 11px;
+            color: #a04000;
+            margin-bottom: 20px;
+        }
+        .title {
+            color: #e65100;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding: 0 40px;
+        }
+        h2 {
+            font-size: 14px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .section-title {
+            text-align: center;
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 20px 0;
+        }
+        .section-box-title {
+            text-align: center;
+            border: 2px solid #000;
+            border-radius: 15px;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            display: inline-block;
+            margin: 20px auto;
+        }
+        .text-center {
+            text-align: center;
+        }
+        p {
+            margin: 5px 0;
+            text-align: justify;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .line-blank {
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            min-width: 150px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        ul {
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="flags"></div>
+    <div class="stamp">
+        <div style="background-color: #00008b; color: white; padding: 5px; border-radius: 5px; font-weight: bold;">BAIL</div>
+        <div>N°D17855</div>
+    </div>
+    <div class="reproduction">"La photocopie et la reproduction sont interdites"</div>
+    
+    <div class="title">BAIL D'HABITATION</div>
+    
+    <div class="subtitle">
+        Régi par les articles 408 à 456 de la loi n°2019 du 26 juin 2019
+        instituant le Code de la Construction et de l'Habitat
+        de la République de Côte d'Ivoire
+    </div>
+</div>
+
+<p class="bold">ENTRE</p>
+
+<p><span class="bold">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom|default('')|upper }} {{ proprio.prenoms|default('')|upper }} ......................................................................................................................</p>
+<p>Référence identité (CNI - RC) N° {{ proprio.numCni|default('......................................') }} .......................................... établie le {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
+<p>Domicilié à {{ proprio.addresse|default('......................................................') }} .......................................................... Cel. : {{ proprio.contacts|default('.....................') }}</p>
+<p>Email : {{ proprio.email|default('....................................................................................................................') }}</p>
+<p>Compte contribuable n° ....................................................................................................................</p>
+<table style="width: 100%;">
+    <tr>
+        <td style="width: 70%;">Dénommé au cours du présent acte &laquo; <span class="bold">LE BAILLEUR</span> &raquo;.</td>
+        <td style="width: 30%; text-align: right; font-weight: bold; text-decoration: underline;">D'une part</td>
+    </tr>
+</table>
+
+<p class="bold" style="margin-left: 20px;">ET</p>
+
+<p><span class="bold">LOCATAIRE :</span> {{ locataire.nom|default('')|upper }} {{ locataire.prenoms|default('')|upper }} ............................................................................................................................</p>
+<p>Référence identité (CNI - RC) N° {{ locataire.numpiece|default('...............................................') }} .............................................. établie le ................................</p>
+<p>Profession : {{ locataire.profession|default('..........................................................') }} ............................. Employeur : ..........................................................................</p>
+<p>Cel. : {{ locataire.contacts|default('.....................................') }} ............ Tél. Domicile : ........................................ Tél. Bureau : ...........................................</p>
+<p>Email : {{ locataire.email|default('..............................................................................................................................................................') }}</p>
+<table style="width: 100%;">
+    <tr>
+        <td style="width: 70%;">Dénommé au cours du présent acte &laquo; <span class="bold">LE PRENEUR</span> &raquo;.</td>
+        <td style="width: 30%; text-align: right; font-weight: bold; text-decoration: underline;">D'autre part</td>
+    </tr>
+</table>
+
+<p class="bold" style="margin-top: 15px; margin-bottom: 15px; text-align: center;">LESQUELS ont convenu et arrêté le contrat de bail qui suit :</p>
+
+<div class="section-title">BAIL</div>
+
+<p>Le BAILLEUR donne en location à titre d'habitation, <span class="bold">BAIL régi par les articles 408 à 456 de la loi n° 2019-576 du 26 juin 2019 instituant le CODE de la CONSTRUCTION et de l'HABITAT</span>, en son chapitre portant sur le bail d'habitation, pour une durée, sous les conditions particulières et moyennant le prix ci-après indiqués, au PRENEUR qui accepte, les biens immobiliers dont la désignation suit :</p>
+
+<div class="section-title">DÉSIGNATION</div>
+
+<p>{{ (appartement.libAppart|default('')) ~ ' situé à ' ~ (appartement.maisson.localisation|default('')) ~ ', Lot ' ~ (appartement.maisson.lot|default('')) }} ........................................................................................................................................................................................</p>
+<p>........................................................................................................................................................................................................</p>
+<p>........................................................................................................................................................................................................</p>
+<p>........................................................................................................................................................................................................</p>
+
+<p style="margin-top: 15px;">Le PRENEUR déclare connaître parfaitement le bien loué pour l'avoir vu et visité en vue du présent bail.</p>
+
+<div class="section-title">ÉTAT DES LIEUX</div>
+
+<p>Le PRENEUR prendra les lieux loués dans l'état où ils se trouveront lors de l'entrée en jouissance et les rendra en fin de bail tel qu'il les aura reçus suivant l'état des lieux dressé par les parties.</p>
+
+<p>À l'expiration du bail, le PRENEUR veillera à la remise des lieux dans leur état primitif portant notamment sur l'agencement, l'enduit, la peinture intérieure, les appareils d'électricité et de plomberie, etc.</p>
+
+<div class="page-break"></div>
+
+<div class="text-center">
+    <div class="section-box-title">TITRE I : CONCLUSION DU CONTRAT DE BAIL ET FIXATION DU LOYER</div>
+</div>
+
+<p><span class="bold">ARTICLE 1 - DURÉE DU BAIL</span><br>
+Le présent bail est consenti pour une durée d'une année, qui commence le {{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '..............................' }}.<br>
+Le BAILLEUR ne peut pas rompre le bail avant le terme de la première (1ère) année.<br>
+A l'expiration de la première année, ledit bail se renouvellera par tacite reconduction.</p>
+
+<p><span class="bold">ARTICLE 2 - LOYER</span><br>
+Le présent bail est consenti et accepté moyennant un loyer mensuel de <span class="bold">(en lettres)</span> {{ montantLoyerLettres|default('......................................................') }}<br>
+....................................................................................................................................................................................................................................<br>
+<span class="bold">(en chiffres)</span> {{ contrat.mntLoyer ? contrat.mntLoyer|number_format(0, ',', ' ') : '..............................' }} <span class="bold">FRANCS CFA</span> payable par mois et d'avance, au plus tard le {{ "%02d"|format(contrat.jourGenerationFacture|default(5)) }} du mois en cours, en espèces ou par chèque à l'ordre du BAILLEUR qui délivre immédiatement un reçu au locataire.</p>
+
+<p><span class="bold">ARTICLE 3 - REVISION DU LOYER</span><br>
+Le loyer pourra être révisé tous les <span class="bold">TROIS (3) ans</span>. A défaut d'accord entre les parties, le nouveau montant du loyer prendra en compte le taux de référence fixé par l'Etat ou par tout organisme qualifié ou autorisé. En cas d'augmentation, le taux ne pourra dépasser les <span class="bold">DIX POUR CENT (10%)</span>.</p>
+
+<p><span class="bold">ARTICLE 4 - DEPOT DE GARANTIE (ou CAUTION)</span><br>
+Pour la garantie de l'exécution des clauses du présent contrat, le PRENEUR a versé entre les mains du BAILLEUR, la somme de <span class="bold">(en lettres)</span> {{ montantCautionLettres|default('..........................................................................') }}<br>
+........................................................................................................................................................................................................................<br>
+........................................................................................ <span class="bold">(en chiffres)</span> {{ contrat.mntCaution ? contrat.mntCaution|number_format(0, ',', ' ') : '..............................' }}<br>
+<span class="bold">FRANCS CFA</span> représentant <span class="bold">{{ contrat.nbMoisCaution|default('DEUX (2)') }} MOIS</span> de loyer en guise de dépôt de garantie (ou caution).</p>
+
+<p>Laquelle somme ne sera pas productive d'intérêts durant toute la durée du bail.</p>
+
+<p>Le locataire ne peut pas se servir du dépôt de garantie (caution) au paiement des loyers même en fin de contrat. A l'expiration du contrat, il garantit le BAILLEUR contre les réparations incombant au PRENEUR et son insolvabilité.</p>
+
+<p>A l'expiration dudit bail, le dépôt de garantie (caution) sera restitué au PRENEUR dans un délai d'un mois de la date de la restitution des clés, après l'exécution de toutes les réparations lui incombant, ainsi que les résiliations des abonnements aux établissements CIE et SODECI faites sans laisser d'impayés.</p>
+
+<p>A cet effet, le PRENEUR s'engage à remettre au BAILLEUR, les quitus CIE et SODECI, faute de quoi, il autorise le BAILLEUR à payer pour son compte les sommes dues auxdits établissements par déduction sur le dépôt de garantie (caution) disponible.</p>
+
+<p><span class="bold">ARTICLE 5 - ENREGISTREMENT OU LEGALISATION DU BAIL</span><br>
+L'enregistrement du bail est requis pour une année et demeure aux frais du PRENEUR ainsi que l'enregistrement des renouvellements dudit bail.</p>
+
+<p>En vertu de l'article 713 du CGI, ne sera pas assujetti au droit d'enregistrement, le bail conclu au profit d'un locataire, <span class="bold">personne physique</span>, destiné à l'<span class="bold">habitation</span> et dont le loyer mensuel est inférieur à CINQ CENT MILLE (<span class="bold">500 000</span>) francs CFA.</p>
+
+<p>Le locataire, <span class="bold">personne morale</span> (société, entreprise, SCI, association, ONG, etc.) devra toujours s'acquitter des droits d'enregistrement quelque soit le montant du loyer.</p>
+
+<p>Le contrat de bail dispensé de l'enregistrement sera légalisé à la Mairie ou auprès de l'autorité compétente.</p>
+
+<div class="page-break"></div>
+
+<div class="text-center">
+    <div class="section-box-title">TITRE II : OBLIGATIONS DES PARTIES</div>
+</div>
+
+<div class="section-title" style="text-decoration: none; font-weight: bold;">SECTION I - OBLIGATIONS DU BAILLEUR</div>
+
+<p><span class="bold">ARTICLE 6 - ETAT DU BIEN LOUE - VICES OU DEFAUTS APPARENTS OU CACHES</span><br>
+Le BAILLEUR est tenu de livrer le bien loué en bon état de réparation, et d'en faire jouir le locataire de manière paisible pendant toute la durée du bail.</p>
+<p>Le bailleur doit garantir le locataire contre tous les vices ou défauts du bien loué qui en empêcheraient son usage normal, quand bien même le bailleur ne les aurait pas connus au moment de la conclusion du bail. S'il résulte de ces vices ou défauts quelque perte pour le locataire, le bailleur est tenu de l'indemniser.</p>
+
+<p><span class="bold">ARTICLE 7 - GROSSES REPARATIONS</span><br>
+Le BAILLEUR ne sera tenu d'exécuter, au cours du bail, que les grosses réparations qui pourraient devenir nécessaires (toiture, étanchéité, gros œuvre, équipements de plomberie et d'électricité encastrés dans le sol et les murs) ; toutes autres réparations quelles qu'elles soient, restant à la charge du PRENEUR.</p>
+<p>Outre les dommages résultant de vices de construction, le BAILLEUR ne sera en aucun cas responsable des dégâts ou accidents occasionnés par les fuites d'eau ou de gaz, par l'humidité et généralement pour tous dommages causés par la force majeure ainsi que pour tout ce qui pourrait en être la conséquence directe ou indirecte.</p>
+<p>Le PRENEUR devra supporter la gêne occasionnée par les grosses réparations et toutes transformations nécessaires que le BAILLEUR serait tenu d'effectuer au cours du bail, quelles qu'en soient l'importance et la durée sans pouvoir demander aucune indemnité ni diminution ou non-paiement du loyer.</p>
+
+<p><span class="bold">ARTICLE 8 - REFECTION DES PEINTURES EXTERIEURES</span><br>
+Le BAILLEUR procédera à la réfection des peintures extérieures tous <span class="bold">les trois (3) ans</span>.</p>
+
+<div class="section-title" style="text-decoration: none; font-weight: bold;">SECTION II - OBLIGATIONS DU PRENEUR</div>
+
+<p><span class="bold">ARTICLE 9 - DESTINATION DES LIEUX</span><br>
+Les lieux loués devront servir au PRENEUR à un usage d'habitation à l'exclusion de tout autre usage, même temporairement.</p>
+
+<p><span class="bold">ARTICLE 10 - CESSION DE BAIL OU SOUS-LOCATION</span><br>
+La présente location a été consentie au PRENEUR &laquo; intuitu personae &raquo;. Toute cession de bail, sous-location ou simple occupation en tout ou partie des lieux par un tiers, est rigoureusement interdite sous peine de résiliation immédiate du présent contrat de location à la simple constatation de l'infraction et sans qu'il soit besoin de recourir à la procédure de mise en demeure.</p>
+
+<p><span class="bold">ARTICLE 11 - MOBILIER</span><br>
+Le PRENEUR s'engage à garnir les lieux loués, de mobiliers lui appartenant en qualité et de valeurs suffisantes pour répondre du paiement de loyers et de l'exécution de toutes les conditions du bail.</p>
+
+<p><span class="bold">ARTICLE 12 - ENTRETIEN ET RÉPARATIONS</span><br>
+Le PRENEUR entretiendra les lieux loués en bon état en faisant les réparations locatives à sa charge, en jouira en bon père de famille, suivant leur usage et ne pourra en aucun cas, rien faire ni laisser, qui puisse les détériorer.</p>
+
+<div class="page-break"></div>
+
+<p>Il supportera toutes réparations qui deviendraient nécessaires par la suite et toutes dégradations résultant de son fait ou de celui de sa famille ou de son personnel de maison.</p>
+<p>Il aura entièrement à sa charge, sans recours contre le BAILLEUR, l'entretien :</p>
+
+<div style="padding-left: 20px;">
+    <p>12.1 <span class="bold">De la plomberie</span> qui comprend la robinetterie, les colonnes de douche, les chasses d'eau des WC, à l'exclusion des canalisations encastrées pour l'adduction en eau potable.</p>
+    <p>12.2 <span class="bold">De l'électricité</span> qui comprend tous les appareils notamment les interrupteurs, les prises, les dismatics et les luminaires.</p>
+    <p>12.3 <span class="bold">Des aménagements intérieurs et réfection de la peinture</span> qui comprennent les enduits, la propreté des sols, leur revêtement et également la réfection des peintures intérieures tous <span class="bold">les trois (3) ans</span>. Il est formellement interdit de changer les couleurs de l'intérieur du bien loué sans l'autorisation préalable du BAILLEUR ;</p>
+</div>
+
+<p>Le PRENEUR reste tenu de la réparation des bris de glaces, la détérioration des fenêtres, des châssis naccos, des grilles et volets métalliques même quand cette détérioration est due au fait que le PRENEUR ne les a pas fait fonctionner régulièrement.</p>
+<p>Aucune de ces réparations n'est à la charge du locataire quand elles ne sont occasionnées que par vétusté, guerres civiles, émeutes, tremblements de terre et tout autre cas de force majeure.</p>
+<p>Le PRENEUR supportera également toutes dégradations résultant de son fait ou de celui de son prestataire dues à la pose d'une antenne ayant abîmé la toiture du bien loué.</p>
+<p>Le PRENEUR ne pourra faire aucune installation électrique et câblage quelconque sans avoir obtenu l'accord préalable du BAILLEUR.</p>
+<p>Le PRENEUR devra installer les appareils de climatisation et autres conformément aux règles de l'art notamment, les compresseurs des splits à l'extérieur sur des socles appropriés. Le PRENEUR devra mettre des tuyaux pour l'écoulement de l'eau des moteurs de climatisation de sorte que l'eau ne s'écoule pas sur les balcons, les terrasses, les grilles métalliques, les volets roulants, les naccos et les baies vitrées.</p>
+<p>La première vidange des fosses d'aisance est à la charge du BAILLEUR, et les suivantes à la charge du PRENEUR.</p>
+<p>Le PRENEUR devra aviser le BAILLEUR, en temps utile, par tout moyen, des grosses réparations qu'il serait nécessaire d'effectuer dans les lieux loués.</p>
+
+<p><span class="bold">ARTICLE 13 - AMÉNAGEMENTS-TRANSFORMATIONS-CONSTRUCTIONS</span><br>
+Le PRENEUR ne pourra faire aucun aménagement, aucune modification ou transformation de l'état ou de la disposition des locaux, sans l'autorisation préalable et écrite du BAILLEUR.</p>
+
+<p><span class="bold">ARTICLE 14 - DÉGRADATIONS ET VOLS</span><br>
+Le PRENEUR est responsable de toutes les dégradations ou vols quelconques qui pourraient être commis par son personnel ou par des tiers dans les locaux loués et il en supportera les conséquences.</p>
+
+<p><span class="bold">ARTICLE 15 - RÈGLEMENTS URBAINS</span><br>
+Le PRENEUR satisfera en lieu et place du BAILLEUR à toutes les prescriptions de police, de voirie et d'hygiène de manière que le BAILLEUR ne soit pas inquiété ni recherché à cet égard.</p>
+
+<div class="page-break"></div>
+
+<p><span class="bold">ARTICLE 16 - ASSURANCES</span><br>
+Le PRENEUR s'engage à souscrire une assurance contre l'incendie, les risques locatifs, le bris de glaces et les recours des voisins et à maintenir cette assurance pendant le cours du présent bail, à en acquitter exactement les primes et cotisations annuelles et à justifier du tout à la première réquisition du BAILLEUR.</p>
+
+<p><span class="bold">ARTICLE 17 - VISITE DES LIEUX</span><br>
+En cas de mise en vente ou de relocation du bien par le propriétaire, le PRENEUR devra laisser visiter le BAILLEUR, ou les acquéreurs et locataires éventuels, chaque fois que le BAILLEUR le jugera utile, à charge pour lui de prévenir le PRENEUR par lettre ou par téléphone au moins 24 heures à l'avance.</p>
+
+<p><span class="bold">ARTICLE 18 - REMISE DES CLÉS</span><br>
+Le jour de l'expiration de la location, le PRENEUR devra remettre au BAILLEUR les clés des locaux. Dans le cas où, par le fait du PRENEUR, le BAILLEUR n'aurait pu mettre en location ou laisser visiter les lieux ou encore faire la livraison à un nouveau locataire ou même en reprendre la libre disposition, il aurait droit à une indemnité égale à trois (3) mois de loyer, sans préjudice de tous dommages et intérêts.</p>
+
+<p><span class="bold">ARTICLE 19 - IMPÔTS-PATENTES-TAXES LOCATIVES</span><br>
+Le PRENEUR s'acquittera, à partir du jour de l'entrée en jouissance, en sus du loyer ci-dessus fixé, de toutes contributions, taxes, charges et autres afférents à son occupation, à l'exception des impôts fonciers qui resteront à la charge du BAILLEUR.</p>
+
+<div class="text-center">
+    <div class="section-box-title">TITRE III : FIN DU CONTRAT DE BAIL</div>
+</div>
+
+<p><span class="bold">ARTICLE 20 - LES CAUSES DE RESILIATION DU BAIL</span></p>
+
+<p>En vertu de <span class="bold">l'article 442</span> de ladite loi, le contrat de bail peut être légitimement résilié dans les cas suivants :</p>
+
+<ul>
+    <li>En cas de force majeure ;</li>
+    <li>Par accord commun des parties ;</li>
+    <li>En cas de manquement à ses obligations par l'une des parties ;</li>
+    <li>Au terme d'un préavis de <span class="bold">trois (3) mois notifié par écrit au bailleur par le locataire</span> ;</li>
+    <li>Au terme d'un congé de <span class="bold">trois (3) mois notifié par écrit au locataire par le bailleur qui veut exercer son droit de reprise du bien pour l'occuper lui-même ou pour le faire occuper de manière effective par un ascendant ou descendant ou allié jusqu'au troisième (3ème) degré inclusivement.</span></li>
+</ul>
+
+<p>La lettre de demande de résiliation du contrat de bail doit être transmise à la partie adverse par remise de courrier contre décharge ou par voie d'huissier.</p>
+
+<p>Lorsque le locataire manque à ses obligations contractuelles, ou quand il accuse deux (2) mois de retard de loyer impayé, le BAILLEUR peut, si bon lui semble, demander son expulsion forcée devant le juge des référés, quinze (15) jours après la notification faite par voie d'huissier au locataire d'avoir à régulariser sa situation, laquelle notification est restée infructueuse.</p>
+
+<p><span class="bold">ARTICLE 21 - ABANDON DU LOCAL PAR LE LOCATAIRE</span><br>
+Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BAILLEUR fait constater l'abandon par voie d'huissier et doit demander l'autorisation d'ouverture des portes au juge des référés.</p>
+
+<p>A l'obtention de l'autorisation judiciaire d'ouverture des portes, le BAILLEUR établit par voie d'huissier de justice l'inventaire des biens trouvés dans le local loué, qui les remets à un commissaire-priseur, en vue de leur vente publique préalablement autorisé par le juge.</p>
+
+</body>
+</html>

@@ -43,7 +43,7 @@ class ApiDashboardController extends AbstractController
     #[Route('/stats', name: 'api_dashboard_stats', methods: ['GET'])]
     #[OA\Get(
         summary: "Récupère les statistiques globales du tableau de bord",
-        description: "Fournit une vue d'ensemble des employés, locataires, propriétés et finances pour l'entreprise connectée. Supporte le filtrage par date.",
+        description: "Fournit une vue d'ensemble enrichie : employees, locataires, propriétés, finances, taux d'occupation, activité récente et évolution mensuelle.",
         parameters: [
             new OA\Parameter(name: "startDate", in: "query", description: "Date de début (YYYY-MM-DD)", schema: new OA\Schema(type: "string", format: "date")),
             new OA\Parameter(name: "endDate", in: "query", description: "Date de fin (YYYY-MM-DD)", schema: new OA\Schema(type: "string", format: "date")),
@@ -54,27 +54,7 @@ class ApiDashboardController extends AbstractController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Statistiques récupérées avec succès",
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: "overview", type: "object", properties: [
-                            new OA\Property(property: "totalEmployees", type: "integer"),
-                            new OA\Property(property: "totalTenants", type: "integer"),
-                            new OA\Property(property: "totalProprios", type: "integer"),
-                            new OA\Property(property: "totalProperties", type: "integer"),
-                            new OA\Property(property: "totalContracts", type: "integer"),
-                        ]),
-                        new OA\Property(property: "financials", type: "object", properties: [
-                            new OA\Property(property: "totalRevenue", type: "number"),
-                            new OA\Property(property: "totalOutstanding", type: "number"),
-                            new OA\Property(property: "unpaidInvoicesCount", type: "integer"),
-                            new OA\Property(property: "paidInvoicesCount", type: "integer"),
-                        ]),
-                        new OA\Property(property: "charts", type: "object", properties: [
-                            new OA\Property(property: "monthlyRevenue", type: "array", items: new OA\Items(type: "object"))
-                        ])
-                    ]
-                )
+                description: "Statistiques récupérées avec succès"
             ),
             new OA\Response(response: 401, description: "Non authentifié"),
             new OA\Response(response: 500, description: "Erreur serveur")
@@ -91,92 +71,129 @@ class ApiDashboardController extends AbstractController
             }
 
             $entreprise = $user->getEntreprise();
-            
-            // Filters
+
+            // === Filters ===
             $startDate = $request->query->get('startDate');
-            $endDate = $request->query->get('endDate');
-            $month = $request->query->get('month'); // Expecting format like '2024-05'
-            $semester = $request->query->get('semester'); // '1' or '2'
-            $year = $request->query->get('year') ?: date('Y');
+            $endDate   = $request->query->get('endDate');
+            $month     = $request->query->get('month');
+            $semester  = $request->query->get('semester');
+            $year      = $request->query->get('year') ?: date('Y');
 
             $criteria = [];
             if ($entreprise) {
                 $criteria['entreprise'] = $entreprise;
             }
 
-            // Count basic entities
+            // ── Period boundaries (used for "new" counts) ──────────────────────
+            [$periodStart, $periodEnd] = $this->resolvePeriodBounds($startDate, $endDate, $month, $semester, $year);
+
+            // === 1. Overview counts ============================================
             $totalEmployees = $this->em->getRepository(Employe::class)->count($criteria);
-            $totalTenants = $this->em->getRepository(Locataire::class)->count($criteria);
-            $totalProprios = $this->em->getRepository(Proprio::class)->count($criteria);
+            $totalTenants   = $this->em->getRepository(Locataire::class)->count($criteria);
+            $totalProprios  = $this->em->getRepository(Proprio::class)->count($criteria);
             $totalContracts = $this->em->getRepository(ContratLocation::class)->count($criteria);
 
+            // Active / resiliated contracts
+            $activeContracts = (int) $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
+                ->select('COUNT(c.id)')
+                ->where('c.etat = 1')
+                ->andWhere($entreprise ? 'c.entreprise = :ent' : '1=1')
+                ->setParameter('ent', $entreprise ?: 0)
+                ->getQuery()->getSingleScalarResult();
+
+            $resiliatedContracts = $totalContracts - $activeContracts;
+
+            // New contracts in period
+            $newContractsPeriod = (int) $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
+                ->select('COUNT(c.id)')
+                ->where('c.createdAt >= :start AND c.createdAt <= :end')
+                ->setParameter('start', $periodStart)
+                ->setParameter('end', $periodEnd)
+                ->andWhere($entreprise ? 'c.entreprise = :ent' : '1=1')
+                ->setParameter('ent', $entreprise ?: 0)
+                ->getQuery()->getSingleScalarResult();
+
+            // New tenants in period
+            $newTenantsPeriod = (int) $this->em->getRepository(Locataire::class)->createQueryBuilder('l')
+                ->select('COUNT(l.id)')
+                ->where('l.createdAt >= :start AND l.createdAt <= :end')
+                ->setParameter('start', $periodStart)
+                ->setParameter('end', $periodEnd)
+                ->andWhere($entreprise ? 'l.entreprise = :ent' : '1=1')
+                ->setParameter('ent', $entreprise ?: 0)
+                ->getQuery()->getSingleScalarResult();
+
+            // === 2. Properties & Occupation ====================================
             if ($entreprise) {
                 $totalMaisons = (int) $this->em->getRepository(Maison::class)->createQueryBuilder('m')
                     ->select('COUNT(m.id)')
                     ->join('m.proprio', 'p')
                     ->where('p.entreprise = :ent')
                     ->setParameter('ent', $entreprise)
-                    ->getQuery()
-                    ->getSingleScalarResult();
+                    ->getQuery()->getSingleScalarResult();
 
-                $totalAppartements = (int) $this->em->getRepository(Appartement::class)->createQueryBuilder('a')
-                    ->select('COUNT(a.id)')
+                $appartQb = $this->em->getRepository(Appartement::class)->createQueryBuilder('a')
                     ->join('a.maisson', 'm')
                     ->join('m.proprio', 'p')
                     ->where('p.entreprise = :ent')
-                    ->setParameter('ent', $entreprise)
-                    ->getQuery()
-                    ->getSingleScalarResult();
+                    ->setParameter('ent', $entreprise);
+
+                $totalAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
+                $occupiedAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->andWhere('a.oqp = 1')->getQuery()->getSingleScalarResult();
             } else {
+                $totalMaisons     = $this->em->getRepository(Maison::class)->count([]);
                 $totalAppartements = $this->em->getRepository(Appartement::class)->count([]);
-                $totalMaisons = $this->em->getRepository(Maison::class)->count([]);
+                $occupiedAppartements  = $this->em->getRepository(Appartement::class)->count(['oqp' => 1]);
             }
 
-            // Revenue query
+            $freeAppartements  = $totalAppartements - $occupiedAppartements;
+            $occupancyRate = $totalAppartements > 0
+                ? round(($occupiedAppartements / $totalAppartements) * 100, 1)
+                : 0;
+
+            // === 3. Financials =================================================
             $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
             if ($entreprise) {
                 $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
             }
 
-            // Apply time filters to invoices
+            // Apply time filter
             if ($startDate && $endDate) {
                 $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
-                   ->setParameter('start', new DateTime($startDate))
-                   ->setParameter('end', new DateTime($endDate . ' 23:59:59'));
+                    ->setParameter('start', new DateTime($startDate))
+                    ->setParameter('end', new DateTime($endDate . ' 23:59:59'));
             } elseif ($month) {
                 $startOfMonth = new DateTime($month . '-01');
-                $endOfMonth = clone $startOfMonth;
-                $endOfMonth->modify('last day of this month');
+                $endOfMonth   = (clone $startOfMonth)->modify('last day of this month');
                 $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
-                   ->setParameter('start', $startOfMonth)
-                   ->setParameter('end', $endOfMonth);
+                    ->setParameter('start', $startOfMonth)
+                    ->setParameter('end', $endOfMonth);
             } elseif ($semester) {
                 if ($semester == '1') {
                     $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
-                       ->setParameter('start', new DateTime($year . '-01-01'))
-                       ->setParameter('end', new DateTime($year . '-06-30 23:59:59'));
+                        ->setParameter('start', new DateTime($year . '-01-01'))
+                        ->setParameter('end', new DateTime($year . '-06-30 23:59:59'));
                 } else {
                     $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
-                       ->setParameter('start', new DateTime($year . '-07-01'))
-                       ->setParameter('end', new DateTime($year . '-12-31 23:59:59'));
+                        ->setParameter('start', new DateTime($year . '-07-01'))
+                        ->setParameter('end', new DateTime($year . '-12-31 23:59:59'));
                 }
             }
 
-            $factures = $qb->getQuery()->getResult();
-
-            $totalRevenue = 0;
+            $factures       = $qb->getQuery()->getResult();
+            $totalRevenue   = 0;
             $totalOutstanding = 0;
-            $paidCount = 0;
-            $unpaidCount = 0;
+            $paidCount      = 0;
+            $unpaidCount    = 0;
 
             foreach ($factures as $facture) {
                 /** @var FactureLocation $facture */
-                $mntFact = $facture->getMntFact() ?? 0;
+                $mntFact  = $facture->getMntFact() ?? 0;
                 $soldeFact = $facture->getSoldeFactLoc() ?? 0;
 
-                $totalRevenue += ($mntFact - $soldeFact);
+                $totalRevenue     += ($mntFact - $soldeFact);
                 $totalOutstanding += $soldeFact;
-                
+
                 if ($soldeFact <= 0) {
                     $paidCount++;
                 } else {
@@ -184,88 +201,190 @@ class ApiDashboardController extends AbstractController
                 }
             }
 
-            // Monthly distribution for charts (last 6 months or filtered year)
+            // === 4. Recent Activity ============================================
+            $recentActivity = $this->getRecentActivity($entreprise, 8);
+
+            // === 5. Monthly chart =============================================
             $chartData = $this->getMonthlyDistribution($entreprise, $year);
+
+            // === 6. Payment collection rate (for current period) ===============
+            $totalBilled  = $totalRevenue + $totalOutstanding;
+            $collectionRate = $totalBilled > 0 ? round(($totalRevenue / $totalBilled) * 100, 1) : 0;
 
             return $this->json([
                 'overview' => [
-                    'totalEmployees' => $totalEmployees,
-                    'totalTenants' => $totalTenants,
-                    'totalProprios' => $totalProprios,
-                    'totalProperties' => $totalAppartements + $totalMaisons,
-                    'totalContracts' => $totalContracts,
+                    'totalEmployees'        => $totalEmployees,
+                    'totalTenants'          => $totalTenants,
+                    'newTenantsPeriod'      => $newTenantsPeriod,
+                    'totalProprios'         => $totalProprios,
+                    'totalProperties'       => $totalAppartements + $totalMaisons,
+                    'totalMaisons'          => $totalMaisons,
+                    'totalAppartements'     => $totalAppartements,
+                    'occupiedAppartements'  => $occupiedAppartements,
+                    'freeAppartements'      => $freeAppartements,
+                    'occupancyRate'         => $occupancyRate,
+                    'totalContracts'        => $totalContracts,
+                    'activeContracts'       => $activeContracts,
+                    'resiliatedContracts'   => $resiliatedContracts,
+                    'newContractsPeriod'    => $newContractsPeriod,
                 ],
                 'financials' => [
-                    'totalRevenue' => $totalRevenue,
-                    'totalOutstanding' => $totalOutstanding,
-                    'unpaidInvoicesCount' => $unpaidCount,
-                    'paidInvoicesCount' => $paidCount,
+                    'totalRevenue'          => $totalRevenue,
+                    'totalOutstanding'      => $totalOutstanding,
+                    'totalBilled'           => $totalBilled,
+                    'unpaidInvoicesCount'   => $unpaidCount,
+                    'paidInvoicesCount'     => $paidCount,
+                    'collectionRate'        => $collectionRate,
                 ],
-                'charts' => [
-                    'monthlyRevenue' => $chartData,
-                ]
-            ], 200, [], ['groups' => ['group1']]);
+                'charts'         => ['monthlyRevenue' => $chartData],
+                'recentActivity' => $recentActivity,
+            ], 200);
         } catch (\Exception $e) {
             return $this->json([
                 'message' => 'Une erreur est survenue lors du chargement des statistiques',
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'error'   => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine()
             ], 500);
         }
     }
 
-    private function getMonthlyDistribution($entreprise, $year)
+    // ── Helper: resolve time-period boundaries ─────────────────────────────────
+    private function resolvePeriodBounds(?string $startDate, ?string $endDate, ?string $month, ?string $semester, string $year): array
+    {
+        if ($startDate && $endDate) {
+            return [new DateTime($startDate), new DateTime($endDate . ' 23:59:59')];
+        }
+        if ($month) {
+            $s = new DateTime($month . '-01 00:00:00');
+            $e = (clone $s)->modify('last day of this month 23:59:59');
+            return [$s, $e];
+        }
+        if ($semester) {
+            return $semester == '1'
+                ? [new DateTime($year . '-01-01'), new DateTime($year . '-06-30 23:59:59')]
+                : [new DateTime($year . '-07-01'), new DateTime($year . '-12-31 23:59:59')];
+        }
+        // Default: current month
+        $now = new DateTime();
+        $s   = new DateTime($now->format('Y-m') . '-01 00:00:00');
+        $e   = (clone $s)->modify('last day of this month 23:59:59');
+        return [$s, $e];
+    }
+
+    // ── Helper: recent activity feed ───────────────────────────────────────────
+    private function getRecentActivity($entreprise, int $limit = 8): array
+    {
+        $activity = [];
+
+        // Recent signed contracts
+        $qbC = $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
+            ->orderBy('c.createdAt', 'DESC')
+            ->setMaxResults($limit);
+        if ($entreprise) {
+            $qbC->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
+        }
+        foreach ($qbC->getQuery()->getResult() as $contrat) {
+            /** @var ContratLocation $contrat */
+            $appart = $contrat->getAppart();
+            $activity[] = [
+                'type'    => 'contract',
+                'icon'    => 'file-signature',
+                'color'   => '#1ABCB7',
+                'label'   => 'Contrat ' . ($contrat->getEtat() == 1 ? 'signé' : 'résilié'),
+                'detail'  => $appart ? $appart->getLibAppart() : 'Appartement',
+                'date'    => $contrat->getCreatedAt() ? $contrat->getCreatedAt()->format('Y-m-d H:i') : null,
+            ];
+        }
+
+        // Recent payments (reglements)
+        $reglements = $this->em->getRepository(Reglements::class)->createQueryBuilder('r')
+            ->orderBy('r.date', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()->getResult();
+
+        foreach ($reglements as $r) {
+            /** @var Reglements $r */
+            $activity[] = [
+                'type'   => 'payment',
+                'icon'   => 'cash',
+                'color'  => '#32cd32',
+                'label'  => 'Loyer reçu',
+                'detail' => number_format((float)$r->getMontantVerse(), 0, ',', ' ') . ' FCFA',
+                'date'   => $r->getDate() ? date('Y-m-d', $r->getDate()) : null,
+            ];
+        }
+
+        // Sort all by date desc (approximate, based on contract createdAt)
+        usort($activity, function ($a, $b) {
+            return strcmp($b['date'] ?? '', $a['date'] ?? '');
+        });
+
+        return array_slice($activity, 0, $limit);
+    }
+
+    // ── Helper: monthly revenue distribution ──────────────────────────────────
+    private function getMonthlyDistribution($entreprise, $year): array
     {
         $start = new DateTime($year . '-01-01 00:00:00');
-        $end = new DateTime($year . '-12-31 23:59:59');
+        $end   = new DateTime($year . '-12-31 23:59:59');
 
         $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
         $qb->select('f.dateEmission', 'f.mntFact', 'f.soldeFactLoc')
-           ->where('f.dateEmission >= :start')
-           ->andWhere('f.dateEmission <= :end')
-           ->setParameter('start', $start)
-           ->setParameter('end', $end);
+            ->where('f.dateEmission >= :start')
+            ->andWhere('f.dateEmission <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end);
 
         if ($entreprise) {
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
         }
 
         $results = $qb->getQuery()->getResult();
-        
-        $indexedResults = [];
+
+        $indexedRevenue      = [];
+        $indexedOutstanding  = [];
         foreach ($results as $res) {
-             $date = $res['dateEmission'];
-             if ($date instanceof \DateTimeInterface) {
-                 $month = $date->format('Y-m');
-                 $amount = $res['mntFact'] - $res['soldeFactLoc'];
-                 
-                 if (!isset($indexedResults[$month])) {
-                     $indexedResults[$month] = 0;
-                 }
-                 $indexedResults[$month] += $amount;
-             }
+            $date = $res['dateEmission'];
+            if ($date instanceof \DateTimeInterface) {
+                $mKey   = $date->format('Y-m');
+                $revenue = ($res['mntFact'] ?? 0) - ($res['soldeFactLoc'] ?? 0);
+                $outstanding = $res['soldeFactLoc'] ?? 0;
+
+                $indexedRevenue[$mKey]     = ($indexedRevenue[$mKey] ?? 0) + $revenue;
+                $indexedOutstanding[$mKey] = ($indexedOutstanding[$mKey] ?? 0) + $outstanding;
+            }
         }
 
         $fullYear = [];
         for ($m = 1; $m <= 12; $m++) {
             $mStr = str_pad($m, 2, '0', STR_PAD_LEFT);
-            $key = $year . '-' . $mStr;
+            $key  = $year . '-' . $mStr;
             $fullYear[] = [
-                'name' => $this->getMonthName($m),
-                'revenue' => $indexedResults[$key] ?? 0
+                'name'        => $this->getMonthName($m),
+                'revenue'     => $indexedRevenue[$key] ?? 0,
+                'outstanding' => $indexedOutstanding[$key] ?? 0,
             ];
         }
 
         return $fullYear;
     }
 
-    private function getMonthName($m)
+    private function getMonthName($m): string
     {
         $months = [
-            1 => 'Jan', 2 => 'Fév', 3 => 'Mar', 4 => 'Avr', 
-            5 => 'Mai', 6 => 'Juin', 7 => 'Juil', 8 => 'Aoû', 
-            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Déc'
+            1  => 'Jan',
+            2  => 'Fév',
+            3  => 'Mar',
+            4  => 'Avr',
+            5  => 'Mai',
+            6  => 'Juin',
+            7  => 'Juil',
+            8  => 'Aoû',
+            9  => 'Sep',
+            10 => 'Oct',
+            11 => 'Nov',
+            12 => 'Déc',
         ];
         return $months[$m];
     }
@@ -277,23 +396,7 @@ class ApiDashboardController extends AbstractController
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Données locataire récupérées avec succès",
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: "financials", type: "object", properties: [
-                            new OA\Property(property: "totalUnpaid", type: "number"),
-                            new OA\Property(property: "totalPaid", type: "number"),
-                            new OA\Property(property: "unpaidCount", type: "integer"),
-                            new OA\Property(property: "paidCount", type: "integer"),
-                            new OA\Property(property: "nextPaymentDate", type: "string", format: "date", nullable: true),
-                            new OA\Property(property: "totalInvested", type: "number"),
-                            new OA\Property(property: "lastPaymentDate", type: "string", format: "date-time", nullable: true),
-                        ]),
-                        new OA\Property(property: "contract", type: "object", nullable: true),
-                        new OA\Property(property: "presenceDays", type: "integer"),
-                        new OA\Property(property: "recentTransactions", type: "array", items: new OA\Items(type: "object"))
-                    ]
-                )
+                description: "Données locataire récupérées avec succès"
             ),
             new OA\Response(response: 404, description: "Profil locataire non trouvé"),
             new OA\Response(response: 500, description: "Erreur serveur")
@@ -305,11 +408,10 @@ class ApiDashboardController extends AbstractController
         try {
             /** @var User $user */
             $user = $this->security->getUser();
-            if (!$user || !$user->getLocataire()) {
-                // Retourner une structure vide plutôt qu'un 404 pour éviter l'erreur côté client
-                if (!$user) {
-                    return $this->json(['message' => 'Non authentifié'], 401);
-                }
+            if (!$user) {
+                return $this->json(['message' => 'Non authentifié'], 401);
+            }
+            if (!$user->getLocataire()) {
                 return $this->json([
                     'financials' => [
                         'totalUnpaid'     => 0,
@@ -329,18 +431,18 @@ class ApiDashboardController extends AbstractController
             $locataire = $user->getLocataire();
 
             // 1. Financials
-            $factures = $this->em->getRepository(FactureLocation::class)->findBy(['locataire' => $locataire]);
-            $totalUnpaid = 0;
-            $totalPaid = 0;
-            $unpaidCount = 0;
-            $paidCount = 0;
+            $factures     = $this->em->getRepository(FactureLocation::class)->findBy(['locataire' => $locataire]);
+            $totalUnpaid  = 0;
+            $totalPaid    = 0;
+            $unpaidCount  = 0;
+            $paidCount    = 0;
             $oldestUnpaidDate = null;
 
             foreach ($factures as $facture) {
                 $solde = (float) $facture->getSoldeFactLoc();
                 $totalUnpaid += $solde;
-                $totalPaid += ((float)$facture->getMntFact() - $solde);
-                
+                $totalPaid   += ((float)$facture->getMntFact() - $solde);
+
                 if ($solde > 0) {
                     $unpaidCount++;
                     if (!$oldestUnpaidDate || $facture->getDateLimite() < $oldestUnpaidDate) {
@@ -364,7 +466,7 @@ class ApiDashboardController extends AbstractController
             );
 
             // 4. Extra stats
-            $totalInvested = 0;
+            $totalInvested   = 0;
             $lastPaymentDate = null;
             $allTransactions = $this->em->getRepository(\App\Entity\Transaction::class)->findBy(['locataire' => $locataire, 'status' => 'SUCCESS']);
             foreach ($allTransactions as $t) {
@@ -376,12 +478,11 @@ class ApiDashboardController extends AbstractController
 
             $presenceDays = 0;
             if ($contrat && $contrat->getDateDebut()) {
-                $now = new \DateTime();
+                $now  = new \DateTime();
                 $diff = $now->diff($contrat->getDateDebut());
                 $presenceDays = $diff->days;
             }
 
-            // ── Sérialisation manuelle pour éviter les références circulaires ──
             $contratData = null;
             if ($contrat) {
                 $appart = $contrat->getAppart();
@@ -429,7 +530,6 @@ class ApiDashboardController extends AbstractController
                 'presenceDays'       => $presenceDays,
                 'recentTransactions' => $transactionsData,
             ], 200);
-
         } catch (\Exception $e) {
             return $this->json(['message' => 'Erreur: ' . $e->getMessage()], 500);
         }

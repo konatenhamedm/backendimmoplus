@@ -409,4 +409,56 @@ class ApiContratLocationController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
+
+    #[Route('/{id}/imprimer', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/contrat-location/{id}/imprimer",
+        summary: "Imprimer le contrat",
+        description: "Génère le PDF du bail d'habitation.",
+        tags: ['ContratLocation']
+    )]
+    public function imprimer(ContratLocation $contrat): Response
+    {
+        try {
+            if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
+
+            $appartement = $contrat->getAppart();
+            $locataire = $contrat->getLocataire();
+            $proprio = null;
+            if ($appartement && $appartement->getMaisson()) {
+                $proprio = $appartement->getMaisson()->getProprio();
+            }
+
+            $formatter = new \NumberFormatter('fr', \NumberFormatter::SPELLOUT);
+            $montantLoyerLettres = strtoupper($formatter->format($contrat->getMntLoyer() ?? 0));
+            $montantCautionLettres = strtoupper($formatter->format($contrat->getMntCaution() ?? 0));
+
+            $html = $this->renderView('contrats/bail.html.twig', [
+                'contrat' => $contrat,
+                'appartement' => $appartement,
+                'locataire' => $locataire,
+                'proprio' => $proprio,
+                'montantLoyerLettres' => $montantLoyerLettres,
+                'montantCautionLettres' => $montantCautionLettres
+            ]);
+
+            $options = new \Dompdf\Options();
+            $options->set('isRemoteEnabled', true);
+            $options->set('isHtml5ParserEnabled', true);
+            $dompdf = new \Dompdf\Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            $filename = "bail_habitation_" . $contrat->getId() . ".pdf";
+
+            return new Response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+            ]);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
 }
