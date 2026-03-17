@@ -86,7 +86,7 @@ class ApiEtatController extends ApiInterface
 
             $invoiceData = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise, $siteId);
             $payoutData = $this->fetchOwnerPayouts($startDate, $endDate, $entreprise, $siteId);
-            $campaignData = $this->fetchCampaignOccupancy($entreprise);
+            $campaignData = $this->fetchCampaignOccupancy($entreprise, $siteId);
 
             return $this->response([
                 'invoices' => array_map(fn($f) => [
@@ -523,13 +523,19 @@ class ApiEtatController extends ApiInterface
         return $result;
     }
 
-    private function fetchUnpaidInvoices($entreprise)
+    private function fetchUnpaidInvoices($entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
         if ($entreprise) {
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
         }
         $qb->andWhere('f.soldeFactLoc > 0');
+        
+        if ($siteId) {
+            $qb->join('f.contrat', 'c')->join('c.appart', 'a')->join('a.maisson', 'm')
+               ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
+        }
+        
         $factures = $qb->getQuery()->getResult();
 
         $totalRevenue = 0; $totalOutstanding = 0; $paidAmount = 0;
@@ -656,7 +662,7 @@ class ApiEtatController extends ApiInterface
         return $qb->getQuery()->getResult();
     }
 
-    private function fetchCampaignOccupancy($entreprise)
+    private function fetchCampaignOccupancy($entreprise, $siteId = null)
     {
         $criteria = [];
         if ($entreprise) {
@@ -669,9 +675,12 @@ class ApiEtatController extends ApiInterface
             $appartements = [];
             foreach ($c->getContratLocations() as $contrat) {
                 if ($contrat->getAppart()) {
+                    $m = $contrat->getAppart()->getMaisson();
+                    if ($siteId && (!$m || $m->getId() != $siteId)) continue;
+
                     $appartements[] = [
                         'nom' => $contrat->getAppart()->getLibAppart(),
-                        'maison' => $contrat->getAppart()->getMaisson()?->getLibMaison(),
+                        'maison' => $m ? $m->getLibMaison() : null,
                         'locataire' => $contrat->getLocataire()?->getNom() . ' ' . $contrat->getLocataire()?->getPrenoms(),
                         'loyer' => $contrat->getMntLoyer(),
                     ];
