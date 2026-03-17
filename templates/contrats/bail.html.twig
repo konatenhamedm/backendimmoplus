@@ -174,35 +174,41 @@
     </div>
 </div>
 
-<p class="bold">ENTRE</p>
+<p class="bold" style="text-decoration: underline; margin-bottom: 10px;">ENTRE</p>
 
-<p><span class="bold">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '......................................................................................................................' }}</p>
-<p>Référence identité (CNI - RC) N° {{ proprio.numCni|default('........................................................................') }} établie le {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
-<p>Domicilié à {{ proprio.addresse|default('........................................................................................') }} Cel. : {{ proprio.contacts|default('.....................') }}</p>
-<p>Email : {{ proprio.email|default('....................................................................................................................') }}</p>
-<p>Compte contribuable n° {{ proprio.compteContribuable|default('....................................................................................................................') }}</p>
-<table style="width: 100%;">
+<div style="margin-bottom: 15px;">
+    <p><span class="bold" style="display: inline-block; width: 220px;">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '...................................................................................................' }}</p>
+    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> {{ proprio.numCni|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">établie le</span> {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
+    <p><span style="display: inline-block; width: 220px;">Domicilié à</span> {{ proprio.addresse|default('........................................................................') }} <span style="display: inline-block; margin-left: 20px;">Cel. :</span> {{ proprio.contacts|default('.....................') }}</p>
+    <p><span style="display: inline-block; width: 220px;">Email :</span> {{ proprio.email|default('....................................................................................................................') }}</p>
+    <p><span style="display: inline-block; width: 220px;">Compte contribuable n°</span> {{ proprio.compteContribuable|default('....................................................................................................................') }}</p>
+</div>
+
+<table style="width: 100%; margin-bottom: 15px;">
     <tr>
-        <td style="width: 70%;">Dénommé au cours du présent acte &laquo; <span class="bold">LE BAILLEUR</span> &raquo;.</td>
+        <td style="width: 70%; text-align: left;">Dénommé au cours du présent acte &laquo; <span class="bold">LE BAILLEUR</span> &raquo;.</td>
         <td style="width: 30%; text-align: right; font-weight: bold; text-decoration: underline;">D'une part</td>
     </tr>
 </table>
 
-<p class="bold" style="margin-left: 20px;">ET</p>
+<p class="bold" style="text-decoration: underline; margin-bottom: 10px;">ET</p>
 
-<p><span class="bold">LOCATAIRE :</span> {{ locataire.nom or locataire.prenoms ? (locataire.nom|default('')|upper ~ ' ' ~ locataire.prenoms|default('')|upper) : '............................................................................................................................' }}</p>
-<p>Référence identité (CNI - RC) N° {{ locataire.numpiece|default('.............................................................................') }} établie le ................................</p>
-<p>Profession : {{ locataire.profession|default('.........................................................................................') }} Employeur : ..........................................................................</p>
-<p>Cel. : {{ locataire.contacts|default('.....................................') }} Tél. Domicile : ........................................ Tél. Bureau : ...........................................</p>
-<p>Email : {{ locataire.email|default('..............................................................................................................................................................') }}</p>
-<table style="width: 100%;">
+<div style="margin-bottom: 15px;">
+    <p><span class="bold" style="display: inline-block; width: 220px;">LOCATAIRE :</span> {{ locataire.nom or locataire.prenoms ? (locataire.nom|default('')|upper ~ ' ' ~ locataire.prenoms|default('')|upper) : '...................................................................................................' }}</p>
+    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> {{ locataire.numpiece|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">établie le</span> ................................</p>
+    <p><span style="display: inline-block; width: 220px;">Profession :</span> {{ locataire.profession|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">Employeur :</span> {{ locataire.employeur|default('.......................................') }}</p>
+    <p><span style="display: inline-block; width: 220px;">Cel. :</span> {{ locataire.contacts|default('........................') }} <span style="display: inline-block; margin-left: 20px;">Tél. Domicile :</span> ........................ <span style="display: inline-block; margin-left: 20px;">Tél. Bureau :</span> ........................</p>
+    <p><span style="display: inline-block; width: 220px;">Email :</span> {{ locataire.email|default('....................................................................................................................') }}</p>
+</div>
+
+<table style="width: 100%; margin-bottom: 15px;">
     <tr>
-        <td style="width: 70%;">Dénommé au cours du présent acte &laquo; <span class="bold">LE PRENEUR</span> &raquo;.</td>
+        <td style="width: 70%; text-align: left;">Dénommé au cours du présent acte &laquo; <span class="bold">LE PRENEUR</span> &raquo;.</td>
         <td style="width: 30%; text-align: right; font-weight: bold; text-decoration: underline;">D'autre part</td>
     </tr>
 </table>
 
-<p class="bold" style="margin-top: 15px; margin-bottom: 15px; text-align: center;">LESQUELS ont convenu et arrêté le contrat de bail qui suit :</p>
+<p class="bold" style="text-align: center; margin: 20px 0;">LESQUELS ont convenu et arrêté le contrat de bail qui suit :</p>
 
 <div class="section-title">BAIL</div>
 

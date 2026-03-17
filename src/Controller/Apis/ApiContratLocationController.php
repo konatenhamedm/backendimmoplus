@@ -450,6 +450,10 @@ class ApiContratLocationController extends ApiInterface
             $dompdf->setPaper('A4', 'portrait');
             $dompdf->render();
 
+            $canvas = $dompdf->getCanvas();
+            $font = $dompdf->getFontMetrics()->get_font("helvetica", "normal");
+            $canvas->page_text($canvas->get_width()/2 - 30, $canvas->get_height() - 30, "Page {PAGE_NUM} sur {PAGE_COUNT}", $font, 9, array(0,0,0));
+
             $filename = "bail_habitation_" . $contrat->getId() . ".pdf";
 
             return new Response($dompdf->output(), 200, [
