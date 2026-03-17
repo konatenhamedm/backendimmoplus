@@ -81,9 +81,11 @@ class ApiEtatController extends ApiInterface
             $entreprise = $this->getUser()->getEntreprise();
             $startDate = $request->query->get('startDate');
             $endDate = $request->query->get('endDate');
+            $siteId = $request->query->get('siteId');
+            if ($siteId === 'all') $siteId = null;
 
-            $invoiceData = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise);
-            $payoutData = $this->fetchOwnerPayouts($startDate, $endDate, $entreprise);
+            $invoiceData = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise, $siteId);
+            $payoutData = $this->fetchOwnerPayouts($startDate, $endDate, $entreprise, $siteId);
             $campaignData = $this->fetchCampaignOccupancy($entreprise);
 
             return $this->response([
@@ -157,19 +159,21 @@ class ApiEtatController extends ApiInterface
             $format = $request->query->get('format', 'pdf');
             $startDate = $request->query->get('startDate', date('Y-m-01'));
             $endDate = $request->query->get('endDate', date('Y-m-d'));
+            $siteId = $request->query->get('siteId');
+            if ($siteId === 'all') $siteId = null;
             $entreprise = $this->getUser()->getEntreprise();
 
             if ($format === 'pdf') {
-                return $this->generatePdf($reportId, $startDate, $endDate, $entreprise);
+                return $this->generatePdf($reportId, $startDate, $endDate, $entreprise, $siteId);
             } else {
-                return $this->generateExcel($reportId, $startDate, $endDate, $entreprise);
+                return $this->generateExcel($reportId, $startDate, $endDate, $entreprise, $siteId);
             }
         } catch (\Exception $e) {
             return new Response("Erreur lors de la génération: " . $e->getMessage(), 500);
         }
     }
 
-    private function generatePdf($reportId, $startDate, $endDate, $entreprise): Response
+    private function generatePdf($reportId, $startDate, $endDate, $entreprise, $siteId = null): Response
     {
         $html = "";
         $filename = "rapport_" . $reportId . "_" . date('Ymd') . ".pdf";
@@ -312,7 +316,7 @@ class ApiEtatController extends ApiInterface
         ]);
     }
 
-    private function generateExcel($reportId, $startDate, $endDate, $entreprise): Response
+    private function generateExcel($reportId, $startDate, $endDate, $entreprise, $siteId = null): Response
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -445,7 +449,7 @@ class ApiEtatController extends ApiInterface
         ]);
     }
 
-    private function fetchFinanceStats($startDate, $endDate, $entreprise)
+    private function fetchFinanceStats($startDate, $endDate, $entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
         if ($entreprise) {
@@ -455,6 +459,10 @@ class ApiEtatController extends ApiInterface
             $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
+        }
+        if ($siteId) {
+            $qb->join('f.contrat', 'c')->join('c.appart', 'a')->join('a.maisson', 'm')
+               ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
         }
         $factures = $qb->getQuery()->getResult();
 
@@ -473,7 +481,7 @@ class ApiEtatController extends ApiInterface
         ];
     }
 
-    private function fetchTransactions($startDate, $endDate, $entreprise)
+    private function fetchTransactions($startDate, $endDate, $entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(Transaction::class)->createQueryBuilder('t');
         if ($entreprise) {
@@ -485,6 +493,13 @@ class ApiEtatController extends ApiInterface
              $qb->andWhere('t.date >= :start AND t.date <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
+        }
+        if ($siteId) {
+             if (!in_array('f', $qb->getAllAliases())) {
+                 $qb->leftJoin('t.factureLocation', 'f');
+             }
+             $qb->join('f.contrat', 'c')->join('c.appart', 'a')->join('a.maisson', 'm')
+                ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
         }
         return $qb->getQuery()->getResult();
     }
@@ -586,7 +601,7 @@ class ApiEtatController extends ApiInterface
         return null;
     }
 
-    private function fetchInvoiceStatus($startDate, $endDate, $entreprise)
+    private function fetchInvoiceStatus($startDate, $endDate, $entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
         if ($entreprise) {
@@ -596,6 +611,10 @@ class ApiEtatController extends ApiInterface
             $qb->andWhere('f.dateEmission >= :start AND f.dateEmission <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
+        }
+        if ($siteId) {
+            $qb->join('f.contrat', 'c')->join('c.appart', 'a')->join('a.maisson', 'm')
+               ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
         }
         $factures = $qb->getQuery()->getResult();
 
@@ -617,7 +636,7 @@ class ApiEtatController extends ApiInterface
         ];
     }
 
-    private function fetchOwnerPayouts($startDate, $endDate, $entreprise)
+    private function fetchOwnerPayouts($startDate, $endDate, $entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(VersmtProprio::class)->createQueryBuilder('v');
         if ($entreprise) {
@@ -629,6 +648,10 @@ class ApiEtatController extends ApiInterface
             $qb->andWhere('v.dateVersement >= :start AND v.dateVersement <= :end')
                ->setParameter('start', new \DateTime($startDate))
                ->setParameter('end', new \DateTime($endDate . ' 23:59:59'));
+        }
+        if ($siteId) {
+            $qb->join('v.maison', 'm')
+               ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
         }
         return $qb->getQuery()->getResult();
     }
@@ -664,13 +687,17 @@ class ApiEtatController extends ApiInterface
         return $result;
     }
 
-    private function fetchRentByHouse($entreprise)
+    private function fetchRentByHouse($entreprise, $siteId = null)
     {
         $qb = $this->em->getRepository(\App\Entity\ContratLocation::class)->createQueryBuilder('c');
         if ($entreprise) {
             $qb->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
         }
         $qb->andWhere('c.etat = 1');
+        if ($siteId) {
+            $qb->join('c.appart', 'a')->join('a.maisson', 'm')
+               ->andWhere('m.id = :siteId')->setParameter('siteId', $siteId);
+        }
         $contrats = $qb->getQuery()->getResult();
         
         $houses = [];
