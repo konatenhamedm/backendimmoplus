@@ -230,12 +230,43 @@ class ApiEtatController extends ApiInterface
                     'logo' => $logo
                 ]);
                 break;
+            case 'rent_by_house':
+                $data = $this->fetchRentByHouse($entreprise);
+                $html = $this->renderView('reports/maisons_proprio.html.twig', [
+                    'title' => 'Liste des Locataires par Maison',
+                    'data' => $data,
+                    'entreprise' => $entreprise,
+                    'logo' => $logo
+                ]);
+                break;
             case 'invoice_status':
                 $data = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise);
                 $html = $this->renderView('reports/invoices.html.twig', [
                     'title' => 'Rapport des Factures & Règlements',
                     'factures' => $data['items'],
                     'summary' => $data['summary'],
+                    'startDate' => $startDate,
+                    'endDate' => $endDate,
+                    'entreprise' => $entreprise,
+                    'logo' => $logo
+                ]);
+                break;
+            case 'invoices_by_house':
+                $data = $this->fetchInvoicesByHouse($startDate, $endDate, $entreprise);
+                $html = $this->renderView('reports/invoices_by_house.html.twig', [
+                    'title' => 'Factures de Location par Maison',
+                    'data' => $data,
+                    'startDate' => $startDate,
+                    'endDate' => $endDate,
+                    'entreprise' => $entreprise,
+                    'logo' => $logo
+                ]);
+                break;
+            case 'payments_by_house':
+                $data = $this->fetchPaymentsByHouse($startDate, $endDate, $entreprise);
+                $html = $this->renderView('reports/payments_by_house.html.twig', [
+                    'title' => 'Paiements Encaissés par Maison',
+                    'data' => $data,
                     'startDate' => $startDate,
                     'endDate' => $endDate,
                     'entreprise' => $entreprise,
@@ -631,5 +662,108 @@ class ApiEtatController extends ApiInterface
             ];
         }
         return $result;
+    }
+
+    private function fetchRentByHouse($entreprise)
+    {
+        $qb = $this->em->getRepository(\App\Entity\ContratLocation::class)->createQueryBuilder('c');
+        if ($entreprise) {
+            $qb->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
+        }
+        $qb->andWhere('c.etat = 1');
+        $contrats = $qb->getQuery()->getResult();
+        
+        $houses = [];
+        foreach ($contrats as $c) {
+            $maisonLib = $c->getAppart() && $c->getAppart()->getMaisson() ? $c->getAppart()->getMaisson()->getLibMaison() : 'Sans Maison';
+            if (!isset($houses[$maisonLib])) {
+                $houses[$maisonLib] = [
+                    'proprio' => ['nom' => 'Maison', 'prenoms' => $maisonLib],
+                    'maisons' => []
+                ];
+            }
+            $loc = $c->getLocataire();
+            if ($loc) {
+                $houses[$maisonLib]['maisons'][] = [
+                    'nom' => $loc->getNom() . ' ' . $loc->getPrenoms(),
+                    'adresse' => $c->getAppart() ? $c->getAppart()->getLibAppart() : '',
+                    'lot' => 'Contact: ' . $loc->getContacts(),
+                ];
+            }
+        }
+        
+        foreach ($houses as &$house) {
+            $house['maisons_count'] = count($house['maisons']);
+        }
+        return array_values($houses);
+    }
+
+    private function fetchInvoicesByHouse($startDate, $endDate, $entreprise)
+    {
+        $factures = $this->fetchInvoiceStatus($startDate, $endDate, $entreprise)['items'];
+        $houses = [];
+        foreach ($factures as $f) {
+            $maisonLib = 'Autre';
+            if ($f->getContrat() && $f->getContrat()->getAppart() && $f->getContrat()->getAppart()->getMaisson()) {
+                $maisonLib = $f->getContrat()->getAppart()->getMaisson()->getLibMaison();
+            }
+            if (!isset($houses[$maisonLib])) {
+                $houses[$maisonLib] = [
+                    'maison' => $maisonLib,
+                    'total_billed' => 0,
+                    'total_paid' => 0,
+                    'total_outstanding' => 0,
+                    'factures' => []
+                ];
+            }
+            
+            $billed = (float)$f->getMntFact();
+            $outstanding = (float)$f->getSoldeFactLoc();
+            $paid = $billed - $outstanding;
+            
+            $houses[$maisonLib]['total_billed'] += $billed;
+            $houses[$maisonLib]['total_outstanding'] += $outstanding;
+            $houses[$maisonLib]['total_paid'] += $paid;
+            
+            $houses[$maisonLib]['factures'][] = [
+                'date' => $f->getDateEmission()->format('d/m/Y'),
+                'locataire' => $f->getLocataire()?->getNom() . ' ' . $f->getLocataire()?->getPrenoms(),
+                'libelle' => $f->getLibFacture(),
+                'facture' => $billed,
+                'paye' => $paid,
+                'solde' => $outstanding
+            ];
+        }
+        return array_values($houses);
+    }
+
+    private function fetchPaymentsByHouse($startDate, $endDate, $entreprise)
+    {
+        $transactions = $this->fetchTransactions($startDate, $endDate, $entreprise);
+        $houses = [];
+        foreach ($transactions as $t) {
+            $maisonLib = 'Autre';
+            if ($t->getFactureLocation() && $t->getFactureLocation()->getContrat() && $t->getFactureLocation()->getContrat()->getAppart() && $t->getFactureLocation()->getContrat()->getAppart()->getMaisson()) {
+                $maisonLib = $t->getFactureLocation()->getContrat()->getAppart()->getMaisson()->getLibMaison();
+            }
+            if (!isset($houses[$maisonLib])) {
+                $houses[$maisonLib] = [
+                    'maison' => $maisonLib,
+                    'total_amount' => 0,
+                    'transactions' => []
+                ];
+            }
+            
+            $amount = (float)$t->getAmount();
+            $houses[$maisonLib]['total_amount'] += $amount;
+            $houses[$maisonLib]['transactions'][] = [
+                'date' => $t->getDate()->format('d/m/Y H:i'),
+                'reference' => $t->getReference(),
+                'locataire' => $t->getLocataire()?->getNom() . ' ' . $t->getLocataire()?->getPrenoms(),
+                'mode' => $t->getMode(),
+                'montant' => $amount
+            ];
+        }
+        return array_values($houses);
     }
 }
