@@ -177,11 +177,11 @@
 <p class="bold" style="text-decoration: underline; margin-bottom: 10px;">ENTRE</p>
 
 <div style="margin-bottom: 15px;">
-    <p><span class="bold" style="display: inline-block; width: 220px;">PROPRIETAIRE-BAILLEUR :</span> {{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '...................................................................................................' }}</p>
-    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> {{ proprio.numCni|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">établie le</span> {{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</p>
-    <p><span style="display: inline-block; width: 220px;">Domicilié à</span> {{ proprio.addresse|default('........................................................................') }} <span style="display: inline-block; margin-left: 20px;">Cel. :</span> {{ proprio.contacts|default('.....................') }}</p>
-    <p><span style="display: inline-block; width: 220px;">Email :</span> {{ proprio.email|default('....................................................................................................................') }}</p>
-    <p><span style="display: inline-block; width: 220px;">Compte contribuable n°</span> {{ proprio.compteContribuable|default('....................................................................................................................') }}</p>
+    <p><span class="bold" style="display: inline-block; width: 220px;">PROPRIETAIRE-BAILLEUR :</span> <b>{{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '...................................................................................................' }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> <b>{{ proprio.numCni|default('..............................................') }}</b> <span style="display: inline-block; margin-left: 20px;">établie le</span> <b>{{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Domicilié à</span> <b>{{ proprio.addresse|default('........................................................................') }}</b> <span style="display: inline-block; margin-left: 20px;">Cel. :</span> <b>{{ proprio.contacts|default('.....................') }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Email :</span> <b>{{ proprio.email|default('....................................................................................................................') }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Compte contribuable n°</span> <b>{{ proprio.compteContribuable|default('....................................................................................................................') }}</b></p>
 </div>
 
 <table style="width: 100%; margin-bottom: 15px;">
@@ -194,11 +194,11 @@
 <p class="bold" style="text-decoration: underline; margin-bottom: 10px;">ET</p>
 
 <div style="margin-bottom: 15px;">
-    <p><span class="bold" style="display: inline-block; width: 220px;">LOCATAIRE :</span> {{ locataire.nom or locataire.prenoms ? (locataire.nom|default('')|upper ~ ' ' ~ locataire.prenoms|default('')|upper) : '...................................................................................................' }}</p>
-    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> {{ locataire.numpiece|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">établie le</span> ................................</p>
-    <p><span style="display: inline-block; width: 220px;">Profession :</span> {{ locataire.profession|default('..............................................') }} <span style="display: inline-block; margin-left: 20px;">Employeur :</span> {{ locataire.employeur|default('.......................................') }}</p>
-    <p><span style="display: inline-block; width: 220px;">Cel. :</span> {{ locataire.contacts|default('........................') }} <span style="display: inline-block; margin-left: 20px;">Tél. Domicile :</span> ........................ <span style="display: inline-block; margin-left: 20px;">Tél. Bureau :</span> ........................</p>
-    <p><span style="display: inline-block; width: 220px;">Email :</span> {{ locataire.email|default('....................................................................................................................') }}</p>
+    <p><span class="bold" style="display: inline-block; width: 220px;">LOCATAIRE :</span> <b>{{ locataire.nom or locataire.prenoms ? (locataire.nom|default('')|upper ~ ' ' ~ locataire.prenoms|default('')|upper) : '...................................................................................................' }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> <b>{{ locataire.numpiece|default('..............................................') }}</b> <span style="display: inline-block; margin-left: 20px;">établie le</span> ................................</p>
+    <p><span style="display: inline-block; width: 220px;">Profession :</span> <b>{{ locataire.profession|default('..............................................') }}</b> <span style="display: inline-block; margin-left: 20px;">Employeur :</span> <b>{{ locataire.employeur|default('.......................................') }}</b></p>
+    <p><span style="display: inline-block; width: 220px;">Cel. :</span> <b>{{ locataire.contacts|default('........................') }}</b> <span style="display: inline-block; margin-left: 20px;">Tél. Domicile :</span> ........................ <span style="display: inline-block; margin-left: 20px;">Tél. Bureau :</span> ........................</p>
+    <p><span style="display: inline-block; width: 220px;">Email :</span> <b>{{ locataire.email|default('....................................................................................................................') }}</b></p>
 </div>
 
 <table style="width: 100%; margin-bottom: 15px;">
@@ -216,7 +216,7 @@
 
 <div class="section-title">DÉSIGNATION</div>
 
-<p>{{ appartement.libAppart ? (appartement.libAppart ~ ' situé à ' ~ appartement.maisson.localisation|default('...') ~ ', Lot ' ~ appartement.maisson.lot|default('...')) : '........................................................................................................................................................................................' }}</p>
+<p><b>{{ appartement.libAppart ? (appartement.libAppart ~ ' situé à ' ~ appartement.maisson.localisation|default('...') ~ ', Lot ' ~ appartement.maisson.lot|default('...')) : '........................................................................................................................................................................................' }}</b></p>
 {% if not appartement.libAppart %}
 <p>........................................................................................................................................................................................................</p>
 <p>........................................................................................................................................................................................................</p>
@@ -238,23 +238,23 @@
 </div>
 
 <p><span class="bold">ARTICLE 1 - DURÉE DU BAIL</span><br>
-Le présent bail est consenti pour une durée d'une année, qui commence le {{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '..............................' }}.<br>
+Le présent bail est consenti pour une durée d'une année, qui commence le <b>{{ contrat.dateDebut ? contrat.dateDebut|date('d/m/Y') : '..............................' }}</b>.<br>
 Le BAILLEUR ne peut pas rompre le bail avant le terme de la première (1ère) année.<br>
 A l'expiration de la première année, ledit bail se renouvellera par tacite reconduction.</p>
 
 <p><span class="bold">ARTICLE 2 - LOYER</span><br>
-Le présent bail est consenti et accepté moyennant un loyer mensuel de <span class="bold">(en lettres)</span> {{ montantLoyerLettres|default('......................................................') }}<br>
+Le présent bail est consenti et accepté moyennant un loyer mensuel de <span class="bold">(en lettres)</span> <b>{{ montantLoyerLettres|default('......................................................') }}</b><br>
 {% if not montantLoyerLettres %}....................................................................................................................................................................................................................................<br>{% endif %}
-<span class="bold">(en chiffres)</span> {{ contrat.mntLoyer ? contrat.mntLoyer|number_format(0, ',', ' ') : '..............................' }} <span class="bold">FRANCS CFA</span> payable par mois et d'avance, au plus tard le {{ "%02d"|format(contrat.jourGenerationFacture|default(5)) }} du mois en cours, en espèces ou par chèque à l'ordre du BAILLEUR qui délivre immédiatement un reçu au locataire.</p>
+<span class="bold">(en chiffres)</span> <b>{{ contrat.mntLoyer ? contrat.mntLoyer|number_format(0, ',', ' ') : '..............................' }}</b> <span class="bold">FRANCS CFA</span> payable par mois et d'avance, au plus tard le <b>{{ "%02d"|format(contrat.jourGenerationFacture|default(5)) }}</b> du mois en cours, en espèces ou par chèque à l'ordre du BAILLEUR qui délivre immédiatement un reçu au locataire.</p>
 
 <p><span class="bold">ARTICLE 3 - REVISION DU LOYER</span><br>
 Le loyer pourra être révisé tous les <span class="bold">TROIS (3) ans</span>. A défaut d'accord entre les parties, le nouveau montant du loyer prendra en compte le taux de référence fixé par l'Etat ou par tout organisme qualifié ou autorisé. En cas d'augmentation, le taux ne pourra dépasser les <span class="bold">DIX POUR CENT (10%)</span>.</p>
 
 <p><span class="bold">ARTICLE 4 - DEPOT DE GARANTIE (ou CAUTION)</span><br>
-Pour la garantie de l'exécution des clauses du présent contrat, le PRENEUR a versé entre les mains du BAILLEUR, la somme de <span class="bold">(en lettres)</span> {{ montantCautionLettres|default('..........................................................................') }}<br>
+Pour la garantie de l'exécution des clauses du présent contrat, le PRENEUR a versé entre les mains du BAILLEUR, la somme de <span class="bold">(en lettres)</span> <b>{{ montantCautionLettres|default('..........................................................................') }}</b><br>
 {% if not montantCautionLettres %}........................................................................................................................................................................................................................<br>
-........................................................................................ {% endif %}<span class="bold">(en chiffres)</span> {{ contrat.mntCaution ? contrat.mntCaution|number_format(0, ',', ' ') : '..............................' }}<br>
-<span class="bold">FRANCS CFA</span> représentant <span class="bold">{{ contrat.nbMoisCaution|default('DEUX (2)') }} MOIS</span> de loyer en guise de dépôt de garantie (ou caution).</p>
+........................................................................................ {% endif %}<span class="bold">(en chiffres)</span> <b>{{ contrat.mntCaution ? contrat.mntCaution|number_format(0, ',', ' ') : '..............................' }}</b><br>
+<span class="bold">FRANCS CFA</span> représentant <span class="bold"><b>{{ contrat.nbMoisCaution|default('DEUX (2)') }}</b> MOIS</span> de loyer en guise de dépôt de garantie (ou caution).</p>
 
 <p>Laquelle somme ne sera pas productive d'intérêts durant toute la durée du bail.</p>
 
