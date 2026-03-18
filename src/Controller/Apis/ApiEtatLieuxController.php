@@ -19,12 +19,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 #[OA\Tag(name: 'EtatLieux')]
 class ApiEtatLieuxController extends ApiInterface
 {
-    private $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-    }
 
     #[Route('/contrat/{id}', methods: ['GET'])]
     #[OA\Get(
@@ -92,8 +86,8 @@ class ApiEtatLieuxController extends ApiInterface
             if (isset($data['pieces'])) $etatLieux->setPieces($data['pieces']);
             if (isset($data['observations'])) $etatLieux->setObservations($data['observations']);
 
-            $this->entityManager->persist($etatLieux);
-            $this->entityManager->flush();
+            $this->em->persist($etatLieux);
+            $this->em->flush();
 
             return $this->responseData($etatLieux, 'group1', ['message' => 'État des lieux enregistré avec succès']);
         } catch (\Exception $exception) {
@@ -125,7 +119,7 @@ class ApiEtatLieuxController extends ApiInterface
             if (isset($data['pieces'])) $etatLieux->setPieces($data['pieces']);
             if (isset($data['observations'])) $etatLieux->setObservations($data['observations']);
 
-            $this->entityManager->flush();
+            $this->em->flush();
 
             return $this->responseData($etatLieux, 'group1', ['message' => 'État des lieux modifié avec succès']);
         } catch (\Exception $exception) {
@@ -143,8 +137,8 @@ class ApiEtatLieuxController extends ApiInterface
     public function delete(EtatLieux $etatLieux): Response
     {
         try {
-            $this->entityManager->remove($etatLieux);
-            $this->entityManager->flush();
+            $this->em->remove($etatLieux);
+            $this->em->flush();
             return $this->response(['message' => 'Opération succès']);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
