@@ -177,7 +177,7 @@
 <p class="bold" style="text-decoration: underline; margin-bottom: 10px;">ENTRE</p>
 
 <div style="margin-bottom: 15px;">
-    <p><span class="bold" style="display: inline-block; width: 220px;">PROPRIETAIRE-BAILLEUR :</span> <b>{{ proprio.nom or proprio.prenoms ? (proprio.nom|default('')|upper ~ ' ' ~ proprio.prenoms|default('')|upper) : '...................................................................................................' }}</b></p>
+    <p><span class="bold" style="display: inline-block; width: 220px;">PROPRIETAIRE-BAILLEUR :</span> <b>{{ appartement.maisson.libMaison|default('SITE / MAISON')|upper }}</b></p>
     <p><span style="display: inline-block; width: 220px;">Référence identité (CNI - RC) N°</span> <b>{{ proprio.numCni|default('..............................................') }}</b> <span style="display: inline-block; margin-left: 20px;">établie le</span> <b>{{ proprio.dateCni ? proprio.dateCni|date('d/m/Y') : '.....................' }}</b></p>
     <p><span style="display: inline-block; width: 220px;">Domicilié à</span> <b>{{ proprio.addresse|default('........................................................................') }}</b> <span style="display: inline-block; margin-left: 20px;">Cel. :</span> <b>{{ proprio.contacts|default('.....................') }}</b></p>
     <p><span style="display: inline-block; width: 220px;">Email :</span> <b>{{ proprio.email|default('....................................................................................................................') }}</b></p>
