@@ -169,6 +169,14 @@ class ContratLocation
     #[ORM\JoinColumn(nullable: true)]
     private ?Fichier $fichierResiliation = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $signatureLocataire = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $signatureBailleur = null;
+
     #[ORM\Column(nullable: true, name: 'jourGenerationFacture')]
     #[Groups(['group1'])]
     private ?int $jourGenerationFacture = null;
@@ -603,6 +611,28 @@ class ContratLocation
     {
         $this->nbEcheance = $nbEcheance;
 
+        return $this;
+    }
+
+    public function getSignatureLocataire(): ?string
+    {
+        return $this->signatureLocataire;
+    }
+
+    public function setSignatureLocataire(?string $signatureLocataire): static
+    {
+        $this->signatureLocataire = $signatureLocataire;
+        return $this;
+    }
+
+    public function getSignatureBailleur(): ?string
+    {
+        return $this->signatureBailleur;
+    }
+
+    public function setSignatureBailleur(?string $signatureBailleur): static
+    {
+        $this->signatureBailleur = $signatureBailleur;
         return $this;
     }
 }

@@ -139,14 +139,18 @@
 </head>
 <body>
 
-{% macro checkbox_cell() %}
+{% macro checkbox_cell(val) %}
 <div style="text-align: center; width: 100%;">
     <div style="display: inline-block; width: 45%; text-align: center;">
-        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto;"></div>
+        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto; position: relative;">
+            {% if val == 1 %}<span style="position: absolute; top: -4px; left: 2px; font-size: 13px; font-weight: bold;">X</span>{% endif %}
+        </div>
         <div style="font-size:8px; margin-top:2px;">BON</div>
     </div>
     <div style="display: inline-block; width: 45%; text-align: center;">
-        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto;"></div>
+        <div style="width:12px; height:12px; border:1px solid #000; margin: 0 auto; position: relative;">
+            {% if val is not null and val == 0 %}<span style="position: absolute; top: -4px; left: 2px; font-size: 13px; font-weight: bold;">X</span>{% endif %}
+        </div>
         <div style="font-size:8px; margin-top:2px;">MAUVAIS</div>
     </div>
 </div>
@@ -412,20 +416,21 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
           'NOMBRE DE CLÉS'
         ] %}
         {% for row in table1_rows %}
+        {% set rId = loop.index0 %}
         <tr>
             <td>{{ loop.index }}</td>
             <td class="text-left font-bold">{{ row }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td></td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table1Data.states[rId][0] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table1Data.states[rId][1] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table1Data.states[rId][2] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table1Data.states[rId][3] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table1Data.states[rId][4] : null) }}</td>
+            <td>{{ etatLieux ? etatLieux.pieces.table1Data.obs[rId]|default('') : '' }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td colspan="8" style="text-align: left; font-weight: bold; padding: 10px;">
-                OBSERVATIONS GÉNÉRALES : <span style="float: right;">TOTAL :</span>
+                OBSERVATIONS GÉNÉRALES : <span style="font-weight: normal;">{{ etatLieux ? etatLieux.pieces.table1Data.obsGen|default('') : '' }}</span> <span style="float: right;">TOTAL :</span>
             </td>
         </tr>
     </tbody>
@@ -459,20 +464,21 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
           'NOMBRE DE CLÉS'
         ] %}
         {% for row in table2_rows %}
+        {% set rId = loop.index0 %}
         <tr>
             <td>{{ loop.index + 9 }}</td>
             <td class="text-left font-bold">{{ row }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td>{{ _self.checkbox_cell() }}</td>
-            <td></td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table2Data.states[rId][0] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table2Data.states[rId][1] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table2Data.states[rId][2] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table2Data.states[rId][3] : null) }}</td>
+            <td>{{ _self.checkbox_cell(etatLieux ? etatLieux.pieces.table2Data.states[rId][4] : null) }}</td>
+            <td>{{ etatLieux ? etatLieux.pieces.table2Data.obs[rId]|default('') : '' }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td colspan="8" style="text-align: left; font-weight: bold; padding: 10px;">
-                OBSERVATIONS GÉNÉRALES : <span style="float: right;">TOTAL :</span>
+                OBSERVATIONS GÉNÉRALES : <span style="font-weight: normal;">{{ etatLieux ? etatLieux.pieces.table2Data.obsGen|default('') : '' }}</span> <span style="float: right;">TOTAL :</span>
             </td>
         </tr>
     </tbody>
@@ -481,9 +487,23 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
 <div style="margin-top: 40px;">
     <table style="width: 100%; border: none;">
         <tr>
-            <td style="width: 33%; text-align: left; font-weight: bold; border: none;">BAILLEUR</td>
-            <td style="width: 33%; text-align: center; border: none;">Fait le ......................................</td>
-            <td style="width: 33%; text-align: right; font-weight: bold; border: none;">PRENEUR</td>
+            <td style="width: 33%; text-align: left; font-weight: bold; border: none; vertical-align: top;">
+                BAILLEUR<br>
+                {% if contrat.signatureBailleur %}
+                    <img src="{{ contrat.signatureBailleur }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Bailleur">
+                {% else %}
+                    <br><br><br>
+                {% endif %}
+            </td>
+            <td style="width: 33%; text-align: center; border: none; vertical-align: top;">Fait le ......................................</td>
+            <td style="width: 33%; text-align: right; font-weight: bold; border: none; vertical-align: top;">
+                PRENEUR<br>
+                {% if contrat.signatureLocataire %}
+                    <img src="{{ contrat.signatureLocataire }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Preneur">
+                {% else %}
+                    <br><br><br>
+                {% endif %}
+            </td>
         </tr>
     </table>
 </div>

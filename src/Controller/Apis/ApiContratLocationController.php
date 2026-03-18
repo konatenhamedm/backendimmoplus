@@ -231,6 +231,13 @@ class ApiContratLocationController extends ApiInterface
                 }
             }
 
+            if (isset($data['signatureLocataire'])) {
+                $contrat->setSignatureLocataire($data['signatureLocataire']);
+            }
+            if (isset($data['signatureBailleur'])) {
+                $contrat->setSignatureBailleur($data['signatureBailleur']);
+            }
+
             // Recalculate Total
             $caution = $contrat->getMntCaution() ?? 0;
             $avance = $contrat->getMntAvance() ?? 0;
@@ -417,7 +424,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Génère le PDF du bail d'habitation.",
         tags: ['ContratLocation']
     )]
-    public function imprimer(ContratLocation $contrat): Response
+    public function imprimer(ContratLocation $contrat, \App\Repository\EtatLieuxRepository $etatLieuxRepository): Response
     {
         try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
@@ -429,6 +436,8 @@ class ApiContratLocationController extends ApiInterface
                 $proprio = $appartement->getMaisson()->getProprio();
             }
 
+            $etatLieux = $etatLieuxRepository->findOneBy(['contratLocation' => $contrat]);
+
             $formatter = new \NumberFormatter('fr', \NumberFormatter::SPELLOUT);
             $montantLoyerLettres = strtoupper($formatter->format($contrat->getMntLoyer() ?? 0));
             $montantCautionLettres = strtoupper($formatter->format($contrat->getMntCaution() ?? 0));
@@ -438,6 +447,7 @@ class ApiContratLocationController extends ApiInterface
                 'appartement' => $appartement,
                 'locataire' => $locataire,
                 'proprio' => $proprio,
+                'etatLieux' => $etatLieux,
                 'montantLoyerLettres' => $montantLoyerLettres,
                 'montantCautionLettres' => $montantCautionLettres
             ]);

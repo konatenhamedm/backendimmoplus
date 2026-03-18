@@ -11,6 +11,9 @@
 		{
 			"name": "immoplus_front",
 			"path": "../../../immoplus_front"
+		},
+		{
+			"path": "../../../../ATELIYA/backoffice_frame"
 		}
 	],
 	"settings": {}
