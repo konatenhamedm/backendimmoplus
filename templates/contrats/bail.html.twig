@@ -495,7 +495,7 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
                     <br><br><br>
                 {% endif %}
             </td>
-            <td style="width: 33%; text-align: center; border: none; vertical-align: top;">Fait le ......................................</td>
+            <td style="width: 33%; text-align: center; border: none; vertical-align: top;">Fait le {{ contrat.dateSignature ? contrat.dateSignature|date('d/m/Y') : '......................................' }}</td>
             <td style="width: 33%; text-align: right; font-weight: bold; border: none; vertical-align: top;">
                 PRENEUR<br>
                 {% if contrat.signatureLocataire %}

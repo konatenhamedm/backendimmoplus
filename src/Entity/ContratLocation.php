@@ -177,6 +177,10 @@ class ContratLocation
     #[Groups(["group1"])]
     private ?string $signatureBailleur = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(["group1"])]
+    private ?\DateTimeInterface $dateSignature = null;
+
     #[ORM\Column(nullable: true, name: 'jourGenerationFacture')]
     #[Groups(['group1'])]
     private ?int $jourGenerationFacture = null;
@@ -633,6 +637,17 @@ class ContratLocation
     public function setSignatureBailleur(?string $signatureBailleur): static
     {
         $this->signatureBailleur = $signatureBailleur;
+        return $this;
+    }
+
+    public function getDateSignature(): ?\DateTimeInterface
+    {
+        return $this->dateSignature;
+    }
+
+    public function setDateSignature(?\DateTimeInterface $dateSignature): static
+    {
+        $this->dateSignature = $dateSignature;
         return $this;
     }
 }

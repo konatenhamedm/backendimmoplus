@@ -231,11 +231,17 @@ class ApiContratLocationController extends ApiInterface
                 }
             }
 
+            $signatureAdded = false;
             if (isset($data['signatureLocataire'])) {
                 $contrat->setSignatureLocataire($data['signatureLocataire']);
+                $signatureAdded = true;
             }
             if (isset($data['signatureBailleur'])) {
                 $contrat->setSignatureBailleur($data['signatureBailleur']);
+                $signatureAdded = true;
+            }
+            if ($signatureAdded && !$contrat->getDateSignature()) {
+                $contrat->setDateSignature(new \DateTime());
             }
 
             // Recalculate Total
