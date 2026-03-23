@@ -72,7 +72,7 @@ class AppFixtures extends Fixture
 
         // 1. Create Entreprise
         $entreprise = new Entreprise();
-        $entreprise->setDenomination('ImmoPlus Demo');
+        $entreprise->setDenomination('motiplus Demo');
         $entreprise->setEmail('contact@immoplus.demo');
         $entreprise->setContacts('0102030405');
         $entreprise->setCode('IMMO001');

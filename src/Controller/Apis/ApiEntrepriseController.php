@@ -3,13 +3,22 @@
 namespace App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
+use App\Entity\Abonnement;
 use App\Entity\Entreprise;
+use App\Entity\User;
 use App\Repository\EntrepriseRepository;
 use App\Repository\PaysRepository;
+use App\Entity\Employe;
+use App\Entity\Fonction;
+use App\Entity\Groupe;
+use App\Repository\FonctionRepository;
+use App\Repository\GroupeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Contrôleur pour la gestion des entreprises
@@ -136,6 +145,229 @@ class ApiEntrepriseController extends ApiInterface
             $repository->save($entreprise, true);
 
             return $this->responseData($entreprise, 'group1');
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/register', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/entreprise/register",
+        summary: "S'inscrire (Entreprise)",
+        description: "Enregistre une nouvelle entreprise (14 jours d'essai), avec accès FNE et compte admin.",
+        tags: ['Entreprise']
+    )]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "denomination", type: "string"),
+                new OA\Property(property: "pays_id", type: "integer"),
+                new OA\Property(property: "contacts", type: "string"),
+                new OA\Property(property: "sigle", type: "string"),
+                new OA\Property(property: "email", type: "string"),
+                new OA\Property(property: "fneLogin", type: "string"),
+                new OA\Property(property: "fnePassword", type: "string"),
+                new OA\Property(property: "admin_nom", type: "string"),
+                new OA\Property(property: "admin_prenoms", type: "string"),
+                new OA\Property(property: "admin_login", type: "string"),
+                new OA\Property(property: "admin_password", type: "string")
+            ]
+        )
+    )]
+    public function register(
+        Request $request, 
+       EntityManagerInterface $em,
+        UserPasswordHasherInterface $hasher,
+        PaysRepository $paysRepo,
+        FonctionRepository $fonctionRepo,
+        GroupeRepository $groupeRepo
+    ): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data || !isset($data['denomination']) || !isset($data['admin_login']) || !isset($data['admin_password']) || !isset($data['pays_id'])) {
+                return $this->errorResponse(null, "Données manquantes (denomination, pays_id, admin_login, admin_password requis)", 400);
+            }
+
+            $pays = $paysRepo->find($data['pays_id']);
+            if (!$pays) {
+                return $this->errorResponse(null, "Pays introuvable", 404);
+            }
+
+            // --- CREATION DE L'ENTREPRISE ---
+            $entreprise = new Entreprise();
+            $entreprise->setDenomination($data['denomination']);
+            $entreprise->setCode('ENT-' . strtoupper(substr(uniqid(), -6)));
+            $entreprise->setPays($pays);
+            
+            if (isset($data['contacts'])) $entreprise->setContacts($data['contacts']);
+            if (isset($data['sigle'])) $entreprise->setSigle($data['sigle']);
+            if (isset($data['email'])) $entreprise->setEmail($data['email']);
+            
+            // FNE
+            if (isset($data['fneLogin'])) $entreprise->setFneLogin($data['fneLogin']);
+            if (isset($data['fnePassword'])) $entreprise->setFnePassword($data['fnePassword']);
+
+            // Abonnement essai 14 jours (sauvegarde dans l'entité Entreprise par rétrocompatibilité)
+            $entreprise->setAbonnement('ESSAI');
+            $dateFin = new \DateTime();
+            $dateFin->modify('+14 days');
+            $entreprise->setDateFinAbonnement($dateFin);
+            $entreprise->setIsActive(true);
+            $entreprise->setDateCreation(new \DateTime());
+
+            $em->persist($entreprise);
+
+            // --- NOUVEAU SYSTEME D'ABONNEMENT ---
+            $abonnement = new Abonnement();
+            $abonnement->setEntreprise($entreprise);
+            $abonnement->setType('ESSAI');
+            $abonnement->setEtat('ACTIF');
+            $abonnement->setDateFin($dateFin);
+            $em->persist($abonnement);
+
+            // --- RECHERCHE / CREATION DE LA FONCTION & GROUPE ---
+            $fonction = $fonctionRepo->findOneBy(['code' => 'SADM']);
+            if (!$fonction) {
+                $fonction = new Fonction();
+                $fonction->setCode('SADM');
+                $fonction->setLibelle('Super Administrateur');
+                $fonction->setEntreprise($entreprise);
+                $em->persist($fonction);
+            }
+
+            $groupe = $groupeRepo->findOneBy(['code' => 'ADMIN']);
+            if (!$groupe) {
+                $groupe = new Groupe();
+                $groupe->setCode('ADMIN');
+                $groupe->setName('Administrateurs');
+                // The global logic holds if missing
+                $em->persist($groupe);
+            }
+
+            // --- CREATION DE L'EMPLOYE ---
+            $employe = new Employe();
+            $employe->setNom($data['admin_nom'] ?? 'Admin');
+            $employe->setPrenom($data['admin_prenoms'] ?? '');
+            $employe->setEntreprise($entreprise);
+            $employe->setFonction($fonction);
+            $em->persist($employe);
+
+            // --- CREATION USER ADMIN DE L'ENTREPRISE ---
+            $user = new User();
+            $user->setLogin($data['admin_login']);
+            $hashedPassword = $hasher->hashPassword($user, $data['admin_password']);
+            $user->setPassword($hashedPassword);
+            $user->setNom($data['admin_nom'] ?? 'Admin');
+            $user->setPrenoms($data['admin_prenoms'] ?? '');
+            $user->setRoles(['ROLE_ADMIN']);
+            $user->setEntreprise($entreprise);
+            $user->setEmploye($employe);
+            $user->setGroupe($groupe);
+            $user->setIsActive(true);
+
+            $em->persist($user);
+            $em->flush();
+
+            return $this->responseData([
+                'entreprise' => [
+                    'id' => $entreprise->getId(),
+                    'denomination' => $entreprise->getDenomination(),
+                    'dateFinAbonnement' => $entreprise->getDateFinAbonnement()->format('Y-m-d H:i:s')
+                ],
+                'admin_user' => [
+                    'id' => $user->getId(),
+                    'login' => $user->getLogin()
+                ]
+            ], 'group1', ['message' => 'Inscription réussie. Vous avez 14 jours d\'essai.']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/{id}/renew-subscription', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/entreprise/{id}/renew-subscription",
+        summary: "Renouveler l'abonnement de l'entreprise",
+        description: "Renouvelle l'abonnement pour une période en utilisant un module ou une durée (1_MOIS, 6_MOIS, 1_AN).",
+        tags: ['Entreprise']
+    )]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: "object",
+            properties: [
+                new OA\Property(property: "module_abonnement_id", type: "integer", description: "L'ID du module d'abonnement (optionnel)"),
+                new OA\Property(property: "duree", type: "string", description: "1_MOIS, 6_MOIS, 1_AN (utilisé si aucun module)")
+            ]
+        )
+    )]
+    public function renewSubscription(Request $request, Entreprise $entreprise, EntityManagerInterface $em, \App\Repository\ModuleAbonnementRepository $moduleRepo): Response
+    {
+        try {
+            if (!$entreprise) return $this->errorResponse(null, "Entreprise non trouvée", 404);
+
+            $data = json_decode($request->getContent(), true);
+            $moduleId = $data['module_abonnement_id'] ?? null;
+            $module = $moduleId ? $moduleRepo->find($moduleId) : null;
+
+            $currentDateFin = $entreprise->getDateFinAbonnement();
+            if (!$currentDateFin || $currentDateFin < new \DateTime()) {
+                $currentDateFin = new \DateTime(); // Repart d'aujourd'hui si expiré
+            } else {
+                $currentDateFin = \DateTime::createFromInterface($currentDateFin);
+            }
+
+            $abonnementMode = '';
+            $abonnement = new \App\Entity\Abonnement();
+            $abonnement->setEntreprise($entreprise);
+            $abonnement->setType('RENOUVELLEMENT');
+            $abonnement->setEtat('ACTIF');
+
+            // Nouveau système : basé sur le module d'abonnement s'il est fourni
+            if ($module) {
+                $dureeJours = ((int) $module->getDuree()) > 0 ? (int) $module->getDuree() : 30;
+                $currentDateFin->modify("+{$dureeJours} days");
+                $abonnementMode = $module->getCode() ?? 'MODULE';
+                $abonnement->setModuleAbonnement($module);
+            } else {
+                // Ancien système par défaut (si aucun module fourni)
+                $duree = $data['duree'] ?? '1_MOIS';
+                switch ($duree) {
+                    case '1_MOIS':
+                        $currentDateFin->modify('+1 month');
+                        $abonnementMode = 'MENSUEL';
+                        break;
+                    case '6_MOIS':
+                        $currentDateFin->modify('+6 months');
+                        $abonnementMode = 'SEMESTRIEL';
+                        break;
+                    case '1_AN':
+                        $currentDateFin->modify('+1 year');
+                        $abonnementMode = 'ANNUEL';
+                        break;
+                    default:
+                        return $this->errorResponse(null, "Durée invalide. Formats: 1_MOIS, 6_MOIS, ou 1_AN.", 400);
+                }
+            }
+
+            $entreprise->setDateFinAbonnement($currentDateFin);
+            $entreprise->setAbonnement($abonnementMode);
+            
+            $abonnement->setDateFin(clone $currentDateFin);
+            $em->persist($abonnement);
+            $em->persist($entreprise);
+            $em->flush();
+
+            return $this->responseData([
+                'message' => 'Abonnement renouvelé avec succès.',
+                'nouvelleDateFin' => $entreprise->getDateFinAbonnement()->format('Y-m-d H:i:s'),
+                'typeAbonnement' => $entreprise->getAbonnement()
+            ], 'group1');
+
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);

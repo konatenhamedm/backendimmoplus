@@ -119,6 +119,23 @@ class Entreprise
     #[Groups(["group1"])]
     private ?string $numero = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $fneLogin = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $fnePassword = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(["group1"])]
+    private ?\DateTimeInterface $dateFinAbonnement = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $abonnement = null;
+
+
     public function __construct()
     {
         $this->employes = new ArrayCollection();
@@ -538,6 +555,54 @@ class Entreprise
     public function setNumero(string $numero): static
     {
         $this->numero = $numero;
+        return $this;
+    }
+
+    public function getFneLogin(): ?string
+    {
+        return $this->fneLogin;
+    }
+
+    public function setFneLogin(?string $fneLogin): static
+    {
+        $this->fneLogin = $fneLogin;
+
+        return $this;
+    }
+
+    public function getFnePassword(): ?string
+    {
+        return $this->fnePassword;
+    }
+
+    public function setFnePassword(?string $fnePassword): static
+    {
+        $this->fnePassword = $fnePassword;
+
+        return $this;
+    }
+
+    public function getDateFinAbonnement(): ?\DateTimeInterface
+    {
+        return $this->dateFinAbonnement;
+    }
+
+    public function setDateFinAbonnement(?\DateTimeInterface $dateFinAbonnement): static
+    {
+        $this->dateFinAbonnement = $dateFinAbonnement;
+
+        return $this;
+    }
+
+    public function getAbonnement(): ?string
+    {
+        return $this->abonnement;
+    }
+
+    public function setAbonnement(?string $abonnement): static
+    {
+        $this->abonnement = $abonnement;
+
         return $this;
     }
 }

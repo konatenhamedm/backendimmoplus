@@ -83,6 +83,34 @@ class AuthController extends ApiInterface
             }
         }
 
+        // --- VERIFICATION D'ABONNEMENT ENTREPRISE ---
+        if ($user->getEntreprise() && !$user->getLocataire()) {
+            $entreprise = $user->getEntreprise();
+            
+            // On vérifie d'abord dans la table Abonnement si une entrée active existe
+            $latestAbonnement = $entityManager->getRepository(\App\Entity\Abonnement::class)->findOneBy(
+                ['entreprise' => $entreprise],
+                ['dateFin' => 'DESC']
+            );
+
+            $isValid = false;
+            if ($latestAbonnement) {
+                if ($latestAbonnement->getEtat() === 'ACTIF' && $latestAbonnement->getDateFin() >= new \DateTime()) {
+                    $isValid = true;
+                }
+            } else {
+                // Rétrocompatibilité (au cas où il n'y a pas d'enregistrement dans Abonnement)
+                if ($entreprise->getDateFinAbonnement() && $entreprise->getDateFinAbonnement() >= new \DateTime()) {
+                    $isValid = true;
+                }
+            }
+
+            if (!$isValid) {
+                return $this->json(['error' => 'L\'abonnement de votre entreprise a expiré. Veuillez le renouveler pour vous connecter.'], Response::HTTP_FORBIDDEN);
+            }
+        }
+
+
 
         // --- LOG DE CONNEXION ---
         $connectionLog = new ConnectionLog();

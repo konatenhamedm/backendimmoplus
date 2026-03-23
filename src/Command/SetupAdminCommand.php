@@ -46,7 +46,7 @@ class SetupAdminCommand extends Command
 
         // 2. Entreprise
         $entreprise = new Entreprise();
-        $entreprise->setDenomination("ImmoPlus SARL");
+        $entreprise->setDenomination("motiplus SARL");
         $entreprise->setCode("IP001");
         $entreprise->setSigle("IP");
         $entreprise->setAgrements("AGREMENT-001");
@@ -63,7 +63,7 @@ class SetupAdminCommand extends Command
         $entreprise->setPays($pays);
         $entreprise->setDateCreation(new \DateTime());
         $this->entityManager->persist($entreprise);
-        $io->info("Entreprise 'ImmoPlus SARL' créée.");
+        $io->info("Entreprise 'motiplus SARL' créée.");
 
         // 3. Fonction
         $fonction = new Fonction();

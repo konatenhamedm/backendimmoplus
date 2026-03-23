@@ -1,5 +1,5 @@
 -- =====================================================
--- Script d'initialisation COMPLET de la base de données ImmoPlus
+-- Script d'initialisation COMPLET de la base de données motiplus
 -- =====================================================
 -- Ce script vide la base de données et insère les données initiales
 -- Mot de passe admin: admin (hashé avec bcrypt)
@@ -250,7 +250,7 @@ INSERT INTO `_admin_param_motif` (`id`, `code`, `libelle`) VALUES
 -- 14. ENTREPRISE PAR DÉFAUT
 -- =====================================================
 INSERT INTO `_admin_param_entreprise` (`id`, `nom`, `sigle`, `email`, `telephone`, `adresse`, `logo`) VALUES
-(1, 'ImmoPlus', 'IP', 'contact@immoplus.ci', '+225 01 02 03 04 05', 'Abidjan, Cocody', '/logo.png');
+(1, 'motiplus', 'IP', 'contact@immoplus.ci', '+225 01 02 03 04 05', 'Abidjan, Cocody', '/logo.png');
 
 -- =====================================================
 -- 15. UTILISATEUR ADMINISTRATEUR

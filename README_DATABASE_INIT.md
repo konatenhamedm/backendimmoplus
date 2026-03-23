@@ -1,8 +1,8 @@
-# 🗄️ Guide d'Initialisation de la Base de Données ImmoPlus
+# 🗄️ Guide d'Initialisation de la Base de Données motiplus
 
 ## 📋 Vue d'ensemble
 
-Ce script SQL initialise complètement la base de données ImmoPlus avec:
+Ce script SQL initialise complètement la base de données motiplus avec:
 - Les permissions système
 - Un utilisateur administrateur (login: `admin`, mot de passe: `admin`)
 - Toutes les données de base nécessaires au fonctionnement de l'application

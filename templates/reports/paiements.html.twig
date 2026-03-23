@@ -118,11 +118,11 @@
 				{% if logo %}
 					<img src="{{ logo }}" alt="Logo">
 				{% else %}
-					<div style="font-size: 24px; font-weight: bold; color: #7C3AED;">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+					<div style="font-size: 24px; font-weight: bold; color: #7C3AED;">{{ entreprise.denomination|default('motiplus') }}</div>
 				{% endif %}
 			</div>
 			<div class="company-info">
-				<div class="company-name">{{ entreprise.denomination|default('ImmoPlus') }}</div>
+				<div class="company-name">{{ entreprise.denomination|default('motiplus') }}</div>
 				<div>{{ entreprise.adresse|default('') }}
 					{{ entreprise.ville|default('') }}</div>
 				<div>Tél:
@@ -136,7 +136,7 @@
 		</header>
 
 		<footer>
-			<div>Document généré par ImmoPlus System le
+			<div>Document généré par motiplus System le
 				{{ "now"|date("d/m/Y H:i") }}</div>
 			<div style="margin-top: 2px;">Page
 				<span class="pagenum"></span>

@@ -1,8 +1,8 @@
-# 📋 Structure du Menu ImmoPlus - Explication Détaillée
+# 📋 Structure du Menu motiplus - Explication Détaillée
 
 ## 🗂️ Tables de Gestion du Menu
 
-Le système de menu d'ImmoPlus utilise 3 tables principales:
+Le système de menu d'motiplus utilise 3 tables principales:
 
 ### 1. `_admin_param_groupe_module` (Groupes de Menu)
 **Rôle**: Définit les menus principaux (sections du menu latéral)

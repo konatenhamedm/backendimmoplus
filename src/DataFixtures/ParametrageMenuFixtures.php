@@ -213,7 +213,7 @@ class ParametrageMenuFixtures extends Fixture
 
         // 6. Create Users for each Group
         $entreprise = new Entreprise();
-        $entreprise->setDenomination('ImmoPlus');
+        $entreprise->setDenomination('motiplus');
         $entreprise->setNumero('ENT002');
         $entreprise->setCode('IMMO002');
         $entreprise->setContacts('00000000');
