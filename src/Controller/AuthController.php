@@ -84,7 +84,7 @@ class AuthController extends ApiInterface
         }
 
         // --- VERIFICATION D'ABONNEMENT ENTREPRISE ---
-        if ($user->getEntreprise() && !$user->getLocataire()) {
+    /*     if ($user->getEntreprise() && !$user->getLocataire()) {
             $entreprise = $user->getEntreprise();
             
             // On vérifie d'abord dans la table Abonnement si une entrée active existe
@@ -108,7 +108,7 @@ class AuthController extends ApiInterface
             if (!$isValid) {
                 return $this->json(['error' => 'L\'abonnement de votre entreprise a expiré. Veuillez le renouveler pour vous connecter.'], Response::HTTP_FORBIDDEN);
             }
-        }
+        } */
 
 
 
