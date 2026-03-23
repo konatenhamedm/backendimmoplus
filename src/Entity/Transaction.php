@@ -48,8 +48,16 @@ class Transaction
     private ?string $description = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Locataire $locataire = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Entreprise $entreprise = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?ModuleAbonnement $moduleAbonnement = null;
 
     #[ORM\ManyToOne(inversedBy: 'transactions')]
     private ?FactureLocation $factureLocation = null;
@@ -185,6 +193,30 @@ class Transaction
     public function setAgent(?User $agent): static
     {
         $this->agent = $agent;
+
+        return $this;
+    }
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
+    public function getModuleAbonnement(): ?ModuleAbonnement
+    {
+        return $this->moduleAbonnement;
+    }
+
+    public function setModuleAbonnement(?ModuleAbonnement $moduleAbonnement): static
+    {
+        $this->moduleAbonnement = $moduleAbonnement;
 
         return $this;
     }

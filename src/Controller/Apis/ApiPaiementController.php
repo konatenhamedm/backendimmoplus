@@ -113,6 +113,61 @@ class ApiPaiementController extends ApiInterface
         return $this->json($result);
     }
 
+    #[Route('/initie/paiement/abonnement/{id}', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/paiement/initie/paiement/abonnement/{id}",
+        summary: "Initier le paiement d'un abonnement",
+        tags: ['Paiement']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: "object",
+            required: ["email", "numero", "operateur", "module_abonnement_id"],
+            properties: [
+                new OA\Property(property: "email", type: "string", example: "client@email.com"),
+                new OA\Property(property: "numero", type: "string", example: "0708091011"),
+                new OA\Property(property: "operateur", type: "string", example: "MOBILE"),
+                new OA\Property(property: "module_abonnement_id", type: "integer", example: 1),
+                new OA\Property(property: "returnURL", type: "string", example: "https://myapp.com/success")
+            ]
+        )
+    )]
+    public function initiePaiementAbonnement(
+        Request $request,
+        \App\Entity\Entreprise $entreprise,
+        PaiementService $paiementService,
+        \App\Repository\ModuleAbonnementRepository $moduleRepo
+    ): Response {
+        $data = json_decode($request->getContent(), true);
+
+        if (!$entreprise) {
+             return $this->json(['message' => 'Entreprise non trouvée'], 404);
+        }
+
+        $moduleId = $data['module_abonnement_id'] ?? null;
+        if (!$moduleId) {
+             return $this->json(['message' => 'Module abonnement manquant'], 400);
+        }
+        $module = $moduleRepo->find($moduleId);
+        if (!$module) {
+             return $this->json(['message' => 'Module introuvable'], 404);
+        }
+
+        $user = $this->getUser();
+        if (!$user) {
+             return $this->json(['message' => 'Utilisateur non authentifié'], 401);
+        }
+
+        $result = $paiementService->traiterPaiementAbonnement($data, $user, $entreprise, $module);
+
+        if (isset($result['code']) && $result['code'] !== 200) {
+            return $this->json($result, 400);
+        }
+
+        return $this->json($result);
+    }
+
     #[Route('/mes-paiements', methods: ['GET'])]
     #[OA\Get(
         path: "/api/paiement/mes-paiements",

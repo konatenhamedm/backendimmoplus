@@ -140,6 +140,77 @@ class PaiementService
         }
     }
 
+    public function traiterPaiementAbonnement($data, User $user, \App\Entity\Entreprise $entreprise, \App\Entity\ModuleAbonnement $module): array
+    {
+        $transaction = new Transaction();
+
+        $amount = (int) $module->getMontant();
+        $transaction->setAmount((string)$amount); 
+        $transaction->setEntreprise($entreprise);
+        $transaction->setModuleAbonnement($module);
+        
+        $reference = $this->generateReference('SUB');
+        $transaction->setReference($reference);
+        $transaction->setType('abonnement'); 
+        $transaction->setMode($data['operateure'] ?? 'MOBILE_MONEY');
+        $transaction->setStatus('INITIE'); 
+        $transaction->setDescription('Paiement Abonnement ' . $module->getCode());
+        $transaction->setDate(new \DateTime());
+
+        $this->transactionRepository->save($transaction, true);
+
+        try {
+            $client = new \SoapClient($this->paiementUrl . '?wsdl', [
+                'cache_wsdl' => WSDL_CACHE_NONE,
+                'trace' => 1,
+                'exceptions' => true
+            ]);
+
+            $requestData = [
+                'merchantId'           => $this->merchantId,
+                'referenceNumber'      => $reference,
+                'amount'               => (int)$transaction->getAmount(),
+                'channel'              => $data['operateur'] ?? 'MOBILE',
+                'countryCurrencyCode'  => '952', // XOF
+                'currency'             => 'XOF',
+                'customerId'           => (string) $user->getId(),
+                'hashcode'             => 'hashcode', 
+                'customerFirstName'    => $user->getEmploye() ? $user->getEmploye()->getNom() : 'Entreprise',
+                'customerLastname'     => $user->getEmploye() ? $user->getEmploye()->getPrenom() : 'Admin',
+                'customerEmail'        => $data['email'] ?? $entreprise->getEmail() ?? 'client@email.com',
+                'customerPhoneNumber'  => $data['numero'] ?? $entreprise->getContacts() ?? '00000000',
+                'description'          => $transaction->getDescription(),
+                'notificationURL'      => $this->urlGenerator->generate('api_paiement_webhook', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'returnURL'            => $data['returnURL'] ?? 'immoplus://payment/success',
+                'returnContext'        => http_build_query([
+                    'transaction_id' => $transaction->getId(),
+                    'reference'   => $reference,
+                ]),
+            ];
+
+            $response = $client->initTransact($requestData);
+
+            $sessionId = $response->Sessionid ?? '';
+            $paiementProUrl = 'https://www.paiementpro.net/webservice/onlinepayment/processing_v2.php?sessionid=' . $sessionId;
+
+            return [
+                'code'        => 200,
+                'reference'   => $reference,
+                'transaction_id' => $sessionId,
+                'redirectUrl' => $paiementProUrl,
+                'sessionId'   => $sessionId
+            ];
+        } catch (\SoapFault $e) {
+            $transaction->setStatus('FAILED');
+            $this->transactionRepository->save($transaction, true);
+            return [ 'code' => 400, 'error' => $e->getMessage(), 'reference' => $reference ];
+        } catch (\Exception $e) {
+             $transaction->setStatus('FAILED');
+             $this->transactionRepository->save($transaction, true);
+             return [ 'code' => 500, 'error' => $e->getMessage(), 'reference' => $reference ];
+        }
+    }
+
     public function handleWebhook(array $data): array
     {
         // Data usually contains referenceNumber, responsecode, etc.
@@ -158,34 +229,63 @@ class PaiementService
         if (isset($data['responsecode']) && $data['responsecode'] == 0) {
             $transaction->setStatus('SUCCESS');
             
-            $facture = $transaction->getFactureLocation();
-            if ($facture) {
-                $amountPaid = (int)$transaction->getAmount();
-                $newSolde = $facture->getSoldeFactLoc() - $amountPaid;
-                if ($newSolde < 0) $newSolde = 0;
-                
-                $facture->setSoldeFactLoc($newSolde);
-                $facture->setStatut($newSolde <= 0 ? 'payer' : 'partiel');
-                
-                // Create Reglement
-                $reglement = new Reglements();
-                $reglement->setNumFact($facture);
-                $reglement->setMontantVerse($amountPaid);
-                $reglement->setDate(time());
-                $reglement->setNumchq($transaction->getReference());
-                
-                // Find or create TypeVersement 'MOBILE_MONEY'
-                $type = $this->typeVersementsRepository->findOneBy(['codTyp' => 'MOBILE']);
-                if (!$type) {
-                    $type = new TypeVersements();
-                    $type->setCodTyp('MOBILE');
-                    $type->setLibType('Mobile Money');
-                    $this->typeVersementsRepository->save($type, true);
+            if ($transaction->getType() === 'abonnement') {
+                $entreprise = $transaction->getEntreprise();
+                $module = $transaction->getModuleAbonnement();
+                if ($entreprise && $module) {
+                    $currentDateFin = $entreprise->getDateFinAbonnement();
+                    if (!$currentDateFin || $currentDateFin < new \DateTime()) {
+                        $currentDateFin = new \DateTime(); // Repart d'aujourd'hui
+                    }
+                    $newDateFin = $currentDateFin instanceof \DateTime ? clone $currentDateFin : \DateTime::createFromInterface($currentDateFin);
+
+                    $dureeJours = ((int) $module->getDuree()) > 0 ? (int) $module->getDuree() : 30;
+                    $newDateFin->modify("+{$dureeJours} days");
+                    
+                    $abonnement = new \App\Entity\Abonnement();
+                    $abonnement->setEntreprise($entreprise);
+                    $abonnement->setType('RENOUVELLEMENT');
+                    $abonnement->setEtat('ACTIF');
+                    $abonnement->setModuleAbonnement($module);
+                    $abonnement->setDateFin(clone $newDateFin);
+
+                    $entreprise->setDateFinAbonnement($newDateFin);
+                    $entreprise->setAbonnement($module->getCode());
+
+                    $this->em->persist($abonnement);
+                    $this->em->persist($entreprise);
+                    $this->em->flush();
                 }
-                $reglement->setTypeversement($type);
-                
-                $this->reglementsRepository->save($reglement, true);
-                $this->factureLocationRepository->save($facture, true);
+            } else {
+                $facture = $transaction->getFactureLocation();
+                if ($facture) {
+                    $amountPaid = (int)$transaction->getAmount();
+                    $newSolde = $facture->getSoldeFactLoc() - $amountPaid;
+                    if ($newSolde < 0) $newSolde = 0;
+                    
+                    $facture->setSoldeFactLoc($newSolde);
+                    $facture->setStatut($newSolde <= 0 ? 'payer' : 'partiel');
+                    
+                    // Create Reglement
+                    $reglement = new Reglements();
+                    $reglement->setNumFact($facture);
+                    $reglement->setMontantVerse($amountPaid);
+                    $reglement->setDate(time());
+                    $reglement->setNumchq($transaction->getReference());
+                    
+                    // Find or create TypeVersement 'MOBILE_MONEY'
+                    $type = $this->typeVersementsRepository->findOneBy(['codTyp' => 'MOBILE']);
+                    if (!$type) {
+                        $type = new TypeVersements();
+                        $type->setCodTyp('MOBILE');
+                        $type->setLibType('Mobile Money');
+                        $this->typeVersementsRepository->save($type, true);
+                    }
+                    $reglement->setTypeversement($type);
+                    
+                    $this->reglementsRepository->save($reglement, true);
+                    $this->factureLocationRepository->save($facture, true);
+                }
             }
             
             $this->transactionRepository->save($transaction, true);
