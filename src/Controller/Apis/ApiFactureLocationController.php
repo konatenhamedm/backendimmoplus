@@ -12,6 +12,7 @@ use App\Repository\FactureLocationRepository;
 use App\Repository\LocataireRepository;
 use App\Repository\TabMoisRepository;
 use App\Repository\TransactionRepository;
+use App\Service\FneGeneratorService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -355,6 +356,44 @@ class ApiFactureLocationController extends ApiInterface
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/{id}/generate-fne', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/facture-location/{id}/generate-fne",
+        summary: "Générer la Facture Normalisée (FNE)",
+        description: "Communique avec l'API e-impots pour certifier la facture.",
+        tags: ['FactureLocation']
+    )]
+    public function generateFNE(
+        FactureLocation $facture,
+        FneGeneratorService $fneService,
+        FactureLocationRepository $repository
+    ): Response {
+        try {
+            if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
+            if ($facture->getFneUid()) {
+                return $this->errorResponse(null, "Cette facture a déjà été normalisée.", 400);
+            }
+
+            // Génération
+            $result = $fneService->generateFneForFacture($facture);
+            
+            // Mise à jour de la facture
+            $facture->setFneUid($result['uid'] ?? null);
+            $facture->setFneQrCode($result['qr_code'] ?? null);
+            $facture->setFneStatus($result['status'] ?? null);
+
+            $repository->save($facture, true);
+
+            return $this->responseData([
+                'facture' => $facture,
+                'fne_details' => $result
+            ], 'group1', ['message' => 'Facture normalisée avec succès.']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => "Erreur de normalisation : " . $exception->getMessage()]);
         }
     }
 }

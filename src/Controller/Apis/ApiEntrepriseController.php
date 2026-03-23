@@ -446,6 +446,8 @@ class ApiEntrepriseController extends ApiInterface
             if (isset($data['directeur'])) $entreprise->setDirecteur($data['directeur']);
             if (isset($data['ville'])) $entreprise->setVille($data['ville']);
             if (isset($data['numero'])) $entreprise->setNumero($data['numero']);
+            if (isset($data['fneLogin'])) $entreprise->setFneLogin($data['fneLogin']);
+            if (isset($data['fnePassword'])) $entreprise->setFnePassword($data['fnePassword']);
             if (isset($data['isActive'])) $entreprise->setIsActive(filter_var($data['isActive'], FILTER_VALIDATE_BOOLEAN));
 
             if (isset($data['pays_id'])) {

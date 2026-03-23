@@ -7,9 +7,6 @@
 		{
 			"name": "immoplus_front",
 			"path": "../../../immoplus_front"
-		},
-		{
-			"path": "../../../../ATELIYA/couture_apps"
 		}
 	],
 	"settings": {}

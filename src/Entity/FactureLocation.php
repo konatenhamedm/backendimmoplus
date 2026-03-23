@@ -91,6 +91,18 @@ class FactureLocation
     #[Groups(['group1'])]
     private ?string $encaisse = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $fneUid = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $fneQrCode = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $fneStatus = null;
+
     public function __construct()
     {
         $this->reglements = new ArrayCollection();
@@ -318,6 +330,42 @@ class FactureLocation
     public function setEntreprise(?Entreprise $entreprise): static
     {
         $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
+    public function getFneUid(): ?string
+    {
+        return $this->fneUid;
+    }
+
+    public function setFneUid(?string $fneUid): static
+    {
+        $this->fneUid = $fneUid;
+
+        return $this;
+    }
+
+    public function getFneQrCode(): ?string
+    {
+        return $this->fneQrCode;
+    }
+
+    public function setFneQrCode(?string $fneQrCode): static
+    {
+        $this->fneQrCode = $fneQrCode;
+
+        return $this;
+    }
+
+    public function getFneStatus(): ?string
+    {
+        return $this->fneStatus;
+    }
+
+    public function setFneStatus(?string $fneStatus): static
+    {
+        $this->fneStatus = $fneStatus;
 
         return $this;
     }
