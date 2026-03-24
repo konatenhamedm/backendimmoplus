@@ -37,7 +37,19 @@ class ApiVersmtProprioController extends ApiInterface
     public function index(Request $request, VersmtProprioRepository $repository): Response
     {
         try {
-            $versements = $repository->findBy([], ['id' => 'DESC']);
+            $agenceId = $request->query->get('agence_id');
+            
+            $qb = $repository->createQueryBuilder('v')
+                ->orderBy('v.id', 'DESC');
+                
+            if ($agenceId && $agenceId !== 'null' && $agenceId !== 'undefined') {
+                $qb->join('v.proprio', 'p')
+                   ->andWhere('p.agence = :agenceId')
+                   ->setParameter('agenceId', $agenceId);
+            }
+            
+            $versements = $qb->getQuery()->getResult();
+            
             return $this->responseData($versements, 'group1');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
