@@ -78,10 +78,20 @@ class ApiDashboardController extends AbstractController
             $month     = $request->query->get('month');
             $semester  = $request->query->get('semester');
             $year      = $request->query->get('year') ?: date('Y');
+            
+            // X-Agence-Id context
+            $headerAgenceId = $request->headers->get('X-Agence-Id');
+            if ($headerAgenceId === 'null' || $headerAgenceId === 'undefined') {
+                $headerAgenceId = null;
+            }
+            $agenceId = $headerAgenceId ? (int) $headerAgenceId : ($user->getAgence() ? $user->getAgence()->getId() : null);
 
             $criteria = [];
             if ($entreprise) {
                 $criteria['entreprise'] = $entreprise;
+            }
+            if ($agenceId) {
+                $criteria['agence'] = $agenceId;
             }
 
             // ── Period boundaries (used for "new" counts) ──────────────────────
@@ -94,57 +104,71 @@ class ApiDashboardController extends AbstractController
             $totalContracts = $this->em->getRepository(ContratLocation::class)->count($criteria);
 
             // Active / resiliated contracts
-            $activeContracts = (int) $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
+            $qbActiveCt = $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
                 ->select('COUNT(c.id)')
-                ->where('c.etat = 1')
-                ->andWhere($entreprise ? 'c.entreprise = :ent' : '1=1')
-                ->setParameter('ent', $entreprise ?: 0)
-                ->getQuery()->getSingleScalarResult();
+                ->where('c.etat = 1');
+            if ($entreprise) {
+                $qbActiveCt->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qbActiveCt->andWhere('c.agence = :ag')->setParameter('ag', $agenceId);
+            }
+            $activeContracts = (int) $qbActiveCt->getQuery()->getSingleScalarResult();
 
             $resiliatedContracts = $totalContracts - $activeContracts;
 
             // New contracts in period
-            $newContractsPeriod = (int) $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
+            $qbNewCt = $this->em->getRepository(ContratLocation::class)->createQueryBuilder('c')
                 ->select('COUNT(c.id)')
                 ->where('c.createdAt >= :start AND c.createdAt <= :end')
                 ->setParameter('start', $periodStart)
-                ->setParameter('end', $periodEnd)
-                ->andWhere($entreprise ? 'c.entreprise = :ent' : '1=1')
-                ->setParameter('ent', $entreprise ?: 0)
-                ->getQuery()->getSingleScalarResult();
+                ->setParameter('end', $periodEnd);
+            if ($entreprise) {
+                $qbNewCt->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qbNewCt->andWhere('c.agence = :ag')->setParameter('ag', $agenceId);
+            }
+            $newContractsPeriod = (int) $qbNewCt->getQuery()->getSingleScalarResult();
 
             // New tenants in period
-            $newTenantsPeriod = (int) $this->em->getRepository(Locataire::class)->createQueryBuilder('l')
+            $qbNewT = $this->em->getRepository(Locataire::class)->createQueryBuilder('l')
                 ->select('COUNT(l.id)')
                 ->where('l.createdAt >= :start AND l.createdAt <= :end')
                 ->setParameter('start', $periodStart)
-                ->setParameter('end', $periodEnd)
-                ->andWhere($entreprise ? 'l.entreprise = :ent' : '1=1')
-                ->setParameter('ent', $entreprise ?: 0)
-                ->getQuery()->getSingleScalarResult();
+                ->setParameter('end', $periodEnd);
+            if ($entreprise) {
+                $qbNewT->andWhere('l.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qbNewT->andWhere('l.agence = :ag')->setParameter('ag', $agenceId);
+            }
+            $newTenantsPeriod = (int) $qbNewT->getQuery()->getSingleScalarResult();
 
             // === 2. Properties & Occupation ====================================
+            $qbMaisons = $this->em->getRepository(Maison::class)->createQueryBuilder('m')
+                ->select('COUNT(m.id)')
+                ->join('m.proprio', 'p');
             if ($entreprise) {
-                $totalMaisons = (int) $this->em->getRepository(Maison::class)->createQueryBuilder('m')
-                    ->select('COUNT(m.id)')
-                    ->join('m.proprio', 'p')
-                    ->where('p.entreprise = :ent')
-                    ->setParameter('ent', $entreprise)
-                    ->getQuery()->getSingleScalarResult();
-
-                $appartQb = $this->em->getRepository(Appartement::class)->createQueryBuilder('a')
-                    ->join('a.maisson', 'm')
-                    ->join('m.proprio', 'p')
-                    ->where('p.entreprise = :ent')
-                    ->setParameter('ent', $entreprise);
-
-                $totalAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
-                $occupiedAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->andWhere('a.oqp = 1')->getQuery()->getSingleScalarResult();
-            } else {
-                $totalMaisons     = $this->em->getRepository(Maison::class)->count([]);
-                $totalAppartements = $this->em->getRepository(Appartement::class)->count([]);
-                $occupiedAppartements  = $this->em->getRepository(Appartement::class)->count(['oqp' => 1]);
+                $qbMaisons->andWhere('p.entreprise = :ent')->setParameter('ent', $entreprise);
             }
+            if ($agenceId) {
+                $qbMaisons->andWhere('m.agence = :ag')->setParameter('ag', $agenceId);
+            }
+            $totalMaisons = (int) $qbMaisons->getQuery()->getSingleScalarResult();
+
+            $appartQb = $this->em->getRepository(Appartement::class)->createQueryBuilder('a')
+                ->join('a.maisson', 'm')
+                ->join('m.proprio', 'p');
+            if ($entreprise) {
+                $appartQb->andWhere('p.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $appartQb->andWhere('a.agence = :ag')->setParameter('ag', $agenceId);
+            }
+
+            $totalAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
+            $occupiedAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->andWhere('a.oqp = 1')->getQuery()->getSingleScalarResult();
 
             $freeAppartements  = $totalAppartements - $occupiedAppartements;
             $occupancyRate = $totalAppartements > 0
@@ -155,6 +179,9 @@ class ApiDashboardController extends AbstractController
             $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f');
             if ($entreprise) {
                 $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qb->andWhere('f.agence = :ag')->setParameter('ag', $agenceId);
             }
 
             // Apply time filter
@@ -202,10 +229,10 @@ class ApiDashboardController extends AbstractController
             }
 
             // === 4. Recent Activity ============================================
-            $recentActivity = $this->getRecentActivity($entreprise, 8);
+            $recentActivity = $this->getRecentActivity($entreprise, $agenceId, 8);
 
             // === 5. Monthly chart =============================================
-            $chartData = $this->getMonthlyDistribution($entreprise, $year);
+            $chartData = $this->getMonthlyDistribution($entreprise, $agenceId, $year);
 
             // === 6. Payment collection rate (for current period) ===============
             $totalBilled  = $totalRevenue + $totalOutstanding;
@@ -273,7 +300,7 @@ class ApiDashboardController extends AbstractController
     }
 
     // ── Helper: recent activity feed ───────────────────────────────────────────
-    private function getRecentActivity($entreprise, int $limit = 8): array
+    private function getRecentActivity($entreprise, $agenceId, int $limit = 8): array
     {
         $activity = [];
 
@@ -283,6 +310,9 @@ class ApiDashboardController extends AbstractController
             ->setMaxResults($limit);
         if ($entreprise) {
             $qbC->andWhere('c.entreprise = :ent')->setParameter('ent', $entreprise);
+        }
+        if ($agenceId) {
+            $qbC->andWhere('c.agence = :ag')->setParameter('ag', $agenceId);
         }
         foreach ($qbC->getQuery()->getResult() as $contrat) {
             /** @var ContratLocation $contrat */
@@ -324,7 +354,7 @@ class ApiDashboardController extends AbstractController
     }
 
     // ── Helper: monthly revenue distribution ──────────────────────────────────
-    private function getMonthlyDistribution($entreprise, $year): array
+    private function getMonthlyDistribution($entreprise, $agenceId, $year): array
     {
         $start = new DateTime($year . '-01-01 00:00:00');
         $end   = new DateTime($year . '-12-31 23:59:59');
@@ -338,6 +368,9 @@ class ApiDashboardController extends AbstractController
 
         if ($entreprise) {
             $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
+        }
+        if ($agenceId) {
+            $qb->andWhere('f.agence = :ag')->setParameter('ag', $agenceId);
         }
 
         $results = $qb->getQuery()->getResult();
