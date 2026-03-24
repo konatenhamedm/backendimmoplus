@@ -567,4 +567,63 @@ class ApiDashboardController extends AbstractController
             return $this->json(['message' => 'Erreur: ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/platform', name: 'api_dashboard_platform', methods: ['GET'])]
+    #[OA\Get(summary: "Statistiques globales plateformes pour SADM", tags: ['Dashboard'])]
+    public function getPlatformStats(Request $request): JsonResponse
+    {
+        try {
+            $user = $this->security->getUser();
+            if (!$user) {
+                return $this->json(['message' => 'Non authentifié'], 401);
+            }
+
+            // Only SADM should access this theoretically, but let's just return the global stats
+            $conn = $this->em->getConnection();
+
+            // Total Entreprises
+            $totalEntreprises = (int) $conn->fetchOne('SELECT COUNT(id) FROM _admin_param_entreprise');
+
+            // Total Agences
+            $totalAgences = (int) $conn->fetchOne('SELECT COUNT(id) FROM _admin_param_agence');
+
+            // Total Utilisateurs
+            $totalUsers = (int) $conn->fetchOne('SELECT COUNT(id) FROM users WHERE is_active = 1');
+
+            // Total Maisons (Sites)
+            $totalMaisons = (int) $conn->fetchOne('SELECT COUNT(id) FROM parametre_maison');
+
+            // Total Appartements
+            $totalAppartements = (int) $conn->fetchOne('SELECT COUNT(id) FROM parametre_appartement');
+
+            // Total Locataires
+            $totalLocataires = (int) $conn->fetchOne('SELECT COUNT(id) FROM locataire');
+
+            // Total Propriétaires
+            $totalProprietaires = (int) $conn->fetchOne('SELECT COUNT(id) FROM proprio');
+
+            // Contrats actifs
+            $totalContratsActifs = (int) $conn->fetchOne('SELECT COUNT(id) FROM loc_contrat_location WHERE etat = 1');
+
+            // Chiffre d'affaire global estimé (Loyer mensuel * Contrats Actifs) - Simplification
+            $totalLoyerMensuel = (float) $conn->fetchOne('SELECT SUM(mnt_loyer) FROM loc_contrat_location WHERE etat = 1');
+
+            return $this->json([
+                'overview' => [
+                    'totalEntreprises' => $totalEntreprises,
+                    'totalAgences' => $totalAgences,
+                    'totalUsers' => $totalUsers,
+                    'totalMaisons' => $totalMaisons,
+                    'totalAppartements' => $totalAppartements,
+                    'totalLocataires' => $totalLocataires,
+                    'totalProprietaires' => $totalProprietaires,
+                    'totalContratsActifs' => $totalContratsActifs,
+                    'chiffreAffaireMensuelGbl' => $totalLoyerMensuel,
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            return $this->json(['message' => 'Erreur: ' . $e->getMessage()], 500);
+        }
+    }
 }
