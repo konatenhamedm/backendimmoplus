@@ -157,6 +157,12 @@ class Proprio
     #[Groups(['group1'])]
     private Collection $chargeProprios;
 
+    
+    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function __construct()
     {
         $this->proprioMaisons = new ArrayCollection();
@@ -687,4 +693,18 @@ class Proprio
 
         return $encaisser - $commAmount - $charges - $totalDejaPaye;
     }
+
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
+
+        return $this;
+    }
+
 }

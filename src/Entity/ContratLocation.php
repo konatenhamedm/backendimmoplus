@@ -185,6 +185,12 @@ class ContratLocation
     #[Groups(['group1'])]
     private ?int $jourGenerationFacture = null;
 
+    
+    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function __construct()
     {
         $this->facturelocs = new ArrayCollection();
@@ -650,4 +656,18 @@ class ContratLocation
         $this->dateSignature = $dateSignature;
         return $this;
     }
+
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
+
+        return $this;
+    }
+
 }

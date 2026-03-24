@@ -36,6 +36,12 @@ class Depenses
     #[ORM\OneToMany(mappedBy: 'depenses', targetEntity: LigneDepense::class)]
     private Collection $ligneDepenses;
 
+    
+    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function __construct()
     {
         $this->ligneDepenses = new ArrayCollection();
@@ -135,4 +141,18 @@ class Depenses
 
         return $this;
     }
+
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
+
+        return $this;
+    }
+
 }

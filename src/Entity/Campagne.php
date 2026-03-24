@@ -57,6 +57,12 @@ class Campagne
     #[ORM\OneToMany(mappedBy: 'campagne', targetEntity: CampagneContrat::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $campagneContrats;
 
+    
+    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function __construct()
     {
         $this->facturelocs = new ArrayCollection();
@@ -265,4 +271,18 @@ class Campagne
 
         return $somme;
     }
+
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
+
+        return $this;
+    }
+
 }

@@ -58,6 +58,12 @@ class Employe
     private ?Service $service = null;
 
     // ... (rest of the fields)
+    
+    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function getUser(): ?User
     {
         return $this->user;
@@ -276,6 +282,20 @@ class Employe
     public function setService(?Service $service): self
     {
         $this->service = $service;
+
+        return $this;
+    }
+
+
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
 
         return $this;
     }
