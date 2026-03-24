@@ -80,7 +80,7 @@ class ApiDashboardController extends AbstractController
             $year      = $request->query->get('year') ?: date('Y');
             
             // X-Agence-Id context
-            $headerAgenceId = $request->headers->get('X-Agence-Id');
+            $headerAgenceId = $request->query->get('agence_id');
             if ($headerAgenceId === 'null' || $headerAgenceId === 'undefined') {
                 $headerAgenceId = null;
             }

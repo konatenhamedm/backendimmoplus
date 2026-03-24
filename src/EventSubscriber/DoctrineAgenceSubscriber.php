@@ -34,7 +34,22 @@ class DoctrineAgenceSubscriber
                 $agenceId = null;
 
                 if ($request) {
-                    $headerId = $request->headers->get('X-Agence-Id');
+                    // Chercher dans l'URL (?agence_id=X)
+                    $headerId = $request->query->get('agence_id');
+                    
+                    // Si absent, chercher dans le corps JSON de la requête (utile pour POST)
+                    if (!$headerId) {
+                        $content = json_decode($request->getContent(), true);
+                        if (is_array($content) && isset($content['agence_id'])) {
+                            $headerId = $content['agence_id'];
+                        }
+                    }
+
+                    // Fallback sur le request->request (formulaires x-www-form-urlencoded)
+                    if (!$headerId) {
+                        $headerId = $request->request->get('agence_id');
+                    }
+                    
                     if ($headerId && $headerId !== 'null' && $headerId !== 'undefined') {
                         $agenceId = (int) $headerId;
                     }

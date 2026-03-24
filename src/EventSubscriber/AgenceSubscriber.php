@@ -36,7 +36,8 @@ class AgenceSubscriber implements EventSubscriberInterface
         }
 
         $request = $event->getRequest();
-        $agenceId = $request->headers->get('X-Agence-Id');
+        // Lire l'ID de l'agence depuis les paramètres de l'URL (?agence_id=X)
+        $agenceId = $request->query->get('agence_id');
         
         // Also support agence selection fallback from connected user if applicable
         if (!$agenceId && $this->security->getUser() && method_exists($this->security->getUser(), 'getAgence') && $this->security->getUser()->getAgence()) {
