@@ -182,7 +182,8 @@ class ApiEntrepriseController extends ApiInterface
         UserPasswordHasherInterface $hasher,
         PaysRepository $paysRepo,
         FonctionRepository $fonctionRepo,
-        GroupeRepository $groupeRepo
+        GroupeRepository $groupeRepo,
+        \App\Repository\CiviliteRepository $civiliteRepo
     ): Response
     {
         try {
@@ -247,6 +248,15 @@ class ApiEntrepriseController extends ApiInterface
                 // The global logic holds if missing
                 $em->persist($groupe);
             }
+            
+            // --- RECHERCHE CIVILITE PAR DEFAUT ---
+            $civilite = $civiliteRepo->findOneBy([]);
+            if (!$civilite) {
+                $civilite = new \App\Entity\Civilite();
+                $civilite->setCode('M.');
+                $civilite->setLibelle('Monsieur');
+                $em->persist($civilite);
+            }
 
             // --- CREATION DE L'EMPLOYE ---
             $employe = new Employe();
@@ -254,6 +264,13 @@ class ApiEntrepriseController extends ApiInterface
             $employe->setPrenom($data['admin_prenoms'] ?? '');
             $employe->setEntreprise($entreprise);
             $employe->setFonction($fonction);
+            $employe->setCivilite($civilite);
+            $employe->setContact($data['contacts'] ?? 'Non renseigné');
+            $employe->setAdresseMail($data['email'] ?? 'admin@entreprise.com');
+            $employe->setNumPiece('Non défini');
+            $employe->setResidence('Non défini');
+            $employe->setMatricule('MAT-'.strtoupper(substr(uniqid(), -6)));
+            
             $em->persist($employe);
 
             // --- CREATION USER ADMIN DE L'ENTREPRISE ---
