@@ -23,6 +23,22 @@ class TypeMaison
     #[Groups(['group1'])]
     private ?string $libType = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(['group1'])]
+    private ?Entreprise $entreprise = null;
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
     #[ORM\OneToMany(mappedBy: 'typeMaison', targetEntity: Maison::class)]
     private Collection $typeMaisonMaisons;
 

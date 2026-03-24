@@ -39,7 +39,14 @@ class TypeMaisonRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    public function findAllByEntreprise($entreprise)
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getResult();
+    }
 //     * @return Typemaison[] Returns an array of Typemaison objects
 //     */
 //    public function findByExampleField($value): array

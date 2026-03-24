@@ -27,7 +27,12 @@ class ApiTypeMaisonController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            $types = $repository->findAll();
+            
+            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+                $types = $repository->findAllByEntreprise($this->getUser()->getEntreprise());
+            } else {
+                $types = $repository->findAll();
+            }
 
             if ($withPagination == "true") {
                 $types = $this->paginationService->paginate($types);
@@ -64,6 +69,10 @@ class ApiTypeMaisonController extends ApiInterface
             $typeMaison = new TypeMaison();
             
             if (isset($data['libType'])) $typeMaison->setLibType($data['libType']);
+            
+            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+                $typeMaison->setEntreprise($this->getUser()->getEntreprise());
+            }
 
             $repository->save($typeMaison, true);
 

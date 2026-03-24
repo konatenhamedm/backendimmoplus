@@ -24,6 +24,22 @@ class Motif
     #[Groups(['group1'])]
     private ?string $libMotif = null;
 
+    #[ORM\ManyToOne]
+    #[Groups(['group1'])]
+    private ?Entreprise $entreprise = null;
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
     #[ORM\OneToMany(mappedBy: 'motif', targetEntity: FinContrat::class)]
     private Collection $fincontrats;
 

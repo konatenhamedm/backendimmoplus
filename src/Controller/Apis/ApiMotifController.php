@@ -27,7 +27,12 @@ class ApiMotifController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            $motifs = $repository->findAll();
+            
+            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+                $motifs = $repository->findAllByEntreprise($this->getUser()->getEntreprise());
+            } else {
+                $motifs = $repository->findAll();
+            }
 
             if ($withPagination == "true") {
                 $motifs = $this->paginationService->paginate($motifs);
@@ -64,6 +69,10 @@ class ApiMotifController extends ApiInterface
             $motif = new Motif();
             
             if (isset($data['libMotif'])) $motif->setLibMotif($data['libMotif']);
+            
+            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+                $motif->setEntreprise($this->getUser()->getEntreprise());
+            }
 
             $repository->save($motif, true);
 

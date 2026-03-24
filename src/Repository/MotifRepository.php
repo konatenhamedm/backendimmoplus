@@ -39,7 +39,14 @@ class MotifRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
+    public function findAllByEntreprise($entreprise)
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getResult();
+    }
 //     * @return Motif[] Returns an array of Motif objects
 //     */
 //    public function findByExampleField($value): array
