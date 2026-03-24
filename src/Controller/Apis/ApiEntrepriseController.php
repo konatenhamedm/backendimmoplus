@@ -9,9 +9,7 @@ use App\Entity\User;
 use App\Repository\EntrepriseRepository;
 use App\Repository\PaysRepository;
 use App\Entity\Employe;
-use App\Entity\Fonction;
 use App\Entity\Groupe;
-use App\Repository\FonctionRepository;
 use App\Repository\GroupeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -181,7 +179,6 @@ class ApiEntrepriseController extends ApiInterface
        EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher,
         PaysRepository $paysRepo,
-        FonctionRepository $fonctionRepo,
         GroupeRepository $groupeRepo,
         \App\Repository\CiviliteRepository $civiliteRepo
     ): Response
@@ -230,16 +227,7 @@ class ApiEntrepriseController extends ApiInterface
             $abonnement->setDateFin($dateFin);
             $em->persist($abonnement);
 
-            // --- RECHERCHE / CREATION DE LA FONCTION & GROUPE ---
-            $fonction = $fonctionRepo->findOneBy(['code' => 'SADM']);
-            if (!$fonction) {
-                $fonction = new Fonction();
-                $fonction->setCode('SADM');
-                $fonction->setLibelle('Super Administrateur');
-                $fonction->setEntreprise($entreprise);
-                $em->persist($fonction);
-            }
-
+            // --- RECHERCHE / CREATION DU GROUPE ---
             $groupe = $groupeRepo->findOneBy(['code' => 'ADMIN']);
             if (!$groupe) {
                 $groupe = new Groupe();
@@ -263,7 +251,7 @@ class ApiEntrepriseController extends ApiInterface
             $employe->setNom($data['admin_nom'] ?? 'Admin');
             $employe->setPrenom($data['admin_prenoms'] ?? '');
             $employe->setEntreprise($entreprise);
-            $employe->setFonction($fonction);
+            $employe->setFonction('Super Administrateur');
             $employe->setCivilite($civilite);
             $employe->setContact($data['contacts'] ?? 'Non renseigné');
             $employe->setAdresseMail($data['email'] ?? 'admin@entreprise.com');

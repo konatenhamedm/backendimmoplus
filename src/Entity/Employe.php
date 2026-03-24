@@ -31,10 +31,9 @@ class Employe
     #[Groups(['group1'])]
     private ?string $prenom = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group1'])]
-    private ?Fonction $fonction = null;
+    private ?string $fonction = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -144,12 +143,12 @@ class Employe
         return $this;
     }
 
-    public function getFonction(): ?Fonction
+    public function getFonction(): ?string
     {
         return $this->fonction;
     }
 
-    public function setFonction(?Fonction $fonction): self
+    public function setFonction(?string $fonction): self
     {
         $this->fonction = $fonction;
 

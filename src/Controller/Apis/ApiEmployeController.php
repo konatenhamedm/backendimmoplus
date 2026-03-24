@@ -94,7 +94,7 @@ class ApiEmployeController extends ApiInterface
         description: "Ajoute un nouvel employé.",
         tags: ['Employe']
     )]
-    public function create(Request $request, EmployeRepository $repository, FonctionRepository $fonctionRepository, CiviliteRepository $civiliteRepository): Response
+    public function create(Request $request, EmployeRepository $repository, CiviliteRepository $civiliteRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -113,9 +113,8 @@ class ApiEmployeController extends ApiInterface
             if (isset($data['contacts'])) $employe->setContacts($data['contacts']); // Note: Employe entity has both contact and contacts
             if (isset($data['residence'])) $employe->setResidence($data['residence']);
 
-            if (isset($data['fonction_id'])) {
-                $fonction = $fonctionRepository->find($data['fonction_id']);
-                if ($fonction) $employe->setFonction($fonction);
+            if (isset($data['fonction'])) {
+                $employe->setFonction($data['fonction']);
             }
             if (isset($data['civilite_id'])) {
                 $civilite = $civiliteRepository->find($data['civilite_id']);
@@ -154,7 +153,7 @@ class ApiEmployeController extends ApiInterface
         description: "Met à jour un employé existant.",
         tags: ['Employe']
     )]
-    public function update(Request $request, Employe $employe, EmployeRepository $repository, FonctionRepository $fonctionRepository, CiviliteRepository $civiliteRepository): Response
+    public function update(Request $request, Employe $employe, EmployeRepository $repository, CiviliteRepository $civiliteRepository): Response
     {
         try {
             if (!$employe) return $this->errorResponse(null, "Employé non trouvé", 404);
@@ -173,9 +172,8 @@ class ApiEmployeController extends ApiInterface
             if (isset($data['contacts'])) $employe->setContacts($data['contacts']);
             if (isset($data['residence'])) $employe->setResidence($data['residence']);
 
-            if (isset($data['fonction_id'])) {
-                $fonction = $fonctionRepository->find($data['fonction_id']);
-                if ($fonction) $employe->setFonction($fonction);
+            if (isset($data['fonction'])) {
+                $employe->setFonction($data['fonction']);
             }
             if (isset($data['civilite_id'])) {
                 $civilite = $civiliteRepository->find($data['civilite_id']);

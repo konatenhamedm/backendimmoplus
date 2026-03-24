@@ -93,9 +93,6 @@ class Entreprise
     #[Groups(["group1"])]
     private ?Pays $pays = null;
 
-    #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Fonction::class)]
-    private Collection $fonctions;
-
     #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Locataire::class)]
     private Collection $locataires;
 
@@ -140,7 +137,6 @@ class Entreprise
     {
         $this->employes = new ArrayCollection();
         $this->proprios = new ArrayCollection();
-        $this->fonctions = new ArrayCollection();
         $this->locataires = new ArrayCollection();
         $this->contratlocs = new ArrayCollection();
         $this->campagnes = new ArrayCollection();
@@ -375,30 +371,6 @@ class Entreprise
     public function setPays(?Pays $pays): static
     {
         $this->pays = $pays;
-        return $this;
-    }
-
-    public function getFonctions(): Collection
-    {
-        return $this->fonctions;
-    }
-
-    public function addFonction(Fonction $fonction): static
-    {
-        if (!$this->fonctions->contains($fonction)) {
-            $this->fonctions->add($fonction);
-            $fonction->setEntreprise($this);
-        }
-        return $this;
-    }
-
-    public function removeFonction(Fonction $fonction): static
-    {
-        if ($this->fonctions->removeElement($fonction)) {
-            if ($fonction->getEntreprise() === $this) {
-                $fonction->setEntreprise(null);
-            }
-        }
         return $this;
     }
 

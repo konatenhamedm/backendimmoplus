@@ -100,6 +100,53 @@ class Utils
         return $fichier;
     }
 
+    public function sauvegardeBase64($base64String, $filePath, $filePrefix, string $basePath = self::BASE_PATH): ?Fichier
+    {
+        if (!$base64String || !$filePrefix) {
+            return null;
+        }
+
+        // Generate file name
+        $extension = 'png'; // signatures are usually PNGs from canvas
+        $fileName = $filePrefix . '.' . $extension;
+        $fullPath = rtrim($filePath, '/') . '/' . $fileName;
+
+        // Ensure directory exists
+        if (!is_dir($filePath)) {
+            mkdir($filePath, 0777, true);
+        }
+
+        // Clean base64 string if it contains data URI scheme
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64String, $type)) {
+            $base64String = substr($base64String, strpos($base64String, ',') + 1);
+            $type = strtolower($type[1]); // jpg, png, gif
+            
+            if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
+                throw new \Exception('invalid image type');
+            }
+            $extension = $type;
+            $fileName = $filePrefix . '.' . $extension;
+            $fullPath = rtrim($filePath, '/') . '/' . $fileName;
+        }
+
+        $base64String = str_replace(' ', '+', $base64String);
+        $data = base64_decode($base64String);
+
+        if ($data === false) {
+            return null;
+        }
+
+        file_put_contents($fullPath, $data);
+
+        $fichier = new Fichier();
+        $fichier->setAlt($fileName);
+        $fichier->setPath($basePath);
+        $fichier->setSize(filesize($fullPath));
+        $fichier->setUrl($extension);
+
+        return $fichier;
+    }
+
     public function sauvegardeFichierOld($filePath, $filePrefix, $uploadedFile, string $basePath = self::BASE_PATH, ?string $oldFilePath = null): ?Fichier
     {
 

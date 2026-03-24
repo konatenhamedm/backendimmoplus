@@ -169,13 +169,15 @@ class ContratLocation
     #[ORM\JoinColumn(nullable: true)]
     private ?Fichier $fichierResiliation = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[Groups(["group1"])]
-    private ?string $signatureLocataire = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Fichier $signatureLocataire = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[Groups(["group1"])]
-    private ?string $signatureBailleur = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Fichier $signatureBailleur = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Groups(["group1"])]
@@ -624,23 +626,23 @@ class ContratLocation
         return $this;
     }
 
-    public function getSignatureLocataire(): ?string
+    public function getSignatureLocataire(): ?Fichier
     {
         return $this->signatureLocataire;
     }
 
-    public function setSignatureLocataire(?string $signatureLocataire): static
+    public function setSignatureLocataire(?Fichier $signatureLocataire): static
     {
         $this->signatureLocataire = $signatureLocataire;
         return $this;
     }
 
-    public function getSignatureBailleur(): ?string
+    public function getSignatureBailleur(): ?Fichier
     {
         return $this->signatureBailleur;
     }
 
-    public function setSignatureBailleur(?string $signatureBailleur): static
+    public function setSignatureBailleur(?Fichier $signatureBailleur): static
     {
         $this->signatureBailleur = $signatureBailleur;
         return $this;

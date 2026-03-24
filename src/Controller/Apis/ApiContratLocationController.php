@@ -232,13 +232,19 @@ class ApiContratLocationController extends ApiInterface
             }
 
             $signatureAdded = false;
-            if (isset($data['signatureLocataire'])) {
-                $contrat->setSignatureLocataire($data['signatureLocataire']);
-                $signatureAdded = true;
+            if (isset($data['signatureLocataire']) && $data['signatureLocataire']) {
+                $filePath = $this->getUploadDir('signatures_contrats', true);
+                if ($fichier = $this->utils->sauvegardeBase64($data['signatureLocataire'], $filePath, 'locataire_' . uniqid(), 'signatures_contrats')) {
+                    $contrat->setSignatureLocataire($fichier);
+                    $signatureAdded = true;
+                }
             }
-            if (isset($data['signatureBailleur'])) {
-                $contrat->setSignatureBailleur($data['signatureBailleur']);
-                $signatureAdded = true;
+            if (isset($data['signatureBailleur']) && $data['signatureBailleur']) {
+                $filePath = $this->getUploadDir('signatures_contrats', true);
+                if ($fichier = $this->utils->sauvegardeBase64($data['signatureBailleur'], $filePath, 'bailleur_' . uniqid(), 'signatures_contrats')) {
+                    $contrat->setSignatureBailleur($fichier);
+                    $signatureAdded = true;
+                }
             }
             if ($signatureAdded && !$contrat->getDateSignature()) {
                 $contrat->setDateSignature(new \DateTime());
