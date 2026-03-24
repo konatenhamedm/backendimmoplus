@@ -164,7 +164,7 @@ class ApiDashboardController extends AbstractController
                 $appartQb->andWhere('p.entreprise = :ent')->setParameter('ent', $entreprise);
             }
             if ($agenceId) {
-                $appartQb->andWhere('a.agence = :ag')->setParameter('ag', $agenceId);
+                $appartQb->andWhere('m.agence = :ag')->setParameter('ag', $agenceId);
             }
 
             $totalAppartements = (int) (clone $appartQb)->select('COUNT(a.id)')->getQuery()->getSingleScalarResult();
