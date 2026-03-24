@@ -249,6 +249,16 @@ class PaiementService
                     $abonnement->setModuleAbonnement($module);
                     $abonnement->setDateFin(clone $newDateFin);
 
+                    // Désactiver les anciens abonnements actifs
+                    $oldAbonnements = $this->em->getRepository(\App\Entity\Abonnement::class)->findBy([
+                        'entreprise' => $entreprise,
+                        'etat' => 'ACTIF'
+                    ]);
+                    foreach ($oldAbonnements as $oldAb) {
+                        $oldAb->setEtat('EXPIRE');
+                        $this->em->persist($oldAb);
+                    }
+
                     $entreprise->setDateFinAbonnement($newDateFin);
                     $entreprise->setAbonnement($module->getCode());
 

@@ -98,6 +98,17 @@ class ApiAbonnementController extends ApiInterface
             // Met potentiellement à jour la date de fin sur l'entreprise globale
             if ($abonnement->getEtat() === 'ACTIF') {
                 $entreprise->setDateFinAbonnement(clone $abonnement->getDateFin());
+                
+                // Expirer les autres abonnements actifs
+                $oldAbonnements = $em->getRepository(Abonnement::class)->findBy([
+                    'entreprise' => $entreprise,
+                    'etat' => 'ACTIF'
+                ]);
+                foreach ($oldAbonnements as $oldAb) {
+                    // On ne modifie pas celui qu'on vient juste de créer s'il était déjà flush (mais ici il n'est pas encore persisté)
+                    $oldAb->setEtat('EXPIRE');
+                    $em->persist($oldAb);
+                }
             }
 
             $em->persist($abonnement);
