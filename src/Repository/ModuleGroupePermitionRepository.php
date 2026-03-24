@@ -84,7 +84,7 @@ class ModuleGroupePermitionRepository extends ServiceEntityRepository
      * Module = Grand titre (Paramétrage, Gestion Immobilière, etc.)
      * GroupeModule = Ressource/Page (/locataire, /maison, /civilite, etc.)
      */
-    public function getMenuStructure($groupeId): array
+    public function getMenuStructure($groupeId, $entrepriseId = null): array
     {
         $em = $this->getEntityManager();
         $connection = $em->getConnection();
@@ -113,10 +113,11 @@ class ModuleGroupePermitionRepository extends ServiceEntityRepository
             LEFT JOIN {$tablegIcon} as i ON gm.icon_id = i.id
             LEFT JOIN {$tablegIcon} as mi ON m.icon_id = mi.id
             WHERE gu.id = :groupe
+            AND (mgp.entreprise_id IS NULL OR mgp.entreprise_id = :entreprise)
             ORDER BY m.ordre ASC, mgp.ordre ASC
         SQL;
 
-        $stmt = $connection->executeQuery($sql, ['groupe' => $groupeId]);
+        $stmt = $connection->executeQuery($sql, ['groupe' => $groupeId, 'entreprise' => $entrepriseId]);
 
         return $stmt->fetchAllAssociative();
     }

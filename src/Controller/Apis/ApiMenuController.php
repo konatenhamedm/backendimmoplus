@@ -71,8 +71,9 @@ class ApiMenuController extends ApiInterface
                 return $this->errorResponse(null, "Groupe non trouvé", 404);
             }
 
+            $entrepriseId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
             // Récupérer la structure complète du menu
-            $menuData = $repository->getMenuStructure($groupe->getId());
+            $menuData = $repository->getMenuStructure($groupe->getId(), $entrepriseId);
 
             // Organiser les données par module_id (grands titres)
             $menuByModule = [];

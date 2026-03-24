@@ -51,12 +51,39 @@ class ApiGroupeController extends ApiInterface
             }
 
             // Using 'group1' context, ensure Entity has #[Groups(['group1'])] on properties
-            return $this->responseData($groupes, 'group1', [], $withPagination == "true" ? true : false);
+            $response = $this->responseData($groupes, 'group1', [], $withPagination == "true" ? true : false);
+            return $this->filterPermissionsByEntreprise($response);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             $this->setMessage("Erreur lors de la récupération des groupes");
             return $this->response([]);
         }
+    }
+
+    private function filterPermissionsByEntreprise(Response $response): Response
+    {
+        $content = json_decode($response->getContent(), true);
+        $userEntrepriseId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
+
+        if (isset($content['data'])) {
+            if (isset($content['data']['id']) && isset($content['data']['moduleGroupePermitions'])) {
+                // Un seul objet (Show)
+                $content['data']['moduleGroupePermitions'] = array_values(array_filter($content['data']['moduleGroupePermitions'], function ($perm) use ($userEntrepriseId) {
+                    return ($perm['entreprise']['id'] ?? null) === $userEntrepriseId;
+                }));
+            } elseif (is_array($content['data'])) {
+                // Liste d'objets (Index)
+                foreach ($content['data'] as &$groupe) {
+                    if (isset($groupe['moduleGroupePermitions'])) {
+                        $groupe['moduleGroupePermitions'] = array_values(array_filter($groupe['moduleGroupePermitions'], function ($perm) use ($userEntrepriseId) {
+                            return ($perm['entreprise']['id'] ?? null) === $userEntrepriseId;
+                        }));
+                    }
+                }
+            }
+        }
+        $response->setContent(json_encode($content));
+        return $response;
     }
 
     #[Route('/create', methods: ['POST'])]
@@ -168,6 +195,10 @@ class ApiGroupeController extends ApiInterface
                     if (isset($permData['ordre_groupe'])) $permission->setOrdreGroupe($permData['ordre_groupe']);
                     if (isset($permData['menu_principal'])) $permission->setMenuPrincipal($permData['menu_principal']);
                     
+                    if ($this->getUser() && method_exists($this->getUser(), 'getEntreprise')) {
+                        $permission->setEntreprise($this->getUser()->getEntreprise());
+                    }
+
                     $this->updateAuditFields($permission, true);
                     $groupe->addModuleGroupePermition($permission);
                 }
@@ -176,7 +207,8 @@ class ApiGroupeController extends ApiInterface
             $this->updateAuditFields($groupe, true);
             $groupeRepository->add($groupe, true);
 
-            return $this->responseData($groupe, 'group1', ['Content-Type' => 'application/json']);
+            $response = $this->responseData($groupe, 'group1', ['Content-Type' => 'application/json']);
+            return $this->filterPermissionsByEntreprise($response);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             $this->setMessage($exception->getMessage());
@@ -196,7 +228,8 @@ class ApiGroupeController extends ApiInterface
             if (!$groupe) {
                 return $this->errorResponse(null, "Groupe non trouvé", 404);
             }
-            return $this->responseData($groupe, 'group1');
+            $response = $this->responseData($groupe, 'group1');
+            return $this->filterPermissionsByEntreprise($response);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response([]);
@@ -292,9 +325,18 @@ class ApiGroupeController extends ApiInterface
                     if (isset($permData['id']) && $permData['id'] !== null) {
                         $permission = $permissionRepository->find($permData['id']);
                         
-                        // Verify the permission belongs to this groupe
-                        if ($permission && $permission->getGroupeUser() !== $groupe) {
-                            continue; // Skip if permission doesn't belong to this groupe
+                        // Verify the permission belongs to this groupe and this entreprise
+                        if ($permission) {
+                            if ($permission->getGroupeUser() !== $groupe) {
+                                continue;
+                            }
+                            $permEntrId = $permission->getEntreprise() ? $permission->getEntreprise()->getId() : null;
+                            $userEntrId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
+                            
+                            // If it belongs to another enterprise, don't modify it, create a new one instead or skip.
+                            if ($permEntrId !== $userEntrId) {
+                                $permission = null; // Forces creation of a new permission for this enterprise
+                            }
                         }
                     }
                     
@@ -323,6 +365,11 @@ class ApiGroupeController extends ApiInterface
                     if (isset($permData['ordre'])) $permission->setOrdre($permData['ordre']);
                     if (isset($permData['ordre_groupe'])) $permission->setOrdreGroupe($permData['ordre_groupe']);
                     if (isset($permData['menu_principal'])) $permission->setMenuPrincipal($permData['menu_principal']);
+                    
+                    if ($this->getUser() && method_exists($this->getUser(), 'getEntreprise')) {
+                        $permission->setEntreprise($this->getUser()->getEntreprise());
+                    }
+
                     $this->updateAuditFields($permission);
                 }
             }
@@ -330,7 +377,8 @@ class ApiGroupeController extends ApiInterface
             $this->updateAuditFields($groupe);
             $groupeRepository->add($groupe, true);
 
-            return $this->responseData($groupe, 'group1');
+            $response = $this->responseData($groupe, 'group1');
+            return $this->filterPermissionsByEntreprise($response);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             $this->setMessage($exception->getMessage());

@@ -128,7 +128,17 @@ class ApiGroupePermissionController extends ApiInterface
                 AbstractNormalizer::IGNORED_ATTRIBUTES => ['groupeUser', 'utilisateurs', 'roles'] // On ignore le lien inverse vers user/groupe pour éviter la boucle
             ];
 
-            return $this->responseData($permissions, null, [], false); // false pour pagination car Collection
+            // Filtrer par entreprise
+            $userEntrepriseId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
+            $filteredPermissions = [];
+            foreach ($permissions as $perm) {
+                $permEntreprise = $perm->getEntreprise();
+                if (($permEntreprise ? $permEntreprise->getId() : null) === $userEntrepriseId) {
+                    $filteredPermissions[] = $perm;
+                }
+            }
+
+            return $this->responseData($filteredPermissions, null, [], false); // false pour pagination car Collection
             
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
@@ -197,6 +207,10 @@ class ApiGroupePermissionController extends ApiInterface
             $entity->setGroupeUser($groupe);
             $entity->setModule($module);
             $entity->setPermition($permition);
+            
+            if ($this->getUser() && method_exists($this->getUser(), 'getEntreprise')) {
+                $entity->setEntreprise($this->getUser()->getEntreprise());
+            }
             
             if (isset($data['ordre'])) {
                 $entity->setOrdre($data['ordre']);
@@ -277,11 +291,22 @@ class ApiGroupePermissionController extends ApiInterface
                 return $this->errorResponse(null, "Paramètres groupe_id et groupe_module_id requis", 400);
             }
 
-            // Recherche de la permission spécifique
-            $permission = $repository->findOneBy([
+            $userEntrepriseId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
+
+            // Recherche de la permission spécifique testant aussi l'entreprise
+            $permissions = $repository->findBy([
                 'groupeUser' => $groupeId,
                 'groupeModule' => $groupeModuleId
             ]);
+
+            $permission = null;
+            foreach ($permissions as $p) {
+                $pEntrId = $p->getEntreprise() ? $p->getEntreprise()->getId() : null;
+                if ($pEntrId === $userEntrepriseId) {
+                    $permission = $p;
+                    break;
+                }
+            }
 
             if (!$permission) {
                 // Pas de permission explicite trouvée, ou accès refusé
