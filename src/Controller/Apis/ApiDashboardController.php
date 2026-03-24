@@ -578,35 +578,74 @@ class ApiDashboardController extends AbstractController
                 return $this->json(['message' => 'Non authentifié'], 401);
             }
 
-            // Only SADM should access this theoretically, but let's just return the global stats
-            $conn = $this->em->getConnection();
-
             // Total Entreprises
-            $totalEntreprises = (int) $conn->fetchOne('SELECT COUNT(id) FROM _admin_param_entreprise');
+            $totalEntreprises = (int) $this->em->createQuery('SELECT COUNT(e.id) FROM App\Entity\Entreprise e')->getSingleScalarResult();
 
             // Total Agences
-            $totalAgences = (int) $conn->fetchOne('SELECT COUNT(id) FROM _admin_param_agence');
+            $totalAgences = (int) $this->em->createQuery('SELECT COUNT(a.id) FROM App\Entity\Agence a')->getSingleScalarResult();
 
             // Total Utilisateurs
-            $totalUsers = (int) $conn->fetchOne('SELECT COUNT(id) FROM users WHERE is_active = 1');
+            $totalUsers = (int) $this->em->createQuery('SELECT COUNT(u.id) FROM App\Entity\User u WHERE u.isActive = true OR u.isActive = 1')->getSingleScalarResult();
 
             // Total Maisons (Sites)
-            $totalMaisons = (int) $conn->fetchOne('SELECT COUNT(id) FROM parametre_maison');
+            $totalMaisons = (int) $this->em->createQuery('SELECT COUNT(m.id) FROM App\Entity\Maison m')->getSingleScalarResult();
 
             // Total Appartements
-            $totalAppartements = (int) $conn->fetchOne('SELECT COUNT(id) FROM parametre_appartement');
+            $totalAppartements = (int) $this->em->createQuery('SELECT COUNT(a.id) FROM App\Entity\Appartement a')->getSingleScalarResult();
 
             // Total Locataires
-            $totalLocataires = (int) $conn->fetchOne('SELECT COUNT(id) FROM locataire');
+            $totalLocataires = (int) $this->em->createQuery('SELECT COUNT(l.id) FROM App\Entity\Locataire l')->getSingleScalarResult();
 
             // Total Propriétaires
-            $totalProprietaires = (int) $conn->fetchOne('SELECT COUNT(id) FROM proprio');
+            $totalProprietaires = (int) $this->em->createQuery('SELECT COUNT(p.id) FROM App\Entity\Proprio p')->getSingleScalarResult();
 
             // Contrats actifs
-            $totalContratsActifs = (int) $conn->fetchOne('SELECT COUNT(id) FROM loc_contrat_location WHERE etat = 1');
+            $totalContratsActifs = (int) $this->em->createQuery('SELECT COUNT(c.id) FROM App\Entity\ContratLocation c WHERE c.etat = 1')->getSingleScalarResult();
 
             // Chiffre d'affaire global estimé (Loyer mensuel * Contrats Actifs) - Simplification
-            $totalLoyerMensuel = (float) $conn->fetchOne('SELECT SUM(mnt_loyer) FROM loc_contrat_location WHERE etat = 1');
+            $totalLoyerMensuel = (float) $this->em->createQuery('SELECT SUM(c.mntLoyer) FROM App\Entity\ContratLocation c WHERE c.etat = 1')->getSingleScalarResult();
+
+            // --- Charts Data Preparation ---
+            // 1. Evolution Inscriptions (Derniers 6 mois)
+            $sixMonthsAgo = new \DateTime('-6 months');
+            $enterprises = $this->em->createQuery('SELECT e.createdAt FROM App\Entity\Entreprise e WHERE e.createdAt >= :date ORDER BY e.createdAt ASC')
+                ->setParameter('date', $sixMonthsAgo)
+                ->getResult();
+            
+            $users = $this->em->createQuery('SELECT u.createdAt FROM App\Entity\User u WHERE u.createdAt >= :date ORDER BY u.createdAt ASC')
+                ->setParameter('date', $sixMonthsAgo)
+                ->getResult();
+
+            $months = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $m = (new \DateTime("-$i months"))->format('Y-m');
+                $months[$m] = ['name' => $m, 'entreprises' => 0, 'utilisateurs' => 0];
+            }
+
+            foreach ($enterprises as $e) {
+                if ($e['createdAt']) {
+                    $m = $e['createdAt']->format('Y-m');
+                    if (isset($months[$m])) $months[$m]['entreprises']++;
+                }
+            }
+
+            foreach ($users as $u) {
+                if ($u['createdAt']) {
+                    $m = $u['createdAt']->format('Y-m');
+                    if (isset($months[$m])) $months[$m]['utilisateurs']++;
+                }
+            }
+            $evolutionChart = array_values($months);
+
+            // 2. Statut des Contrats
+            $contratsByEtat = $this->em->createQuery('SELECT c.etat, COUNT(c.id) as count FROM App\Entity\ContratLocation c GROUP BY c.etat')->getResult();
+            $contratChart = [];
+            foreach ($contratsByEtat as $c) {
+                $label = 'Actif';
+                if ($c['etat'] == 0) $label = 'En attente/Brouillon';
+                if ($c['etat'] == 2) $label = 'Résilié';
+                $contratChart[] = ['name' => $label, 'value' => (int)$c['count']];
+            }
 
             return $this->json([
                 'overview' => [
@@ -619,6 +658,14 @@ class ApiDashboardController extends AbstractController
                     'totalProprietaires' => $totalProprietaires,
                     'totalContratsActifs' => $totalContratsActifs,
                     'chiffreAffaireMensuelGbl' => $totalLoyerMensuel,
+                ],
+                'charts' => [
+                    'evolution' => $evolutionChart,
+                    'contrats' => $contratChart,
+                    'parc' => [
+                        ['name' => 'Maisons', 'value' => $totalMaisons],
+                        ['name' => 'Appartements', 'value' => $totalAppartements]
+                    ]
                 ]
             ], 200);
 
