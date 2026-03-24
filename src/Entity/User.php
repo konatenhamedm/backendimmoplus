@@ -101,6 +101,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?Entreprise $entreprise = null;
 
+    #[ORM\ManyToOne(targetEntity: Agence::class, inversedBy: 'users')]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group1'])]
     private ?string $nom = null;
@@ -391,6 +396,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->prenoms = $prenoms;
 
+        return $this;
+    }
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
         return $this;
     }
 }

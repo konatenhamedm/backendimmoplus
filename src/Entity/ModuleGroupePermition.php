@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Entreprise;
 use App\Repository\ModuleGroupePermitionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -38,6 +39,11 @@ class ModuleGroupePermition
 
     #[ORM\ManyToOne(inversedBy: 'moduleGroupePermitions')]
     private ?Groupe $groupeUser = null;
+
+    #[ORM\ManyToOne(targetEntity: Entreprise::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Entreprise $entreprise = null;
 
     #[ORM\Column]
     #[Groups(['group1'])]
@@ -132,6 +138,18 @@ class ModuleGroupePermition
     public function setMenuPrincipal(bool $menuPrincipal): self
     {
         $this->menuPrincipal = $menuPrincipal;
+
+        return $this;
+    }
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): self
+    {
+        $this->entreprise = $entreprise;
 
         return $this;
     }

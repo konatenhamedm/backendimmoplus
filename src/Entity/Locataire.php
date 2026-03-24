@@ -133,6 +133,11 @@ class Locataire
     #[Groups(['group1'])]
     private ?SituationMatrimoniale $situationMatri = null;
 
+    #[ORM\ManyToOne(targetEntity: Agence::class, inversedBy: 'locataires')]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     #[ORM\OneToMany(mappedBy: 'locataire', targetEntity: ContratLocation::class)]
     #[Ignore]
     private Collection $contratLocations;
@@ -549,6 +554,17 @@ class Locataire
             }
         }
 
+        return $this;
+    }
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
         return $this;
     }
 }

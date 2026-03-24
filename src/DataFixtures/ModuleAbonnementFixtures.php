@@ -26,21 +26,39 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
         // On définit nos 3 abonnements SaaS
         $modulesData = [
             [
-                'code' => '1 MOIS (ESSENTIEL)',
-                'description' => 'Abonnement basique pour une durée d\'un mois.',
-                'montant' => '10000',
+                'code' => 'BASIC (Mensuel)',
+                'description' => 'Idéal pour les petites agences (jusqu\'à 50 biens). Support WhatsApp.',
+                'montant' => '25000',
                 'duree' => '30'
             ],
             [
-                'code' => '6 MOIS (PRO)',
-                'description' => 'Abonnement intermédiaire pour une durée de 6 mois avec remise incluse.',
-                'montant' => '54000',
-                'duree' => '180'
+                'code' => 'BASIC (Annuel)',
+                'description' => '2 mois offerts ! Idéal pour petites agences (jusqu\'à 50 biens).',
+                'montant' => '250000',
+                'duree' => '365'
             ],
             [
-                'code' => '1 AN (PREMIUM)',
-                'description' => 'Abonnement complet pour une durée de 12 mois avec forte remise.',
-                'montant' => '96000',
+                'code' => 'PRO (Mensuel)',
+                'description' => 'Agences pro (jusqu\'à 300 biens). Facturation automatisée, paiements Mobile Money.',
+                'montant' => '75000',
+                'duree' => '30'
+            ],
+            [
+                'code' => 'PRO (Annuel)',
+                'description' => '2 mois offerts ! Agences intermédiaires (jusqu\'à 300 biens).',
+                'montant' => '750000',
+                'duree' => '365'
+            ],
+            [
+                'code' => 'ENTERPRISE (Mensuel)',
+                'description' => 'Grandes agences. Biens illimités, multi-agences, API, support dédié.',
+                'montant' => '200000',
+                'duree' => '30'
+            ],
+            [
+                'code' => 'ENTERPRISE (Annuel)',
+                'description' => '2 mois offerts ! Grandes agences, promoteurs, multi-sites.',
+                'montant' => '2000000',
                 'duree' => '365'
             ]
         ];
