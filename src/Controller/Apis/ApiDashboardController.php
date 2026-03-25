@@ -608,11 +608,11 @@ class ApiDashboardController extends AbstractController
             // --- Charts Data Preparation ---
             // 1. Evolution Inscriptions (Derniers 6 mois)
             $sixMonthsAgo = new \DateTime('-6 months');
-            $enterprises = $this->em->createQuery('SELECT e.createdAt FROM App\Entity\Entreprise e WHERE e.createdAt >= :date ORDER BY e.createdAt ASC')
+            $enterprises = $this->em->createQuery('SELECT e.dateCreation as dateCreation FROM App\Entity\Entreprise e WHERE e.dateCreation >= :date ORDER BY e.dateCreation ASC')
                 ->setParameter('date', $sixMonthsAgo)
                 ->getResult();
             
-            $users = $this->em->createQuery('SELECT u.createdAt FROM App\Entity\User u WHERE u.createdAt >= :date ORDER BY u.createdAt ASC')
+            $users = $this->em->createQuery('SELECT u.createdAt as createdAt FROM App\Entity\User u WHERE u.createdAt >= :date ORDER BY u.createdAt ASC')
                 ->setParameter('date', $sixMonthsAgo)
                 ->getResult();
 
@@ -623,8 +623,8 @@ class ApiDashboardController extends AbstractController
             }
 
             foreach ($enterprises as $e) {
-                if ($e['createdAt']) {
-                    $m = $e['createdAt']->format('Y-m');
+                if ($e['dateCreation']) {
+                    $m = $e['dateCreation']->format('Y-m');
                     if (isset($months[$m])) $months[$m]['entreprises']++;
                 }
             }
