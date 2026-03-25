@@ -9,6 +9,7 @@ use App\Repository\MaisonRepository;
 use App\Repository\ProprioRepository;
 use App\Repository\QuartierRepository;
 use App\Repository\TypeMaisonRepository;
+use App\Service\SubscriptionService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -64,12 +65,28 @@ class ApiMaisonController extends ApiInterface
         description: "Ajoute une nouvelle maison.",
         tags: ['Maison']
     )]
-    public function create(Request $request, MaisonRepository $repository, QuartierRepository $quartierRepository, ProprioRepository $proprioRepository, TypeMaisonRepository $typeMaisonRepository): Response
+    public function create(Request $request, MaisonRepository $repository, QuartierRepository $quartierRepository, ProprioRepository $proprioRepository, TypeMaisonRepository $typeMaisonRepository, SubscriptionService $subscriptionService): Response
     {
         try {
+            $user = $this->getUser();
+            if (!$user || !$user->getEntreprise()) {
+                return $this->errorResponse(null, "Vous devez être rattaché à une entreprise", 403);
+            }
+
+            // Vérifier la limite de l'abonnement
+            if (!$subscriptionService->canAddMaison($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite de biens atteinte pour votre abonnement actuel. Veuillez passer à un plan supérieur.", 403);
+            }
+
             $data = json_decode($request->getContent(), true);
             $maison = new Maison();
             
+            // Set Agence if not provided in data
+            if (isset($data['agence_id'])) {
+                // ... (check if belongs to entreprise)
+            } else {
+                $maison->setAgence($user->getAgence());
+            }
             if (isset($data['libMaison'])) $maison->setLibMaison($data['libMaison']);
             if (isset($data['lot'])) $maison->setLot($data['lot']);
             if (isset($data['ilot'])) $maison->setIlot($data['ilot']);

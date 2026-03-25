@@ -111,6 +111,9 @@ class Entreprise
     #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: User::class)]
     private Collection $users;
 
+    #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Agence::class)]
+    private Collection $agences;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(["group1"])]
@@ -143,6 +146,7 @@ class Entreprise
         $this->quartiers = new ArrayCollection();
         $this->joursMoisEntreprises = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->agences = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -515,6 +519,36 @@ class Entreprise
                 $user->setEntreprise(null);
             }
         }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Agence>
+     */
+    public function getAgences(): Collection
+    {
+        return $this->agences;
+    }
+
+    public function addAgence(Agence $agence): static
+    {
+        if (!$this->agences->contains($agence)) {
+            $this->agences->add($agence);
+            $agence->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAgence(Agence $agence): static
+    {
+        if ($this->agences->removeElement($agence)) {
+            // set the owning side to null (unless already changed)
+            if ($agence->getEntreprise() === $this) {
+                $agence->setEntreprise(null);
+            }
+        }
+
         return $this;
     }
 

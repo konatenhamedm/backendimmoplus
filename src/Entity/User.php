@@ -99,6 +99,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Employe $employe = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
+    #[Groups(['group1'])]
     private ?Entreprise $entreprise = null;
 
     #[ORM\ManyToOne(targetEntity: Agence::class, inversedBy: 'users')]

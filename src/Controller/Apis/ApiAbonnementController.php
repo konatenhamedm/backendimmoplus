@@ -7,6 +7,7 @@ use App\Entity\Abonnement;
 use App\Repository\AbonnementRepository;
 use App\Repository\EntrepriseRepository;
 use App\Repository\ModuleAbonnementRepository;
+use App\Service\SubscriptionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,7 +61,7 @@ class ApiAbonnementController extends ApiInterface
             ]
         )
     )]
-    public function create(Request $request, EntityManagerInterface $em, EntrepriseRepository $entrepriseRepo, ModuleAbonnementRepository $moduleRepo): Response
+    public function create(Request $request, EntityManagerInterface $em, EntrepriseRepository $entrepriseRepo, ModuleAbonnementRepository $moduleRepo, SubscriptionService $subscriptionService): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -98,6 +99,7 @@ class ApiAbonnementController extends ApiInterface
             // Met potentiellement à jour la date de fin sur l'entreprise globale
             if ($abonnement->getEtat() === 'ACTIF') {
                 $entreprise->setDateFinAbonnement(clone $abonnement->getDateFin());
+                $entreprise->setAbonnement($abonnement->getModuleAbonnement()?->getCode());
                 
                 // Expirer les autres abonnements actifs
                 $oldAbonnements = $em->getRepository(Abonnement::class)->findBy([
@@ -114,6 +116,11 @@ class ApiAbonnementController extends ApiInterface
             $em->persist($abonnement);
             $em->persist($entreprise);
             $em->flush();
+
+            // Appliquer les limites du plan (ex: désactiver maisons si downgrade)
+            if ($abonnement->getEtat() === 'ACTIF') {
+                $subscriptionService->enforceLimits($entreprise);
+            }
 
             return $this->responseData($abonnement, 'group_abonnement', ['message' => 'Abonnement enregistré.']);
         } catch (\Exception $exception) {
@@ -154,7 +161,7 @@ class ApiAbonnementController extends ApiInterface
             ]
         )
     )]
-    public function update(Request $request, Abonnement $abonnement, EntityManagerInterface $em): Response
+    public function update(Request $request, Abonnement $abonnement, EntityManagerInterface $em, SubscriptionService $subscriptionService): Response
     {
         try {
             if (!$abonnement) return $this->errorResponse(null, "Abonnement non trouvé", 404);
@@ -170,10 +177,15 @@ class ApiAbonnementController extends ApiInterface
             if ($abonnement->getEntreprise() && $abonnement->getEtat() === 'ACTIF') {
                 $entreprise = $abonnement->getEntreprise();
                 $entreprise->setDateFinAbonnement(clone $abonnement->getDateFin());
+                $entreprise->setAbonnement($abonnement->getModuleAbonnement()?->getCode());
                 $em->persist($entreprise);
             }
             
             $em->flush();
+
+            if ($abonnement->getEntreprise() && $abonnement->getEtat() === 'ACTIF') {
+                $subscriptionService->enforceLimits($abonnement->getEntreprise());
+            }
 
             return $this->responseData($abonnement, 'group_abonnement', ['message' => 'Abonnement mis à jour.']);
         } catch (\Exception $exception) {

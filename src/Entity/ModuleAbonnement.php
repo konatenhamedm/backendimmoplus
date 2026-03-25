@@ -55,6 +55,42 @@ class ModuleAbonnement
     #[ORM\ManyToOne]
     private ?Pays $pays = null;
 
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $maxBiens = 0;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasFacturationAuto = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasRelancesAuto = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasMobileMoney = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasRapportsAvances = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasGestionDepenses = false;
+
+    #[ORM\Column(length: 50)]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?string $signatureElectronique = 'NONE'; // NONE, STANDARD, AVANCEE
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasMultiAgences = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasApiIntegrations = false;
+
     public function __construct()
     {
         $this->abonnements = new ArrayCollection();
@@ -175,6 +211,114 @@ class ModuleAbonnement
     public function setPays(?Pays $pays): static
     {
         $this->pays = $pays;
+
+        return $this;
+    }
+
+    public function getMaxBiens(): ?int
+    {
+        return $this->maxBiens;
+    }
+
+    public function setMaxBiens(int $maxBiens): static
+    {
+        $this->maxBiens = $maxBiens;
+
+        return $this;
+    }
+
+    public function isHasFacturationAuto(): ?bool
+    {
+        return $this->hasFacturationAuto;
+    }
+
+    public function setHasFacturationAuto(bool $hasFacturationAuto): static
+    {
+        $this->hasFacturationAuto = $hasFacturationAuto;
+
+        return $this;
+    }
+
+    public function isHasRelancesAuto(): ?bool
+    {
+        return $this->hasRelancesAuto;
+    }
+
+    public function setHasRelancesAuto(bool $hasRelancesAuto): static
+    {
+        $this->hasRelancesAuto = $hasRelancesAuto;
+
+        return $this;
+    }
+
+    public function isHasMobileMoney(): ?bool
+    {
+        return $this->hasMobileMoney;
+    }
+
+    public function setHasMobileMoney(bool $hasMobileMoney): static
+    {
+        $this->hasMobileMoney = $hasMobileMoney;
+
+        return $this;
+    }
+
+    public function isHasRapportsAvances(): ?bool
+    {
+        return $this->hasRapportsAvances;
+    }
+
+    public function setHasRapportsAvances(bool $hasRapportsAvances): static
+    {
+        $this->hasRapportsAvances = $hasRapportsAvances;
+
+        return $this;
+    }
+
+    public function isHasGestionDepenses(): ?bool
+    {
+        return $this->hasGestionDepenses;
+    }
+
+    public function setHasGestionDepenses(bool $hasGestionDepenses): static
+    {
+        $this->hasGestionDepenses = $hasGestionDepenses;
+
+        return $this;
+    }
+
+    public function getSignatureElectronique(): ?string
+    {
+        return $this->signatureElectronique;
+    }
+
+    public function setSignatureElectronique(string $signatureElectronique): static
+    {
+        $this->signatureElectronique = $signatureElectronique;
+
+        return $this;
+    }
+
+    public function isHasMultiAgences(): ?bool
+    {
+        return $this->hasMultiAgences;
+    }
+
+    public function setHasMultiAgences(bool $hasMultiAgences): static
+    {
+        $this->hasMultiAgences = $hasMultiAgences;
+
+        return $this;
+    }
+
+    public function isHasApiIntegrations(): ?bool
+    {
+        return $this->hasApiIntegrations;
+    }
+
+    public function setHasApiIntegrations(bool $hasApiIntegrations): static
+    {
+        $this->hasApiIntegrations = $hasApiIntegrations;
 
         return $this;
     }
