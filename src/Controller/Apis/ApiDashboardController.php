@@ -673,4 +673,57 @@ class ApiDashboardController extends AbstractController
             return $this->json(['message' => 'Erreur: ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/arrears', name: 'api_dashboard_arrears', methods: ['GET'])]
+    #[OA\Get(summary: "Liste des factures en retard (pour dashboard agent)", tags: ['Dashboard'])]
+    public function getArrears(Request $request, FactureLocationRepository $repository, EntityManagerInterface $em, Security $security): JsonResponse
+    {
+        try {
+            /** @var User $user */
+            $user = $security->getUser();
+            if (!$user) return $this->json(['message' => 'Non authentifié'], 401);
+
+            $entreprise = $user->getEntreprise();
+            
+            // X-Agence-Id context
+            $headerAgenceId = $request->query->get('agence_id');
+            $agenceId = ($headerAgenceId && $headerAgenceId !== 'all' && $headerAgenceId !== 'null' && $headerAgenceId !== 'undefined') ? (int) $headerAgenceId : ($user->getAgence() ? $user->getAgence()->getId() : null);
+
+            $qb = $repository->createQueryBuilder('f')
+                ->where('f.soldeFactLoc > 0')
+                ->join('f.locataire', 'l')
+                ->orderBy('f.dateLimite', 'ASC');
+
+            if ($entreprise) {
+                $qb->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qb->andWhere('f.agence = :ag')->setParameter('ag', $agenceId);
+            }
+
+            $factures = $qb->setMaxResults(10)->getQuery()->getResult();
+
+            $data = [];
+            foreach ($factures as $f) {
+                $data[] = [
+                    'locataire' => [
+                        'nom_complet' => $f->getLocataire()->getNom() . ' ' . $f->getLocataire()->getPrenoms(),
+                        'nom' => $f->getLocataire()->getNom(),
+                    ],
+                    'loyer' => [
+                        'maison' => [
+                            'libMaison' => $f->getAppartement() ? ($f->getAppartement()->getMaisson() ? $f->getAppartement()->getMaisson()->getLibMaison() : 'N/A' ) : 'N/A'
+                        ]
+                    ],
+                    'lastRelance' => null, // À implémenter plus tard
+                    'montantRestant' => (float)$f->getSoldeFactLoc(),
+                    'echeanceCount' => 1,
+                ];
+            }
+
+            return $this->json(['data' => $data], 200);
+        } catch (\Exception $e) {
+            return $this->json(['message' => $e->getMessage()], 500);
+        }
+    }
 }
