@@ -104,7 +104,7 @@ class ApiPaiementController extends ApiInterface
              return $this->json(['message' => 'Utilisateur non authentifié'], 401);
         }
 
-        $result = $paiementService->traiterPaiement($data, $user, $factureLocation);
+        $result = $this->paiementService->traiterPaiement($data, $user, $factureLocation);
 
         if (isset($result['code']) && $result['code'] !== 200) {
             return $this->json($result, 400);
@@ -159,7 +159,7 @@ class ApiPaiementController extends ApiInterface
              return $this->json(['message' => 'Utilisateur non authentifié'], 401);
         }
 
-        $result = $paiementService->traiterPaiementAbonnement($data, $user, $entreprise, $module);
+        $result = $this->paiementService->traiterPaiementAbonnement($data, $user, $entreprise, $module);
 
         if (isset($result['code']) && $result['code'] !== 200) {
             return $this->json($result, 400);
@@ -211,6 +211,28 @@ class ApiPaiementController extends ApiInterface
             
             $transactions = $repository->findBy(['locataire' => $user->getLocataire()->getId()], ['date' => 'DESC']);
             return $this->responseData($transactions, 'group1');
+        } catch (\Exception $exception) {
+            return $this->json(['message' => $exception->getMessage()], 500);
+        }
+    }
+
+    #[Route('/{id}/rapprocher', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/paiement/{id}/rapprocher",
+        summary: "Marquer une transaction comme rapprochée (banque)",
+        tags: ['Paiement']
+    )]
+    public function rapprochement(int $id, \App\Repository\TransactionRepository $repository): Response
+    {
+        try {
+            $transaction = $repository->find($id);
+            if (!$transaction) return $this->json(['message' => 'Transaction non trouvée'], 404);
+            
+            $transaction->setStatus('validated'); 
+            $this->updateAuditFields($transaction);
+            $repository->save($transaction, true);
+            
+            return $this->json(['message' => 'Transaction rapprochée avec succès']);
         } catch (\Exception $exception) {
             return $this->json(['message' => $exception->getMessage()], 500);
         }
