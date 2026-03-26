@@ -168,6 +168,32 @@ class ApiPaiementController extends ApiInterface
         return $this->json($result);
     }
 
+    #[Route('', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/paiement",
+        summary: "Liste de toutes les transactions",
+        tags: ['Paiement']
+    )]
+    public function index(\App\Repository\TransactionRepository $repository, Request $request): Response
+    {
+        try {
+            $agenceId = $request->query->get('agence_id');
+            $qb = $repository->createQueryBuilder('t')
+                ->orderBy('t.date', 'DESC');
+            
+            if ($agenceId && $agenceId !== 'all') {
+                $qb->leftJoin('t.locataire', 'l')
+                   ->andWhere('l.agence = :agenceId')
+                   ->setParameter('agenceId', $agenceId);
+            }
+            
+            $transactions = $qb->getQuery()->getResult();
+            return $this->responseData($transactions, 'group1');
+        } catch (\Exception $exception) {
+            return $this->json(['message' => $exception->getMessage()], 500);
+        }
+    }
+
     #[Route('/mes-paiements', methods: ['GET'])]
     #[OA\Get(
         path: "/api/paiement/mes-paiements",

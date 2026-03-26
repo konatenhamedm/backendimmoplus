@@ -49,6 +49,7 @@ class Transaction
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
     private ?Locataire $locataire = null;
 
     #[ORM\ManyToOne]
