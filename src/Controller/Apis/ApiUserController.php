@@ -37,14 +37,17 @@ class ApiUserController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $role = $request->get('role');
             $user = $this->getUser();
             if (!$user) return $this->errorResponse(null, "Non authentifié", 401);
 
-            $criteria = [];
-            
-            $criteria['entreprise'] = $user->getEntreprise();
-
-            $users = $repository->findBy($criteria, ['id' => 'DESC']);
+            if ($role) {
+                $users = $repository->findByRole($role, $user->getEntreprise());
+            } else {
+                $criteria = [];
+                $criteria['entreprise'] = $user->getEntreprise();
+                $users = $repository->findBy($criteria, ['id' => 'DESC']);
+            }
 
             if ($withPagination == "true") {
                 $users = $this->paginationService->paginate($users);

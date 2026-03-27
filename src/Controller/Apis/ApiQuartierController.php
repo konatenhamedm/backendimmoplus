@@ -4,6 +4,7 @@ namespace App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\Quartier;
+use App\Repository\AgenceRepository;
 use App\Repository\EntrepriseRepository;
 use App\Repository\QuartierRepository;
 use App\Repository\VilleRepository;
@@ -36,14 +37,23 @@ class ApiQuartierController extends ApiInterface
         tags: ['Quartier']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, QuartierRepository $repository, VilleRepository $villeRepository): Response
+    public function index(Request $request, QuartierRepository $repository, VilleRepository $villeRepository, AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
         
             $entreprise = ($this->getUser() && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise() : null;
 
-            $quartiers = $repository->findBy(['entreprise' => $entreprise]);
+            $criteria = ['entreprise' => $entreprise];
+            if ($agenceId) {
+                $agence = $agenceRepository->find($agenceId);
+                if ($agence) {
+                    $criteria['agence'] = $agence;
+                }
+            }
+
+            $quartiers = $repository->findBy($criteria);
 
             if ($withPagination == "true") {
                 $quartiers = $this->paginationService->paginate($quartiers);
@@ -74,7 +84,7 @@ class ApiQuartierController extends ApiInterface
             ]
         )
     )]
-    public function create(Request $request, QuartierRepository $repository, VilleRepository $villeRepository): Response
+    public function create(Request $request, QuartierRepository $repository, VilleRepository $villeRepository, AgenceRepository $agenceRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -86,6 +96,11 @@ class ApiQuartierController extends ApiInterface
                 $ville = $villeRepository->find($data['ville_id']);
                 if (!$ville) return $this->errorResponse(null, "Ville non trouvée", 404);
                 $quartier->setVille($ville);
+            }
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $quartier->setAgence($agence);
             }
 
             // Récupérer l'entreprise de l'utilisateur connecté
@@ -109,7 +124,7 @@ class ApiQuartierController extends ApiInterface
         description: "Met à jour un quartier existant.",
         tags: ['Quartier']
     )]
-    public function update(Request $request, Quartier $quartier, QuartierRepository $repository, VilleRepository $villeRepository, EntrepriseRepository $entrepriseRepository): Response
+    public function update(Request $request, Quartier $quartier, QuartierRepository $repository, VilleRepository $villeRepository, EntrepriseRepository $entrepriseRepository, AgenceRepository $agenceRepository): Response
     {
         try {
             if (!$quartier) return $this->errorResponse(null, "Quartier non trouvé", 404);
@@ -122,6 +137,11 @@ class ApiQuartierController extends ApiInterface
                 $ville = $villeRepository->find($data['ville_id']);
                 if (!$ville) return $this->errorResponse(null, "Ville non trouvée", 404);
                 $quartier->setVille($ville);
+            }
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $quartier->setAgence($agence);
             }
 
             if (isset($data['entreprise_id'])) {

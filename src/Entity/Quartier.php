@@ -34,6 +34,11 @@ class Quartier
     #[ORM\ManyToOne(inversedBy: 'quartiers')]
     private ?Entreprise $entreprise = null;
 
+    #[ORM\ManyToOne(targetEntity: Agence::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Agence $agence = null;
+
     public function __construct()
     {
         $this->quartierMaisons = new ArrayCollection();
@@ -107,6 +112,18 @@ class Quartier
     public function setEntreprise(?Entreprise $entreprise): static
     {
         $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
+    public function getAgence(): ?Agence
+    {
+        return $this->agence;
+    }
+
+    public function setAgence(?Agence $agence): static
+    {
+        $this->agence = $agence;
 
         return $this;
     }

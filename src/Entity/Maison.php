@@ -72,8 +72,8 @@ class Maison
     private ?TypeMaison $typeMaison = null;
 
     #[ORM\ManyToOne(inversedBy: 'maisons')]
-    /* #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Blameable(on: 'create')]*/
+   #[ORM\JoinColumn(nullable: true)]
+     /* #[Gedmo\Blameable(on: 'create')]*/
     #[Groups(['group1'])]
     private ?User $idAgent = null;
 

@@ -36,13 +36,24 @@ class ApiMaisonController extends ApiInterface
         tags: ['Maison']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, MaisonRepository $repository): Response
+    public function index(Request $request, MaisonRepository $repository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
+            $user = $this->getUser();
             
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $maisons = $repository->findAllByEntreprise($this->getUser()->getEntreprise());
+            if ($user && $user->getEntreprise()) {
+                if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                    $agence = $agenceRepository->find((int)$agenceId);
+                    if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                        $maisons = $repository->findBy(['agence' => $agence], ['id' => 'DESC']);
+                    } else {
+                        $maisons = $repository->findAllByEntreprise($user->getEntreprise());
+                    }
+                } else {
+                    $maisons = $repository->findAllByEntreprise($user->getEntreprise());
+                }
             } else {
                 $maisons = $repository->findAll();
             }
@@ -223,19 +234,32 @@ class ApiMaisonController extends ApiInterface
         }
     }
 
-    #[Route('/{id}', methods: ['DELETE'])]
-    #[OA\Delete(
-        path: "/api/maison/{id}",
-        summary: "Supprimer une maison",
-        description: "Supprime une maison.",
+    #[Route('/{id}/affecter-agent', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/maison/{id}/affecter-agent",
+        summary: "Affecter un agent à une maison",
+        description: "Associe un agent à une maison pour la collecte des loyers.",
         tags: ['Maison']
     )]
-    public function delete(Maison $maison, MaisonRepository $repository): Response
+    public function affecterAgent(Request $request, Maison $maison, MaisonRepository $repository, \App\Repository\UserRepository $userRepository): Response
     {
         try {
             if (!$maison) return $this->errorResponse(null, "Maison non trouvée", 404);
-            $repository->remove($maison, true);
-            return $this->response(['message' => 'Maison supprimée avec succès']);
+
+            $data = json_decode($request->getContent(), true);
+            if (!isset($data['agent_id'])) {
+                return $this->errorResponse(null, "L'ID de l'agent est requis", 400);
+            }
+
+            $agent = $userRepository->find($data['agent_id']);
+            if (!$agent) {
+                return $this->errorResponse(null, "Agent non trouvé", 404);
+            }
+
+            $maison->setIdAgent($agent);
+            $repository->save($maison, true);
+
+            return $this->responseData($maison, 'group1');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);

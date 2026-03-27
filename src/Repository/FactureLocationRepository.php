@@ -42,9 +42,20 @@ class FactureLocationRepository extends ServiceEntityRepository
     public function findAllByEntreprise($entreprise)
     {
         return $this->createQueryBuilder('f')
-            ->join('f.locataire', 'l')
-            ->andWhere('l.entreprise = :entreprise')
+            ->andWhere('f.entreprise = :entreprise')
             ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllByAgent($agent)
+    {
+        return $this->createQueryBuilder('f')
+            ->innerJoin('f.appartement', 'a')
+            ->innerJoin('a.maisson', 'm')
+            ->innerJoin('m.idAgent', 'ag')
+            ->andWhere('ag.id = :agent')
+            ->setParameter('agent', $agent)
             ->getQuery()
             ->getResult();
     }

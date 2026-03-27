@@ -43,9 +43,14 @@ class ApiFactureLocationController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $user = $this->getUser();
             
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $factures = $repository->findAllByEntreprise($this->getUser()->getEntreprise());
+            if ($user && $user->getEntreprise()) {
+                if (in_array('ROLE_AGENT', $user->getRoles())) {
+                    $factures = $repository->findAllByAgent($user->getId());
+                } else {
+                    $factures = $repository->findAllByEntreprise($user->getEntreprise());
+                }
             } else {
                 $factures = $repository->findAll();
             }
