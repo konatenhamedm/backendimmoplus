@@ -147,8 +147,11 @@ class AuthController extends ApiInterface
                 'logo_entreprise' => $user->getEntreprise() ? $user->getEntreprise()->getLogo() : null,
                 'entreprise' => $user->getEntreprise() ? ["id" => $user->getEntreprise()->getId(), "denomination" => $user->getEntreprise()->getDenomination()] : null,
                 'pays' => $user->getEntreprise() ? ["id" => $user->getEntreprise()->getPays()->getId()] : null,
-                
-               
+                'agenceId' => $user->getAgence() ? $user->getAgence()->getId() : null,
+                'agence' => $user->getAgence() ? [
+                    'id' => $user->getAgence()->getId(),
+                    'libAgence' => $user->getAgence()->getLibAgence()
+                ] : null,
             ],
             'token_expires_in' => $jwtService->getTtl()
         ], 'group1', ['Content-Type' => 'application/json']);
