@@ -150,7 +150,7 @@ class AuthController extends ApiInterface
                 'agenceId' => $user->getAgence() ? $user->getAgence()->getId() : null,
                 'agence' => $user->getAgence() ? [
                     'id' => $user->getAgence()->getId(),
-                    'libAgence' => $user->getAgence()->getLibAgence()
+                    'libAgence' => $user->getAgence()->getNom()
                 ] : null,
             ],
             'token_expires_in' => $jwtService->getTtl()
