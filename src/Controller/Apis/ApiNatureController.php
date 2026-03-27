@@ -63,7 +63,7 @@ class ApiNatureController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $nature = new Nature();
             
-            if (isset($data['libelleNature'])) $nature->setLibNature($data['libelleNature']);
+            if (isset($data['libNature'])) $nature->setLibNature($data['libNature']);
 
             $repository->save($nature, true);
 
@@ -88,7 +88,7 @@ class ApiNatureController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
             
-            if (isset($data['libelleNature'])) $nature->setLibNature($data['libelleNature']);
+            if (isset($data['libNature'])) $nature->setLibNature($data['libNature']);
 
             $repository->save($nature, true);
 
