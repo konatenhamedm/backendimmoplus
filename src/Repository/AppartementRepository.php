@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Appartement;
 use App\Entity\Contratloc;
+use App\Entity\ContratLocation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -58,7 +59,7 @@ class AppartementRepository extends ServiceEntityRepository
         $qb = $this->em->createQueryBuilder();
 
         $linked = $qb->select('a')
-            ->from(Contratloc::class, 'rl')
+            ->from(ContratLocation::class, 'rl')
             ->innerJoin('rl.appart', 'a')
             ->andWhere('rl.id = :id')
             ->setParameter('id', 12);
