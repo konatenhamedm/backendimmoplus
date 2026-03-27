@@ -100,11 +100,19 @@ class EntrepriseRegistrationService
             $this->em->persist($civilite);
         }
 
+        // --- CREATION DE L'AGENCE PAR DEFAUT ---
+        $agence = new \App\Entity\Agence();
+        $agence->setNom("Siège Social");
+        $agence->setEntreprise($entreprise);
+        $agence->setIsActive(true);
+        $this->em->persist($agence);
+
         // --- CREATION DE L'EMPLOYE (ADMIN) ---
         $employe = new Employe();
         $employe->setNom($data['admin_nom']);
         $employe->setPrenom($data['admin_prenoms'] ?? '');
         $employe->setEntreprise($entreprise);
+        $employe->setAgence($agence);
         $employe->setCivilite($civilite);
         $employe->setMatricule('EMP-' . strtoupper(substr(uniqid(), -6)));
         $employe->setContact($data['contacts'] ?? '00000000');
@@ -119,6 +127,8 @@ class EntrepriseRegistrationService
         $user->setLogin($data['admin_login']);
         $user->setEmploye($employe);
         $user->setGroupe($groupe);
+        $user->setEntreprise($entreprise);
+        $user->setAgence($agence);
         $user->setRoles(['ROLE_ADMIN', 'ROLE_BUREAU']);
         $user->setPassword($this->hasher->hashPassword($user, $data['admin_password']));
         $user->setIsActive(true);
