@@ -157,6 +157,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->createdAt = new \DateTimeImmutable();
         $this->notifications = new ArrayCollection();
         $this->maisons = new ArrayCollection();
+        $this->roles = ['ROLE_USER'];
     }
 
     // ... Getters and setters (pas besoin de toucher ici)

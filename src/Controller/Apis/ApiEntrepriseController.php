@@ -170,7 +170,8 @@ class ApiEntrepriseController extends ApiInterface
                 new OA\Property(property: "admin_nom", type: "string"),
                 new OA\Property(property: "admin_prenoms", type: "string"),
                 new OA\Property(property: "admin_login", type: "string"),
-                new OA\Property(property: "admin_password", type: "string")
+                new OA\Property(property: "admin_password", type: "string"),
+                new OA\Property(property: "module_abonnement_id", type: "integer", nullable: true)
             ]
         )
     )]
@@ -181,6 +182,7 @@ class ApiEntrepriseController extends ApiInterface
         PaysRepository $paysRepo,
         GroupeRepository $groupeRepo,
         \App\Repository\CiviliteRepository $civiliteRepo,
+        \App\Repository\ModuleAbonnementRepository $moduleAbonnementRepo,
         \App\Service\MenuGeneratorService $menuService
     ): Response
     {
@@ -210,23 +212,39 @@ class ApiEntrepriseController extends ApiInterface
             if (isset($data['fneLogin'])) $entreprise->setFneLogin($data['fneLogin']);
             if (isset($data['fnePassword'])) $entreprise->setFnePassword($data['fnePassword']);
 
-            // Abonnement essai 14 jours (sauvegarde dans l'entité Entreprise par rétrocompatibilité)
-            $entreprise->setAbonnement('ESSAI');
+            // --- GESTION DE L'ABONNEMENT (ESSAI OU MODULE SPECIFIQUE) ---
+            $moduleAbonnementId = $data['module_abonnement_id'] ?? null;
+            $typeAbonnement = 'ESSAI';
+            $joursDuree = 14;
+
+            if ($moduleAbonnementId) {
+                $moduleAbonnement = $moduleAbonnementRepo->find($moduleAbonnementId);
+                if ($moduleAbonnement) {
+                    $typeAbonnement = $moduleAbonnement->getCode();
+                    $joursDuree = (int)$moduleAbonnement->getDuree();
+                }
+            }
+
             $dateFin = new \DateTime();
-            $dateFin->modify('+14 days');
+            $dateFin->modify("+$joursDuree days");
+
+            $entreprise->setAbonnement($typeAbonnement);
             $entreprise->setDateFinAbonnement($dateFin);
             $entreprise->setIsActive(true);
             $entreprise->setDateCreation(new \DateTime());
 
             $em->persist($entreprise);
 
-            // --- NOUVEAU SYSTEME D'ABONNEMENT ---
+            // --- NOUVEAU SYSTEME D'ABONNEMENT (Entité Abonnement) ---
             $abonnement = new Abonnement();
             $abonnement->setEntreprise($entreprise);
-            $abonnement->setType('ESSAI');
+            $abonnement->setType($typeAbonnement);
             $abonnement->setEtat('ACTIF');
             $abonnement->setDateFin($dateFin);
             $em->persist($abonnement);
+
+            // --- GÉNÉRATION DU MENU PAR DÉFAUT ---
+            $menuService->generateDefaultMenu($entreprise);
 
             // --- RECHERCHE / CREATION DU GROUPE ---
             $groupe = $groupeRepo->findOneBy(['code' => 'ADMIN']);
