@@ -21,7 +21,7 @@ class CiviliteRepository extends ServiceEntityRepository
         parent::__construct($registry, Civilite::class);
     }
 
-    public function add(Civilite $entity, bool $flush = false): void
+    public function save(Civilite $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
