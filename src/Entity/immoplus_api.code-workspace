@@ -7,6 +7,9 @@
 		{
 			"name": "immoplus_front",
 			"path": "../../../immoplus_front"
+		},
+		{
+			"path": "../../../immoplus_landing"
 		}
 	],
 	"settings": {}

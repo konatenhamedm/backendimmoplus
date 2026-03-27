@@ -176,11 +176,12 @@ class ApiEntrepriseController extends ApiInterface
     )]
     public function register(
         Request $request, 
-       EntityManagerInterface $em,
+        EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher,
         PaysRepository $paysRepo,
         GroupeRepository $groupeRepo,
-        \App\Repository\CiviliteRepository $civiliteRepo
+        \App\Repository\CiviliteRepository $civiliteRepo,
+        \App\Service\MenuGeneratorService $menuService
     ): Response
     {
         try {
@@ -276,6 +277,9 @@ class ApiEntrepriseController extends ApiInterface
 
             $em->persist($user);
             $em->flush();
+
+            // --- GENERATION DU MENU PAR DEFAUT ---
+            $menuService->generateDefaultMenu($entreprise);
 
             return $this->responseData([
                 'entreprise' => [
