@@ -294,6 +294,11 @@ class PaiementService
             return ['message' => 'Transaction not found', 'code' => 404];
         }
 
+        // --- PROCÉDURE ANTI-DOUBLON ---
+        if ($transaction->getStatus() === 'SUCCESS') {
+            return ['message' => 'Transaction déjà traitée', 'code' => 200];
+        }
+
         if (isset($data['responsecode']) && $data['responsecode'] == 0) {
             $transaction->setStatus('SUCCESS');
             
