@@ -183,7 +183,8 @@ class ApiEntrepriseController extends ApiInterface
         GroupeRepository $groupeRepo,
         \App\Repository\CiviliteRepository $civiliteRepo,
         \App\Repository\ModuleAbonnementRepository $moduleAbonnementRepo,
-        \App\Service\MenuGeneratorService $menuService
+        \App\Service\MenuGeneratorService $menuService,
+        \App\Service\EntrepriseRegistrationService $registrationService
     ): Response
     {
         try {
@@ -193,126 +194,43 @@ class ApiEntrepriseController extends ApiInterface
                 return $this->errorResponse(null, "Données manquantes (denomination, pays_id, admin_login, admin_password requis)", 400);
             }
 
-            $pays = $paysRepo->find($data['pays_id']);
-            if (!$pays) {
-                return $this->errorResponse(null, "Pays introuvable", 404);
-            }
+            $entreprise = $registrationService->processRegistration($data);
 
-            // --- CREATION DE L'ENTREPRISE ---
-            $entreprise = new Entreprise();
-            $entreprise->setDenomination($data['denomination']);
-            $entreprise->setCode('ENT-' . strtoupper(substr(uniqid(), -6)));
-            $entreprise->setPays($pays);
-            
-            if (isset($data['contacts'])) $entreprise->setContacts($data['contacts']);
-            if (isset($data['sigle'])) $entreprise->setSigle($data['sigle']);
-            if (isset($data['email'])) $entreprise->setEmail($data['email']);
-            
-            // FNE
-            if (isset($data['fneLogin'])) $entreprise->setFneLogin($data['fneLogin']);
-            if (isset($data['fnePassword'])) $entreprise->setFnePassword($data['fnePassword']);
-
-            // --- GESTION DE L'ABONNEMENT (ESSAI OU MODULE SPECIFIQUE) ---
-            $moduleAbonnementId = $data['module_abonnement_id'] ?? null;
-            $typeAbonnement = 'ESSAI';
-            $joursDuree = 14;
-
-            if ($moduleAbonnementId) {
-                $moduleAbonnement = $moduleAbonnementRepo->find($moduleAbonnementId);
-                if ($moduleAbonnement) {
-                    $typeAbonnement = $moduleAbonnement->getCode();
-                    $joursDuree = (int)$moduleAbonnement->getDuree();
-                }
-            }
-
-            $dateFin = new \DateTime();
-            $dateFin->modify("+$joursDuree days");
-
-            $entreprise->setAbonnement($typeAbonnement);
-            $entreprise->setDateFinAbonnement($dateFin);
-            $entreprise->setIsActive(true);
-            $entreprise->setDateCreation(new \DateTime());
-
-            $em->persist($entreprise);
-
-            // --- NOUVEAU SYSTEME D'ABONNEMENT (Entité Abonnement) ---
-            $abonnement = new Abonnement();
-            $abonnement->setEntreprise($entreprise);
-            $abonnement->setType($typeAbonnement);
-            $abonnement->setEtat('ACTIF');
-            $abonnement->setDateFin($dateFin);
-            $em->persist($abonnement);
-
-            // --- GÉNÉRATION DU MENU PAR DÉFAUT ---
-            $menuService->generateDefaultMenu($entreprise);
-
-            // --- RECHERCHE / CREATION DU GROUPE ---
-            $groupe = $groupeRepo->findOneBy(['code' => 'ADMIN']);
-            if (!$groupe) {
-                $groupe = new Groupe();
-                $groupe->setCode('ADMIN');
-                $groupe->setName('Administrateurs');
-                // The global logic holds if missing
-                $em->persist($groupe);
-            }
-            
-            // --- RECHERCHE CIVILITE PAR DEFAUT ---
-            $civilite = $civiliteRepo->findOneBy([]);
-            if (!$civilite) {
-                $civilite = new \App\Entity\Civilite();
-                $civilite->setCode('M.');
-                $civilite->setLibelle('Monsieur');
-                $em->persist($civilite);
-            }
-
-            // --- CREATION DE L'EMPLOYE ---
-            $employe = new Employe();
-            $employe->setNom($data['admin_nom'] ?? 'Admin');
-            $employe->setPrenom($data['admin_prenoms'] ?? '');
-            $employe->setEntreprise($entreprise);
-            $employe->setFonction('Super Administrateur');
-            $employe->setCivilite($civilite);
-            $employe->setContact($data['contacts'] ?? 'Non renseigné');
-            $employe->setAdresseMail($data['email'] ?? 'admin@entreprise.com');
-            $employe->setNumPiece('Non défini');
-            $employe->setResidence('Non défini');
-            $employe->setMatricule('MAT-'.strtoupper(substr(uniqid(), -6)));
-            
-            $em->persist($employe);
-
-            // --- CREATION USER ADMIN DE L'ENTREPRISE ---
-            $user = new User();
-            $user->setLogin($data['admin_login']);
-            $hashedPassword = $hasher->hashPassword($user, $data['admin_password']);
-            $user->setPassword($hashedPassword);
-            $user->setNom($data['admin_nom'] ?? 'Admin');
-            $user->setPrenoms($data['admin_prenoms'] ?? '');
-            $user->setRoles(['ROLE_ADMIN']);
-            $user->setEntreprise($entreprise);
-            $user->setEmploye($employe);
-            $user->setGroupe($groupe);
-            $user->setIsActive(true);
-
-            $em->persist($user);
-            $em->flush();
-
-            // --- GENERATION DU MENU PAR DEFAUT ---
-            $menuService->generateDefaultMenu($entreprise);
-
-            return $this->responseData([
-                'entreprise' => [
-                    'id' => $entreprise->getId(),
-                    'denomination' => $entreprise->getDenomination(),
-                    'dateFinAbonnement' => $entreprise->getDateFinAbonnement()->format('Y-m-d H:i:s')
-                ],
-                'admin_user' => [
-                    'id' => $user->getId(),
-                    'login' => $user->getLogin()
-                ]
-            ], 'group1', ['message' => 'Inscription réussie. Vous avez 14 jours d\'essai.']);
+            return $this->responseData($entreprise, 'group1', ['message' => 'Inscription réussie.']);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/initiate-payment', methods: ['POST'])]
+    public function initiateRegistrationPayment(
+        Request $request,
+        \App\Repository\ModuleAbonnementRepository $moduleAbonnementRepo,
+        \App\Service\PaiementService $paiementService
+    ): Response {
+        try {
+            $data = json_decode($request->getContent(), true);
+            
+            if (!isset($data['module_abonnement_id'])) {
+                return $this->errorResponse(null, "Module abonnement requis pour le paiement", 400);
+            }
+
+            $module = $moduleAbonnementRepo->find($data['module_abonnement_id']);
+            if (!$module) {
+                return $this->errorResponse(null, "Module introuvable", 404);
+            }
+
+            // On initie le paiement en stockant les données d'inscription dans la transaction
+            $result = $paiementService->traiterPaiementInscription($data, $module, $data);
+
+            if ($result['code'] !== 200) {
+                return $this->json($result, 400);
+            }
+
+            return $this->json($result);
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
         }
     }
 

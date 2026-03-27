@@ -15,6 +15,7 @@ use App\Repository\ReglementsRepository;
 use App\Repository\TypeVersementsRepository;
 use App\Entity\Reglements;
 use App\Entity\TypeVersements;
+use App\Service\EntrepriseRegistrationService;
 
 class PaiementService
 {
@@ -30,7 +31,8 @@ class PaiementService
         private TransactionRepository $transactionRepository,
         private FactureLocationRepository $factureLocationRepository,
         private ReglementsRepository $reglementsRepository,
-        private TypeVersementsRepository $typeVersementsRepository
+        private TypeVersementsRepository $typeVersementsRepository,
+        private EntrepriseRegistrationService $registrationService
     ) {
         $this->apiKey = $params->get('api_key');
         $this->merchantId = $params->get('merchant_id');
@@ -210,6 +212,72 @@ class PaiementService
              return [ 'code' => 500, 'error' => $e->getMessage(), 'reference' => $reference ];
         }
     }
+    public function traiterPaiementInscription($data, \App\Entity\ModuleAbonnement $module, array $registrationData): array
+    {
+        $transaction = new Transaction();
+
+        $amount = (int) $module->getMontant();
+        $transaction->setAmount((string)$amount); 
+        $transaction->setModuleAbonnement($module);
+        
+        $reference = $this->generateReference('REG'); // Registration
+        $transaction->setReference($reference);
+        $transaction->setType('inscription'); 
+        $transaction->setMode($data['operateur'] ?? 'MOBILE');
+        $transaction->setStatus('INITIE'); 
+        $transaction->setDescription('Paiement Inscription Motiplus - ' . $module->getCode());
+        $transaction->setDate(new \DateTime());
+        $transaction->setPayload(json_encode($registrationData));
+
+        $this->transactionRepository->save($transaction, true);
+
+        try {
+            $client = new \SoapClient($this->paiementUrl . '?wsdl', [
+                'cache_wsdl' => WSDL_CACHE_NONE,
+                'trace' => 1,
+                'exceptions' => true
+            ]);
+
+            $requestData = [
+                'merchantId'           => $this->merchantId,
+                'referenceNumber'      => $reference,
+                'amount'               => (int) $amount,
+                'channel'              => $data['operateur'] ?? 'MOBILE',
+                'countryCurrencyCode'  => '952', // XOF
+                'currency'             => 'XOF',
+                'customerId'           => 'PENDING',
+                'hashcode'             => 'hashcode', 
+                'customerFirstName'    => $registrationData['admin_nom'] ?? 'Client',
+                'customerLastname'     => $registrationData['admin_prenoms'] ?? 'Moti',
+                'customerEmail'        => $registrationData['email'] ?? 'client@email.com',
+                'customerPhoneNumber'  => $registrationData['contacts'] ?? '00000000',
+                'description'          => $transaction->getDescription(),
+                'notificationURL'      => $this->urlGenerator->generate('api_paiement_webhook', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'returnURL'            => $data['returnURL'] ?? 'https://web.motiplus.pro/login?reg=success',
+                'returnContext'        => http_build_query([
+                    'transaction_id' => $transaction->getId(),
+                    'reference'   => $reference,
+                ]),
+            ];
+
+            $response = $client->initTransact($requestData);
+
+            $sessionId = $response->Sessionid ?? '';
+            $paiementProUrl = 'https://www.paiementpro.net/webservice/onlinepayment/processing_v2.php?sessionid=' . $sessionId;
+
+            return [
+                'code'        => 200,
+                'reference'   => $reference,
+                'transaction_id' => $sessionId,
+                'redirectUrl' => $paiementProUrl,
+                'sessionId'   => $sessionId
+            ];
+        } catch (\Exception $e) {
+             $transaction->setStatus('FAILED');
+             $this->transactionRepository->save($transaction, true);
+             return [ 'code' => 400, 'error' => $e->getMessage(), 'reference' => $reference ];
+        }
+    }
 
     public function handleWebhook(array $data): array
     {
@@ -265,6 +333,16 @@ class PaiementService
                     $this->em->persist($abonnement);
                     $this->em->persist($entreprise);
                     $this->em->flush();
+                }
+            } elseif ($transaction->getType() === 'inscription') {
+                $payload = json_decode($transaction->getPayload(), true);
+                if ($payload) {
+                    try {
+                        $this->registrationService->processRegistration($payload);
+                    } catch (\Exception $e) {
+                         // Peut-être logger l'erreur mais le paiement a eu lieu
+                         return ['message' => 'Payment OK but registration failed: ' . $e->getMessage(), 'code' => 500];
+                    }
                 }
             } else {
                 $facture = $transaction->getFactureLocation();

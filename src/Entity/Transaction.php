@@ -68,6 +68,9 @@ class Transaction
     #[Groups(['group1'])]
     private ?User $agent = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $payload = null;
+
     public function __construct()
     {
         $this->date = new \DateTime();
@@ -218,6 +221,18 @@ class Transaction
     public function setModuleAbonnement(?ModuleAbonnement $moduleAbonnement): static
     {
         $this->moduleAbonnement = $moduleAbonnement;
+
+        return $this;
+    }
+
+    public function getPayload(): ?string
+    {
+        return $this->payload;
+    }
+
+    public function setPayload(?string $payload): static
+    {
+        $this->payload = $payload;
 
         return $this;
     }
