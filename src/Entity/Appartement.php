@@ -262,7 +262,7 @@ class Appartement
         return $this->appartContratLocations;
     }
 
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     #[SerializedName("maison_id")]
     public function getMaisonId(): ?int
     {

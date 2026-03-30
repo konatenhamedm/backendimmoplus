@@ -37,6 +37,7 @@ class ApiAppartementController extends ApiInterface
         try {
             $withPagination = $request->get('with_pagination', "false");
             $agenceId = $request->get('agence_id');
+            $maisonId = $request->get('maison_id');
             $user = $this->getUser();
     
             if ($user && $user->getEntreprise()) {
@@ -57,6 +58,11 @@ class ApiAppartementController extends ApiInterface
                 } else {
                     $qb->andWhere('m.agence = :agence')
                        ->setParameter('agence', $user->getAgence());
+                }
+
+                if ($maisonId && $maisonId !== 'null') {
+                    $qb->andWhere('a.maisson = :maison')
+                       ->setParameter('maison', $maisonId);
                 }
 
                 $appartements = $qb->getQuery()->getResult();
