@@ -38,16 +38,31 @@ class ApiChargeProprioController extends ApiInterface
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
     #[OA\Parameter(name: "proprio_id", in: "query", description: "Filtrer par id du propriétaire", schema: new OA\Schema(type: "integer"))]
     #[OA\Parameter(name: "date_start", in: "query", description: "Filtrer par date de début (YYYY-MM-DD)", schema: new OA\Schema(type: "string"))]
-    #[OA\Parameter(name: "date_end", in: "query", description: "Filtrer par date de fin (YYYY-MM-DD)", schema: new OA\Schema(type: "string"))]
+    #[OA\Parameter(name: "agence_id", in: "query", description: "Filtrer par id de l'agence", schema: new OA\Schema(type: "integer"))]
     public function index(Request $request, ChargeProprioRepository $repository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
+            $user = $this->getUser();
+            
             $qb = $repository->createQueryBuilder('c');
+            $qb->leftJoin('c.maison', 'm');
+            $qb->leftJoin('m.agence', 'a');
 
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+            if ($user && $user->getEntreprise()) {
                 $qb->andWhere('c.entreprise = :entreprise')
-                   ->setParameter('entreprise', $this->getUser()->getEntreprise());
+                   ->setParameter('entreprise', $user->getEntreprise());
+
+                // Isolation par Agence
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                if (!$isSuperAdmin) {
+                    $qb->andWhere('m.agence = :userAgence')
+                       ->setParameter('userAgence', $user->getAgence());
+                } elseif ($agenceId && $agenceId !== 'all' && $agenceId !== 'null') {
+                    $qb->andWhere('m.agence = :filterAgence')
+                       ->setParameter('filterAgence', $agenceId);
+                }
             }
 
             $proprioId = $request->get('proprio_id');

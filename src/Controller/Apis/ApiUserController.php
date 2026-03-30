@@ -67,7 +67,7 @@ class ApiUserController extends ApiInterface
         description: "Ajoute un nouvel utilisateur.",
         tags: ['User']
     )]
-    public function create(Request $request,EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
+    public function create(Request $request, EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -76,7 +76,7 @@ class ApiUserController extends ApiInterface
             }
 
             $user = new User();
-            
+
             if (isset($data['login'])) $user->setLogin($data['login']);
             if (isset($data['nom'])) $user->setNom($data['nom']);
             if (isset($data['prenoms'])) $user->setPrenoms($data['prenoms']);
@@ -89,24 +89,48 @@ class ApiUserController extends ApiInterface
                 if (!$employe) return $this->errorResponse(null, "Employe non trouvé", 404);
                 $user->setEmploye($employe);
             }
-         
+
 
             if (isset($data['groupe_id'])) {
                 $groupe = $groupeRepository->find($data['groupe_id']);
                 if (!$groupe) return $this->errorResponse(null, "Groupe non trouvé", 404);
                 $user->setGroupe($groupe);
+
+                if ($groupe->getCode() === 'ADMIN') {
+                    $user->setRoles(['ROLE_ADMIN']);
+                }
+                if ($groupe->getCode() === 'PROPRIETAIRE') {
+                    $user->setRoles(['ROLE_PROPRIETAIRE']);
+                }
+
+                if ($groupe->getCode() === 'AGENT') {
+                    $user->setRoles(['ROLE_AGENT']);
+                }
+                if ($groupe->getCode() === 'AGENTADMINAG') {
+                    $user->setRoles(['ROLE_AGENTADMINAG']);
+                }
+                if ($groupe->getCode() === 'SADM') {
+                    $user->setRoles(['ROLE_SADM']);
+                }
+                if ($groupe->getCode() === 'COMPTABLE') {
+                    $user->setRoles(['ROLE_COMPTABLE']);
+                }
+                if ($groupe->getCode() === 'LOCATAIRE') {
+                    $user->setRoles(['ROLE_LOCATAIRE']);
+                }
             }
-            
+
             if (isset($data['locataire_id'])) {
                 $locataire = $locataireRepository->find($data['locataire_id']);
                 if (!$locataire) return $this->errorResponse(null, "Locataire non trouvé", 404);
                 $user->setLocataire($locataire);
+                // $user->setRoles(['ROLE_LOCATAIRE']);
             }
 
             // Upload logo (avatar)
             $uploadedFile = $request->files->get('logo');
             if ($uploadedFile) {
-                $filePrefix = $this->slugger->slug('avatar_'.uniqid());
+                $filePrefix = $this->slugger->slug('avatar_' . uniqid());
                 $filePath = $this->getUploadDir('avatars', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'avatars')) {
                     $user->setLogo($fichier);
@@ -134,17 +158,17 @@ class ApiUserController extends ApiInterface
         description: "Met à jour un utilisateur existant.",
         tags: ['User']
     )]
-    public function update(Request $request,EmployeRepository $employeRepository, User $user, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
+    public function update(Request $request, EmployeRepository $employeRepository, User $user, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
     {
         try {
             if (!$user) return $this->errorResponse(null, "Utilisateur non trouvé", 404);
 
             $data = json_decode($request->getContent(), true);
-             if (null === $data) {
+            if (null === $data) {
                 $data = $request->request->all();
             }
-            
-           
+
+
             if (isset($data['login'])) $user->setLogin($data['login']);
             if (isset($data['nom'])) $user->setNom($data['nom']);
             if (isset($data['prenoms'])) $user->setPrenoms($data['prenoms']);
@@ -154,20 +178,43 @@ class ApiUserController extends ApiInterface
                 if (!$employe) return $this->errorResponse(null, "Employe non trouvé", 404);
                 $user->setEmploye($employe);
             }
-            
-            
+
+
             if (isset($data['groupe_id'])) {
                 $groupe = $groupeRepository->find($data['groupe_id']);
                 if (!$groupe) return $this->errorResponse(null, "Groupe non trouvé", 404);
                 $user->setGroupe($groupe);
+
+                if ($groupe->getCode() === 'ADMIN') {
+                    $user->setRoles(['ROLE_ADMIN']);
+                }
+                if ($groupe->getCode() === 'PROPRIETAIRE') {
+                    $user->setRoles(['ROLE_PROPRIETAIRE']);
+                }
+
+                if ($groupe->getCode() === 'AGENT') {
+                    $user->setRoles(['ROLE_AGENT']);
+                }
+                if ($groupe->getCode() === 'AGENTADMINAG') {
+                    $user->setRoles(['ROLE_AGENTADMINAG']);
+                }
+                if ($groupe->getCode() === 'SADM') {
+                    $user->setRoles(['ROLE_SADM']);
+                }
+                if ($groupe->getCode() === 'COMPTABLE') {
+                    $user->setRoles(['ROLE_COMPTABLE']);
+                }
+                if ($groupe->getCode() === 'LOCATAIRE') {
+                    $user->setRoles(['ROLE_LOCATAIRE']);
+                }
             }
-            
+
             if (isset($data['locataire_id'])) {
                 $locataire = $locataireRepository->find($data['locataire_id']);
                 if (!$locataire) return $this->errorResponse(null, "Locataire non trouvé", 404);
                 $user->setLocataire($locataire);
             }
-            
+
             if (isset($data['password']) && !empty($data['password'])) {
                 $user->setPassword($hasher->hashPassword($user, $data['password']));
             }
@@ -175,7 +222,7 @@ class ApiUserController extends ApiInterface
             // Upload logo (avatar)
             $uploadedFile = $request->files->get('logo');
             if ($uploadedFile) {
-                $filePrefix = $this->slugger->slug('avatar_'.uniqid());
+                $filePrefix = $this->slugger->slug('avatar_' . uniqid());
                 $filePath = $this->getUploadDir('avatars', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'avatars')) {
                     $user->setLogo($fichier);
