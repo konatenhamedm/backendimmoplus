@@ -43,28 +43,14 @@ class ApiLocataireController extends ApiInterface
             
             if ($user && $user->getEntreprise()) {
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
                 
-                $qb = $repository->createQueryBuilder('l')
-                    ->where('l.entreprise = :entreprise')
-                    ->setParameter('entreprise', $user->getEntreprise());
-
-                if ($isSuperAdmin) {
-                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                        $qb->andWhere('l.agence = :agence')
-                           ->setParameter('agence', $agenceId);
-                    }
-                } else {
-                    $qb->andWhere('l.agence = :agence')
-                       ->setParameter('agence', $user->getAgence());
-                }
-
-                if ($search) {
-                    $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR l.profession LIKE :search OR l.contacts LIKE :search')
-                       ->setParameter('search', '%'.$search.'%');
-                }
-
-                $locataires = $qb->getQuery()->getResult();
+                $locataires = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $search
+                );
             } else {
                 $locataires = [];
             }

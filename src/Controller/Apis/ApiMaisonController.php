@@ -45,23 +45,14 @@ class ApiMaisonController extends ApiInterface
             
             if ($user && $user->getEntreprise()) {
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
+                $search = $request->get('search');
                 
-                if ($isSuperAdmin) {
-                    // Super Admin can filter by agency or see all
-                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                        $agence = $agenceRepository->find((int)$agenceId);
-                        if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
-                            $maisons = $repository->findByAgence($agence);
-                        } else {
-                            $maisons = [];
-                        }
-                    } else {
-                        $maisons = $repository->findAllByEntreprise($user->getEntreprise());
-                    }
-                } else {
-                    // Regular users see ONLY their own agency
-                    $maisons = $repository->findByAgence($user->getAgence());
-                }
+                $maisons = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $search
+                );
             } else {
                 $maisons = [];
             }

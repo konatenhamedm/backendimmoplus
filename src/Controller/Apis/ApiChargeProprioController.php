@@ -43,55 +43,28 @@ class ApiChargeProprioController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            $agenceId = $request->get('agence_id');
             $user = $this->getUser();
-            
-            $qb = $repository->createQueryBuilder('c');
-            $qb->leftJoin('c.maison', 'm');
-            $qb->leftJoin('m.agence', 'a');
+            $agenceId = $request->get('agence_id');
 
             if ($user && $user->getEntreprise()) {
-                $qb->andWhere('c.entreprise = :entreprise')
-                   ->setParameter('entreprise', $user->getEntreprise());
-
-                // Isolation par Agence
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
-                if (!$isSuperAdmin) {
-                    $qb->andWhere('m.agence = :userAgence')
-                       ->setParameter('userAgence', $user->getAgence());
-                } elseif ($agenceId && $agenceId !== 'all' && $agenceId !== 'null') {
-                    $qb->andWhere('m.agence = :filterAgence')
-                       ->setParameter('filterAgence', $agenceId);
-                }
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
+                $search = $request->get('search');
+                $proprioId = $request->get('proprio_id');
+                $dateStart = $request->get('date_start');
+                $dateEnd = $request->get('date_end');
+                
+                $charges = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $proprioId,
+                    $search,
+                    $dateStart,
+                    $dateEnd
+                );
+            } else {
+                $charges = [];
             }
-            
-            $search = $request->get('search');
-            if ($search) {
-                $qb->leftJoin('c.proprio', 'p_search')
-                   ->andWhere('c.libelle LIKE :search OR p_search.nom LIKE :search OR p_search.prenoms LIKE :search')
-                   ->setParameter('search', '%'.$search.'%');
-            }
-
-            $proprioId = $request->get('proprio_id');
-            if ($proprioId) {
-                $qb->andWhere('c.proprio = :proprio')
-                   ->setParameter('proprio', $proprioId);
-            }
-
-            $dateStart = $request->get('date_start');
-            if ($dateStart) {
-                $qb->andWhere('c.dateCharge >= :dateStart')
-                   ->setParameter('dateStart', $dateStart . ' 00:00:00');
-            }
-
-            $dateEnd = $request->get('date_end');
-            if ($dateEnd) {
-                $qb->andWhere('c.dateCharge <= :dateEnd')
-                   ->setParameter('dateEnd', $dateEnd . ' 23:59:59');
-            }
-
-            $qb->orderBy('c.id', 'DESC');
-            $charges = $qb->getQuery()->getResult();
 
             if ($withPagination == "true") {
                 $charges = $this->paginationService->paginate($charges);

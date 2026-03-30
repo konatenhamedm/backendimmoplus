@@ -69,6 +69,30 @@ class LocataireRepository extends ServiceEntityRepository
         return $this->findBy(['agence' => $agence], ['id' => 'DESC']);
     }
 
+    /**
+     * Centralized query for locataires with multiple filters
+     */
+    public function findWithFilters($entreprise, $agence = null, $search = null)
+    {
+        $qb = $this->createQueryBuilder('l')
+            ->where('l.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('l.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($search) {
+            $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR l.profession LIKE :search OR l.contacts LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('l.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     
     public function withoutAccount()
     {

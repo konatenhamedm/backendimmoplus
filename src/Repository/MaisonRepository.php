@@ -69,6 +69,35 @@ class MaisonRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Centralized query for maisons with multiple filters
+     */
+    public function findWithFilters($entreprise, $agence = null, $search = null)
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->join('m.agence', 'a')
+            ->leftJoin('m.quartier', 'q')
+            ->leftJoin('m.proprio', 'p')
+            ->leftJoin('m.typeMaison', 't')
+            ->leftJoin('m.idAgent', 'ag')
+            ->andWhere('a.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('m.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($search) {
+            $qb->andWhere('m.libMaison LIKE :search OR p.nom LIKE :search OR p.prenoms LIKE :search OR q.libQuartier LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('m.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 //    /**
 //     * @return Maison[] Returns an array of Maison objects

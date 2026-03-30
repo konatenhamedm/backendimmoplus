@@ -35,31 +35,18 @@ class ApiAgenceController extends ApiInterface
 
             $withPagination = $request->get('with_pagination', "false");
             $search = $request->get('search');
-
-            $qb = $agenceRepository->createQueryBuilder('a')
-                ->where('a.entreprise = :entreprise')
-                ->setParameter('entreprise', $entreprise)
-                ->andWhere('a.isActive = true')
-                ->orderBy('a.id', 'DESC');
-
-            if ($search) {
-                $qb->andWhere('a.nom LIKE :search OR a.email LIKE :search OR a.contact LIKE :search')
-                   ->setParameter('search', '%'.$search.'%');
+            
+            // Si ADMIN ou SADM, on ne restreint pas l'agence
+            $agenceIdToRestrict = null;
+            if (!$user->getGroupe() || !in_array($user->getGroupe()->getCode(), ['ADMIN', 'SADM'])) {
+                $agenceIdToRestrict = $user->getAgence() ? $user->getAgence()->getId() : -1; // -1 to return none if no agence
             }
 
-            // Si ADMIN ou SADM, renvoie les agences filtrées
-            if ($user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SADM'])) {
-                $agences = $qb->getQuery()->getResult();
-            } else {
-                // Sinon (employé classique), on renvoie uniquement son agence (si elle match la recherche)
-                if ($user->getAgence()) {
-                    $qb->andWhere('a.id = :myAgence')
-                       ->setParameter('myAgence', $user->getAgence()->getId());
-                    $agences = $qb->getQuery()->getResult();
-                } else {
-                    $agences = [];
-                }
-            }
+            $agences = $agenceRepository->findWithFilters(
+                $entreprise,
+                $search,
+                $agenceIdToRestrict
+            );
 
             if ($withPagination == "true") {
                 $agences = $this->paginationService->paginate($agences);

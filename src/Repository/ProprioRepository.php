@@ -39,6 +39,25 @@ class ProprioRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Centralized query for owners with filters
+     */
+    public function findWithFilters($entreprise, $search = null)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($search) {
+            $qb->andWhere('p.nom LIKE :search OR p.prenoms LIKE :search OR p.contacts LIKE :search OR p.email LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('p.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 //    /**
 //     * @return Proprio[] Returns an array of Proprio objects

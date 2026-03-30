@@ -46,28 +46,20 @@ class ApiFactureLocationController extends ApiInterface
             $user = $this->getUser();
             
             if ($user && $user->getEntreprise()) {
-                $qb = $repository->createQueryBuilder('f')
-                    ->leftJoin('f.locataire', 'l')
-                    ->where('f.entreprise = :entreprise')
-                    ->setParameter('entreprise', $user->getEntreprise());
-
-                if (in_array('ROLE_AGENT', $user->getRoles())) {
-                    $qb->leftJoin('f.contrat', 'c')
-                       ->leftJoin('c.appartement', 'a')
-                       ->leftJoin('a.maison', 'm')
-                       ->leftJoin('m.agence', 'ag')
-                       ->leftJoin('ag.utilisateurs', 'u')
-                       ->andWhere('u.id = :userId')
-                       ->setParameter('userId', $user->getId());
-                }
-
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                $agenceId = $request->get('agence_id');
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
-                if ($search) {
-                    $qb->andWhere('f.libFacture LIKE :search OR l.nom LIKE :search OR l.prenoms LIKE :search')
-                       ->setParameter('search', '%'.$search.'%');
-                }
-
-                $factures = $qb->getQuery()->getResult();
+                $proprioId = $request->get('proprio_id');
+                $statut = $request->get('statut');
+                
+                $factures = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $proprioId,
+                    $search,
+                    $statut
+                );
             } else {
                 $factures = $repository->findAll();
             }

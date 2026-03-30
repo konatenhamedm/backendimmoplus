@@ -47,45 +47,17 @@ class ApiContratLocationController extends ApiInterface
             
             if ($user && $user->getEntreprise()) {
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
-                
-                $qb = $repository->createQueryBuilder('c')
-                    ->join('c.locataire', 'l') // Still needed for empresa filter if preferred or just use agence
-                    ->join('c.appart', 'a')
-                    ->join('a.maisson', 'm')
-                    ->join('m.agence', 'ag')
-                    ->andWhere('ag.entreprise = :entreprise')
-                    ->setParameter('entreprise', $user->getEntreprise());
-
-                if ($isSuperAdmin) {
-                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                        $qb->andWhere('m.agence = :agence')
-                           ->setParameter('agence', $agenceId);
-                    }
-                } else {
-                    $qb->andWhere('m.agence = :agence')
-                       ->setParameter('agence', $user->getAgence());
-                }
-
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
                 $proprioId = $request->get('proprio_id');
-
-                if ($etat !== null && $etat !== '') {
-                    $qb->andWhere('c.etat = :etat')
-                        ->setParameter('etat', $etat);
-                }
-
-                if ($search) {
-                   $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR a.libAppart LIKE :search OR m.libMaison LIKE :search')
-                      ->setParameter('search', '%'.$search.'%');
-                }
-
-                if ($proprioId && $proprioId !== 'all') {
-                    $qb->leftJoin('m.proprio', 'p_filter')
-                       ->andWhere('p_filter.id = :proprioId')
-                       ->setParameter('proprioId', $proprioId);
-                }
-
-                $contrats = $qb->getQuery()->getResult();
+                
+                $contrats = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $proprioId,
+                    $search,
+                    $etat
+                );
             } else {
                 $contrats = [];
             }

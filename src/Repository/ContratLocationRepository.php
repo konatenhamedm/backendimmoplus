@@ -49,6 +49,43 @@ class ContratLocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Centralized query for lease contracts with filters
+     */
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $etat = null)
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->innerJoin('c.locataire', 'l')
+            ->where('l.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('l.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($proprioId && $proprioId !== 'all' && $proprioId !== 'null') {
+            $qb->leftJoin('c.appart', 'a')
+               ->leftJoin('a.maisson', 'm')
+               ->andWhere('m.proprio = :proprio')
+               ->setParameter('proprio', $proprioId);
+        }
+
+        if ($etat !== null && $etat !== '') {
+            $qb->andWhere('c.etat = :etat')
+                ->setParameter('etat', $etat);
+        }
+
+        if ($search) {
+            $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR c.id LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('c.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     public function getContratLocActif($entreprise): array
     {

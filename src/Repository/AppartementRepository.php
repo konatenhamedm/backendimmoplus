@@ -151,6 +151,42 @@ class AppartementRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Centralized query for apartments with multiple filters
+     */
+    public function findWithFilters($entreprise, $agence = null, $maisonId = null, $search = null, $oqp = null)
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->join('a.maisson', 'm')
+            ->join('m.agence', 'ag')
+            ->andWhere('ag.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('m.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($maisonId && $maisonId !== 'all' && $maisonId !== 'null') {
+            $qb->andWhere('a.maisson = :maison')
+               ->setParameter('maison', $maisonId);
+        }
+
+        if ($search) {
+            $qb->andWhere('a.libAppart LIKE :search OR m.libMaison LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        if ($oqp !== null) {
+            $qb->andWhere('a.oqp = :oqp')
+               ->setParameter('oqp', $oqp);
+        }
+
+        return $qb->orderBy('a.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 
 
     //    /**

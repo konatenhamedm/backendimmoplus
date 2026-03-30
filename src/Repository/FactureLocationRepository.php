@@ -48,6 +48,45 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * Centralized query for rent invoices with filters
+     */
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null)
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.locataire', 'l')
+            ->where('f.entreprise = :entreprise')
+            ->setParameter('entreprise', $entreprise);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('l.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($proprioId && $proprioId !== 'all' && $proprioId !== 'null') {
+            $qb->leftJoin('f.appartement', 'a')
+               ->leftJoin('a.maisson', 'm')
+               ->andWhere('m.proprio = :proprio')
+               ->setParameter('proprio', $proprioId);
+        }
+
+        if ($statut) {
+            $qb->andWhere('f.statut = :statut')
+               ->setParameter('statut', $statut);
+        }
+
+        if ($search) {
+            $qb->leftJoin('f.appartement', 'a_search')
+               ->leftJoin('a_search.maisson', 'm_search')
+               ->andWhere('f.libFacture LIKE :search OR l.nom LIKE :search OR l.prenoms LIKE :search OR m_search.libMaison LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('f.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findAllByAgent($agent)
     {
         return $this->createQueryBuilder('f')

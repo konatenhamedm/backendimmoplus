@@ -41,37 +41,16 @@ class ApiAppartementController extends ApiInterface
             $user = $this->getUser();
     
             if ($user && $user->getEntreprise()) {
-                $entreprise = $user->getEntreprise();
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
-                
-                $qb = $repository->createQueryBuilder('a')
-                    ->join('a.maisson', 'm')
-                    ->join('m.agence', 'ag')
-                    ->andWhere('ag.entreprise = :entreprise')
-                    ->setParameter('entreprise', $entreprise);
-
-                if ($isSuperAdmin) {
-                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                        $qb->andWhere('m.agence = :agence')
-                           ->setParameter('agence', $agenceId);
-                    }
-                } else {
-                    $qb->andWhere('m.agence = :agence')
-                       ->setParameter('agence', $user->getAgence());
-                }
-
-                if ($maisonId && $maisonId !== 'null') {
-                    $qb->andWhere('a.maisson = :maison')
-                       ->setParameter('maison', $maisonId);
-                }
-
+                $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
-                if ($search) {
-                    $qb->andWhere('a.libAppart LIKE :search OR m.libMaison LIKE :search')
-                       ->setParameter('search', '%'.$search.'%');
-                }
-
-                $appartements = $qb->getQuery()->getResult();
+                
+                $appartements = $repository->findWithFilters(
+                    $user->getEntreprise(),
+                    $agence,
+                    $maisonId,
+                    $search
+                );
             } else {
                 $appartements = [];
             }
@@ -105,26 +84,15 @@ class ApiAppartementController extends ApiInterface
             }
 
             $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+            $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
             
-            $qb = $repository->createQueryBuilder('a')
-                ->join('a.maisson', 'm')
-                ->join('m.agence', 'ag')
-                ->andWhere('a.oqp = :status')
-                ->andWhere('ag.entreprise = :entreprise')
-                ->setParameter('status', 0)
-                ->setParameter('entreprise', $user->getEntreprise());
-
-            if ($isSuperAdmin) {
-                if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                    $qb->andWhere('m.agence = :agence')
-                       ->setParameter('agence', $agenceId);
-                }
-            } else {
-                $qb->andWhere('m.agence = :agence')
-                   ->setParameter('agence', $user->getAgence());
-            }
-            
-            $appartements = $qb->getQuery()->getResult();
+            $appartements = $repository->findWithFilters(
+                $user->getEntreprise(),
+                $agence,
+                null,
+                null,
+                0 // Only free apartments
+            );
             
             return $this->responseData($appartements, 'group1');
         } catch (\Exception $exception) {
