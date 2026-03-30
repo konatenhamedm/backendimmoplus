@@ -19,31 +19,31 @@ class Proprio
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?int $id = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $prenoms = null;
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $contacts = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $addresse = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $numCni = null;
 
 
