@@ -22,45 +22,45 @@ class Appartement
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, name: 'libAppart')]
     #[Assert\NotBlank(message: 'Veuillez renseigner le libellé de la colonne', groups: ['colonne-groupe'])]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $libAppart = null;
 
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: '0', name: 'nbrePieces')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $nbrePieces = null;
 
     #[ORM\Column(name: 'numEtage')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?int $numEtage = null;
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', name: 'loyer')]
     #[Assert\Positive(message: 'Le loyer payé doit être > à 0')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $loyer = null;
 
     #[ORM\Column(nullable: true, name: 'caution')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?int $caution = null;
 
     #[ORM\Column(length: 255, name: 'details')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?string $details = null;
 
     #[ORM\Column(nullable: true, name: 'oqp')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?int $oqp = null;
 
     #[ORM\ManyToOne(inversedBy: 'appartements')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'appartement-groupe'])]
     private ?Maison $maisson = null;
 
     #[ORM\OneToMany(mappedBy: 'appart', targetEntity: ContratLocation::class)]

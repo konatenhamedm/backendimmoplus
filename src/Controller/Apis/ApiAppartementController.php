@@ -68,7 +68,7 @@ class ApiAppartementController extends ApiInterface
                 $appartements = $this->paginationService->paginate($appartements);
             }
             
-            return $this->responseData($appartements, 'group1', [], $withPagination == "true" ? true : false);
+            return $this->responseData($appartements, 'appartement-groupe', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
