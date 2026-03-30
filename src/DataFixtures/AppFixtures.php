@@ -174,7 +174,7 @@ class AppFixtures extends Fixture
          $appartement->setNbrePieces(3);
          $appartement->setNumEtage(1); // First floor
          $appartement->setLoyer(150000);
-         $appartement->setDetails("Details de l'appartement");
+         $appartement->setDetails("Bel appartement");
          // $appartement->setEntreprise($entreprise); // Not a direct relationship
          $manager->persist($appartement);
 

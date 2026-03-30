@@ -191,6 +191,7 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
                 $appartement->setNbrePieces($faker->numberBetween(1, 4));
                 $appartement->setNumEtage($j);
                 $appartement->setLoyer($faker->randomElement([150000, 200000, 250000, 300000]));
+                $appartement->setDetails($faker->sentence());
                 $appartement->setOqp(0);
                 $manager->persist($appartement);
 
