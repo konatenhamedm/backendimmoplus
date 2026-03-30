@@ -10,10 +10,12 @@ use App\Entity\Employe;
 use App\Entity\Entreprise;
 use App\Entity\Locataire;
 use App\Entity\Maison;
+use App\Entity\Pays;
 use App\Entity\Proprio;
 use App\Entity\Quartier;
 use App\Entity\TypeMaison;
 use App\Entity\User;
+use App\Entity\Ville;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -85,10 +87,45 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
             $manager->persist($agence5);
         }
 
-        // 3. Reference Data
+        // 3. Reference Data (Ensure they exist)
+        $pays = $manager->getRepository(Pays::class)->findOneBy([]) ?: null;
+        if (!$pays) {
+            $pays = new Pays();
+            $pays->setCode("CI");
+            $pays->setLibelle("Côte d'Ivoire");
+            $manager->persist($pays);
+        }
+
+        $ville = $manager->getRepository(Ville::class)->findOneBy([]) ?: null;
+        if (!$ville) {
+            $ville = new Ville();
+            $ville->setLibVille("Abidjan");
+            $ville->setPays($pays);
+            $manager->persist($ville);
+        }
+
         $quartier = $manager->getRepository(Quartier::class)->findOneBy([]) ?: null;
+        if (!$quartier) {
+            $quartier = new Quartier();
+            $quartier->setLibQuartier("Cocody");
+            $quartier->setVille($ville);
+            $manager->persist($quartier);
+        }
+
         $typeMaison = $manager->getRepository(TypeMaison::class)->findOneBy([]) ?: null;
+        if (!$typeMaison) {
+            $typeMaison = new TypeMaison();
+            $typeMaison->setLibType("Villa");
+            $manager->persist($typeMaison);
+        }
+
         $civilite = $manager->getRepository(Civilite::class)->findOneBy(['code' => 'M']) ?: null;
+        if (!$civilite) {
+            $civilite = new Civilite();
+            $civilite->setLibelle("Monsieur");
+            $civilite->setCode("M");
+            $manager->persist($civilite);
+        }
         
         // 4. Get or Create Agent User (ID=6)
         $userAgent = $manager->getRepository(User::class)->find(6);
