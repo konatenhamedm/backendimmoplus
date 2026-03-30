@@ -53,6 +53,7 @@ class Maison
     private ?string $mntCom = null;
 
     #[ORM\OneToMany(mappedBy: 'maisson', targetEntity: Appartement::class, orphanRemoval: true, cascade: ['persist'])]
+    #[Groups(['group1'])]
     private Collection $appartements;
 
     #[ORM\ManyToOne(inversedBy: 'quartierMaisons')]
