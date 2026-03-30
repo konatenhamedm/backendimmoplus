@@ -66,9 +66,23 @@ class ApiContratLocationController extends ApiInterface
                        ->setParameter('agence', $user->getAgence());
                 }
 
+                $search = $request->get('search');
+                $proprioId = $request->get('proprio_id');
+
                 if ($etat !== null && $etat !== '') {
                     $qb->andWhere('c.etat = :etat')
                         ->setParameter('etat', $etat);
+                }
+
+                if ($search) {
+                   $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR a.libAppart LIKE :search OR m.libMaison LIKE :search')
+                      ->setParameter('search', '%'.$search.'%');
+                }
+
+                if ($proprioId && $proprioId !== 'all') {
+                    $qb->leftJoin('m.proprio', 'p_filter')
+                       ->andWhere('p_filter.id = :proprioId')
+                       ->setParameter('proprioId', $proprioId);
                 }
 
                 $contrats = $qb->getQuery()->getResult();

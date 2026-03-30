@@ -37,8 +37,20 @@ class ApiProprioController extends ApiInterface
         try {
             $withPagination = $request->get('with_pagination', "false");
             
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $proprios = $repository->findBy(['entreprise' => $this->getUser()->getEntreprise()], ['id' => 'DESC']);
+            $search = $request->get('search');
+            $user = $this->getUser();
+            
+            if ($user && $user->getEntreprise()) {
+                $qb = $repository->createQueryBuilder('p')
+                    ->where('p.entreprise = :entreprise')
+                    ->setParameter('entreprise', $user->getEntreprise());
+
+                if ($search) {
+                    $qb->andWhere('p.nom LIKE :search OR p.prenoms LIKE :search OR p.contacts LIKE :search OR p.email LIKE :search')
+                       ->setParameter('search', '%'.$search.'%');
+                }
+
+                $proprios = $qb->getQuery()->getResult();
             } else {
                 $proprios = $repository->findBy([], ['id' => 'DESC']);
             }

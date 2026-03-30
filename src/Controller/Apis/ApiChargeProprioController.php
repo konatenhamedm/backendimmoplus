@@ -64,6 +64,13 @@ class ApiChargeProprioController extends ApiInterface
                        ->setParameter('filterAgence', $agenceId);
                 }
             }
+            
+            $search = $request->get('search');
+            if ($search) {
+                $qb->leftJoin('c.proprio', 'p_search')
+                   ->andWhere('c.libelle LIKE :search OR p_search.nom LIKE :search OR p_search.prenoms LIKE :search')
+                   ->setParameter('search', '%'.$search.'%');
+            }
 
             $proprioId = $request->get('proprio_id');
             if ($proprioId) {

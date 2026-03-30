@@ -65,6 +65,12 @@ class ApiAppartementController extends ApiInterface
                        ->setParameter('maison', $maisonId);
                 }
 
+                $search = $request->get('search');
+                if ($search) {
+                    $qb->andWhere('a.libAppart LIKE :search OR m.libMaison LIKE :search')
+                       ->setParameter('search', '%'.$search.'%');
+                }
+
                 $appartements = $qb->getQuery()->getResult();
             } else {
                 $appartements = [];

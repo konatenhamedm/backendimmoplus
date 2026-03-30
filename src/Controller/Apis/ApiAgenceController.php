@@ -33,18 +33,39 @@ class ApiAgenceController extends ApiInterface
                  return $this->responseData([], 'group1');
             }
 
-            // Si ADMIN ou SADM, renvoie toutes les agences de l'entreprise
+            $withPagination = $request->get('with_pagination', "false");
+            $search = $request->get('search');
+
+            $qb = $agenceRepository->createQueryBuilder('a')
+                ->where('a.entreprise = :entreprise')
+                ->setParameter('entreprise', $entreprise)
+                ->andWhere('a.isActive = true')
+                ->orderBy('a.id', 'DESC');
+
+            if ($search) {
+                $qb->andWhere('a.nom LIKE :search OR a.email LIKE :search OR a.contact LIKE :search')
+                   ->setParameter('search', '%'.$search.'%');
+            }
+
+            // Si ADMIN ou SADM, renvoie les agences filtrées
             if ($user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SADM'])) {
-                $agences = $agenceRepository->findBy(['entreprise' => $entreprise, 'isActive' => true], ['id' => 'DESC']);
-                return $this->responseData($agences, 'group1');
+                $agences = $qb->getQuery()->getResult();
+            } else {
+                // Sinon (employé classique), on renvoie uniquement son agence (si elle match la recherche)
+                if ($user->getAgence()) {
+                    $qb->andWhere('a.id = :myAgence')
+                       ->setParameter('myAgence', $user->getAgence()->getId());
+                    $agences = $qb->getQuery()->getResult();
+                } else {
+                    $agences = [];
+                }
             }
 
-            // Sinon (employé classique), on renvoie uniquement son agence
-            if ($user->getAgence()) {
-                return $this->responseData([$user->getAgence()], 'group1');
+            if ($withPagination == "true") {
+                $agences = $this->paginationService->paginate($agences);
             }
 
-            return $this->responseData([], 'group1');
+            return $this->responseData($agences, 'group1', [], $withPagination == "true" ? true : false);
 
         } catch (\Exception $exception) {
             return $this->json(['message' => $exception->getMessage()], 500);

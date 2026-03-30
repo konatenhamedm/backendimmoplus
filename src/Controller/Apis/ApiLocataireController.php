@@ -43,24 +43,28 @@ class ApiLocataireController extends ApiInterface
             
             if ($user && $user->getEntreprise()) {
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                $search = $request->get('search');
                 
+                $qb = $repository->createQueryBuilder('l')
+                    ->where('l.entreprise = :entreprise')
+                    ->setParameter('entreprise', $user->getEntreprise());
+
                 if ($isSuperAdmin) {
                     if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                        $agence = $agenceRepository->find((int)$agenceId);
-                        if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
-                            $locataires = $repository->findByAgence($agence);
-                        } else {
-                            $locataires = [];
-                        }
-                    } else {
-                        // For Admin, show all by enterprise (bypassing repo's default agency filter if possible)
-                        // Actually, repo's findAllByEntreprise uses $this->user->getAgence(). 
-                        // Let's use findBy criteria instead.
-                        $locataires = $repository->findBy(['entreprise' => $user->getEntreprise()], ['id' => 'DESC']);
+                        $qb->andWhere('l.agence = :agence')
+                           ->setParameter('agence', $agenceId);
                     }
                 } else {
-                    $locataires = $repository->findByAgence($user->getAgence());
+                    $qb->andWhere('l.agence = :agence')
+                       ->setParameter('agence', $user->getAgence());
                 }
+
+                if ($search) {
+                    $qb->andWhere('l.nom LIKE :search OR l.prenoms LIKE :search OR l.profession LIKE :search OR l.contacts LIKE :search')
+                       ->setParameter('search', '%'.$search.'%');
+                }
+
+                $locataires = $qb->getQuery()->getResult();
             } else {
                 $locataires = [];
             }

@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Entity\Employe;
 use App\Entity\Entreprise;
 use App\Entity\Pays;
-use App\Entity\Fonction;
 use App\Entity\Civilite;
 use App\Entity\Groupe;
 use Doctrine\ORM\EntityManagerInterface;
@@ -66,11 +65,11 @@ class SetupAdminCommand extends Command
         $io->info("Entreprise 'motiplus SARL' créée.");
 
         // 3. Fonction
-        $fonction = new Fonction();
+      /*   $fonction = new Fonction();
         $fonction->setLibelle("Administrateur");
         $fonction->setCode("ADMIN");
         $fonction->setEntreprise($entreprise);
-        $this->entityManager->persist($fonction);
+        $this->entityManager->persist($fonction); */
 
         // 4. Civilite
         $civilite = $this->entityManager->getRepository(Civilite::class)->find(1);
@@ -79,7 +78,7 @@ class SetupAdminCommand extends Command
         $employe = new Employe();
         $employe->setNom("KONATE");
         $employe->setPrenom("Nhamed");
-        $employe->setFonction($fonction);
+        $employe->setFonction("Administrateur");
         $employe->setEntreprise($entreprise);
         $employe->setCivilite($civilite);
         $employe->setContact("+225 0707070707");

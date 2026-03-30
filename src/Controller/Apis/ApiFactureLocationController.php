@@ -46,11 +46,28 @@ class ApiFactureLocationController extends ApiInterface
             $user = $this->getUser();
             
             if ($user && $user->getEntreprise()) {
+                $qb = $repository->createQueryBuilder('f')
+                    ->leftJoin('f.locataire', 'l')
+                    ->where('f.entreprise = :entreprise')
+                    ->setParameter('entreprise', $user->getEntreprise());
+
                 if (in_array('ROLE_AGENT', $user->getRoles())) {
-                    $factures = $repository->findAllByAgent($user->getId());
-                } else {
-                    $factures = $repository->findAllByEntreprise($user->getEntreprise());
+                    $qb->leftJoin('f.contrat', 'c')
+                       ->leftJoin('c.appartement', 'a')
+                       ->leftJoin('a.maison', 'm')
+                       ->leftJoin('m.agence', 'ag')
+                       ->leftJoin('ag.utilisateurs', 'u')
+                       ->andWhere('u.id = :userId')
+                       ->setParameter('userId', $user->getId());
                 }
+
+                $search = $request->get('search');
+                if ($search) {
+                    $qb->andWhere('f.libFacture LIKE :search OR l.nom LIKE :search OR l.prenoms LIKE :search')
+                       ->setParameter('search', '%'.$search.'%');
+                }
+
+                $factures = $qb->getQuery()->getResult();
             } else {
                 $factures = $repository->findAll();
             }
