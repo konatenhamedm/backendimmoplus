@@ -42,7 +42,10 @@ class MaisonRepository extends ServiceEntityRepository
     public function findAllByEntreprise($entreprise)
     {
         return $this->createQueryBuilder('m')
-            ->leftJoin('m.agence', 'a')
+            ->join('m.agence', 'a')
+            ->join('m.quartier', 'q')
+            ->join('m.proprio', 'p')
+            ->join('m.typeMaison', 't')
             ->andWhere('a.entreprise = :entreprise')
             ->setParameter('entreprise', $entreprise)
             ->getQuery()
@@ -51,7 +54,17 @@ class MaisonRepository extends ServiceEntityRepository
 
     public function findByAgence($agence)
     {
-        return $this->findBy(['agence' => $agence], ['id' => 'DESC']);
+        // Forcing inner joins to avoid orphaned record crashes during serialization
+        return $this->createQueryBuilder('m')
+            ->join('m.agence', 'a')
+            ->join('m.quartier', 'q')
+            ->join('m.proprio', 'p')
+            ->join('m.typeMaison', 't')
+            ->andWhere('m.agence = :agence')
+            ->setParameter('agence', $agence)
+            ->orderBy('m.id', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
 
