@@ -61,7 +61,7 @@ class MaisonRepository extends ServiceEntityRepository
             ->join('m.quartier', 'q')
             ->join('m.proprio', 'p')
             ->join('m.typeMaison', 't')
-            ->join('m.idAgent', 'ag')
+            ->leftjoin('m.idAgent', 'ag')
             ->andWhere('m.agence = :agence')
             ->setParameter('agence', $agence)
             ->orderBy('m.id', 'DESC')
