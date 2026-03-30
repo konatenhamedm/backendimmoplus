@@ -205,6 +205,7 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
                     $contrat->setDateDebut($faker->dateTimeBetween('-1 year', 'now'));
                     $contrat->setMntCaution((string)($appartement->getLoyer() * 2));
                     $contrat->setNbMoisCaution(2);
+                    $contrat->setFraisanex('0');
                     $contrat->setJourGenerationFacture(5);
                     $contrat->setEntreprise($entreprise);
                     $contrat->setEtat(1);
