@@ -154,7 +154,6 @@ class Proprio
     private Collection $versmtProprios;
 
     #[ORM\OneToMany(mappedBy: 'proprio', targetEntity: ChargeProprio::class)]
-    #[Groups(['group1'])]
     private Collection $chargeProprios;
 
     

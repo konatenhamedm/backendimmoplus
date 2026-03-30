@@ -164,6 +164,7 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
             $proprio->setEmail($faker->email);
             $proprio->setAddresse($faker->address);
             $proprio->setEntreprise($entreprise);
+            $proprio->setAgence($i % 2 === 0 ? $agence1 : $agence5);
             $manager->persist($proprio);
             $proprios[] = $proprio;
         }
@@ -176,9 +177,10 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
             $maison->setLibMaison("Résidence " . $faker->streetName);
             $maison->setLot("Lot " . $faker->numberBetween(1, 500));
             $maison->setIlot("Ilot " . $faker->numberBetween(1, 50));
-            $maison->setMntCom(10); // 10%
+            $maison->setMntCom(10000); 
+            $maison->setLocalisation($faker->streetAddress);
             $maison->setProprio($proprios[array_rand($proprios)]);
-            $maison->setAgence($agences[$i % 2]); // Distribute across agences
+            $maison->setAgence($agences[$i % 2]); 
             $maison->setIdAgent($userAgent);
             if ($quartier) $maison->setQuartier($quartier);
             if ($typeMaison) $maison->setTypeMaison($typeMaison);
