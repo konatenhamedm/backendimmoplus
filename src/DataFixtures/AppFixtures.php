@@ -17,6 +17,8 @@ use App\Entity\Pays;
 use App\Entity\Ville;
 use App\Entity\Quartier;
 use App\Entity\TypeMaison;
+use App\Entity\Civilite;
+use App\Entity\Employe;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -71,55 +73,48 @@ class AppFixtures extends Fixture
         $manager->persist($typeMaison);
 
         // 1. Create Entreprise
-        $entreprise = new Entreprise();
+        $entreprise = $manager->getRepository(Entreprise::class)->findOneBy(['numero' => 'ENT001']) ?: new Entreprise();
         $entreprise->setDenomination('motiplus Demo');
         $entreprise->setEmail('contact@immoplus.demo');
         $entreprise->setContacts('0102030405');
         $entreprise->setCode('IMMO001');
         $entreprise->setSigle('IMMO');
-        $entreprise->setAgrements('AGREMENT-001'); // Mandatory
-        $entreprise->setSituationGeo('Abidjan Cocody Riviera'); // Mandatory
+        $entreprise->setAgrements('AGREMENT-001'); 
+        $entreprise->setSituationGeo('Abidjan Cocody Riviera'); 
         $entreprise->setMobile('0505050505');
         $entreprise->setSiteWeb('www.immoplus.demo');
         $entreprise->setDirecteur('Mr Konate');
-        $entreprise->setNumero('ENT001'); // Mandatory
+        $entreprise->setNumero('ENT001'); 
         $entreprise->setPays($pays);
         $entreprise->setVille($ville->getLibVille());
-        // Add other required fields if any (check entities)
         $manager->persist($entreprise);
 
-        // 2. Create User (Admin) with Employe
-        // Employe must be created first or linked
-        $employe = new \App\Entity\Employe();
-        $employe->setNom('Admin');
-        $employe->setPrenom('User');
-        $employe->setMatricule('ADM001');
-        $employe->setContact('0102030405');
-        $employe->setAdresseMail('admin@immoplus.demo');
-        // Need to add mandatory fields for Employe if any (checked: Fonction, Civilite are NotNull in definition? Let's check) 
-        // Employe.php: fonction and civilite are ManyToOne JoinColumn nullable=false.
-        // I need to create Fonction and Civilite.
-
-        $civilite = new \App\Entity\Civilite();
+        $civilite = $manager->getRepository(Civilite::class)->findOneBy(['code' => 'M']) ?: new Civilite();
         $civilite->setLibelle('Monsieur');
         $civilite->setCode('M');
         $manager->persist($civilite);
-        $employe->setCivilite($civilite);
 
-        $employe->setFonction('Administrateur');
-        
-        $employe->setEntreprise($entreprise);
-        $employe->setContacts('0102030405');
-        $employe->setNumPiece('CNI001');
-        $employe->setResidence('Abidjan');
-        $manager->persist($employe);
-
-        $user = new User();
+        // 2. Create User (Admin) with Employe
+        $user = $manager->getRepository(User::class)->findOneBy(['login' => 'admin@immoplus.demo']) ?: new User();
         $user->setLogin('admin@immoplus.demo');
         $user->setPassword($this->hasher->hashPassword($user, 'password'));
         $user->setRoles(['ROLE_ADMIN']);
         $user->setEntreprise($entreprise);
         $user->setIsActive(true);
+
+        $employe = $user->getEmploye() ?: new \App\Entity\Employe();
+        $employe->setNom('Admin');
+        $employe->setPrenom('User');
+        $employe->setMatricule('ADM001');
+        $employe->setContact('0102030405');
+        $employe->setAdresseMail('admin@immoplus.demo');
+        $employe->setCivilite($civilite);
+        $employe->setFonction('Administrateur');
+        $employe->setEntreprise($entreprise);
+        $employe->setNumPiece('CNI001');
+        $employe->setResidence('Abidjan');
+        $manager->persist($employe);
+        
         $user->setEmploye($employe);
         $manager->persist($user);
 
