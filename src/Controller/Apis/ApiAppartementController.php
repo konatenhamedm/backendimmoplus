@@ -32,15 +32,34 @@ class ApiAppartementController extends ApiInterface
         tags: ['Appartement']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, AppartementRepository $repository, MaisonRepository $maisonRepository): Response
+    public function index(Request $request, AppartementRepository $repository, MaisonRepository $maisonRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
+            $user = $this->getUser();
     
-            $entreprise = ($this->getUser() && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise() : null;
+            if ($user && $user->getEntreprise()) {
+                $entreprise = $user->getEntreprise();
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                
+                $qb = $repository->createQueryBuilder('a')
+                    ->join('a.maisson', 'm')
+                    ->join('m.agence', 'ag')
+                    ->andWhere('ag.entreprise = :entreprise')
+                    ->setParameter('entreprise', $entreprise);
 
-            if ($entreprise) {
-                $appartements = $repository->findAllByEntreprise($entreprise);
+                if ($isSuperAdmin) {
+                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                        $qb->andWhere('m.agence = :agence')
+                           ->setParameter('agence', $agenceId);
+                    }
+                } else {
+                    $qb->andWhere('m.agence = :agence')
+                       ->setParameter('agence', $user->getAgence());
+                }
+
+                $appartements = $qb->getQuery()->getResult();
             } else {
                 $appartements = [];
             }
@@ -60,23 +79,37 @@ class ApiAppartementController extends ApiInterface
     #[OA\Get(
         path: "/api/appartement/disponible",
         summary: "Lister les appartements disponibles",
-        description: "Retourne la liste des appartements libres (Oqp = 0) pour l'entreprise connectée.",
+        description: "Retourne la liste des appartements libres (Oqp = 0) filtrés par agence.",
         tags: ['Appartement']
     )]
-    public function getFreeAppartements(AppartementRepository $repository): Response
+    public function getFreeAppartements(Request $request, AppartementRepository $repository): Response
     {
         try {
-            $entreprise = ($this->getUser() && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise() : null;
+            $user = $this->getUser();
+            $agenceId = $request->get('agence_id');
+            
+            if (!$user || !$user->getEntreprise()) {
+                return $this->responseData([], 'group1');
+            }
+
+            $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
             
             $qb = $repository->createQueryBuilder('a')
+                ->join('a.maisson', 'm')
+                ->join('m.agence', 'ag')
                 ->andWhere('a.oqp = :status')
-                ->setParameter('status', 0);
+                ->andWhere('ag.entreprise = :entreprise')
+                ->setParameter('status', 0)
+                ->setParameter('entreprise', $user->getEntreprise());
 
-            if ($entreprise) {
-                $qb->join('a.maisson', 'm')
-                   ->join('m.proprio', 'p')
-                   ->andWhere('p.entreprise = :entreprise')
-                   ->setParameter('entreprise', $entreprise);
+            if ($isSuperAdmin) {
+                if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                    $qb->andWhere('m.agence = :agence')
+                       ->setParameter('agence', $agenceId);
+                }
+            } else {
+                $qb->andWhere('m.agence = :agence')
+                   ->setParameter('agence', $user->getAgence());
             }
             
             $appartements = $qb->getQuery()->getResult();

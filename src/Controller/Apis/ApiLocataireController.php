@@ -34,15 +34,35 @@ class ApiLocataireController extends ApiInterface
         tags: ['Locataire']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, LocataireRepository $repository): Response
+    public function index(Request $request, LocataireRepository $repository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
+            $user = $this->getUser();
             
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $locataires = $repository->findAllByEntreprise($this->getUser()->getEntreprise());
+            if ($user && $user->getEntreprise()) {
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                
+                if ($isSuperAdmin) {
+                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                        $agence = $agenceRepository->find((int)$agenceId);
+                        if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                            $locataires = $repository->findByAgence($agence);
+                        } else {
+                            $locataires = [];
+                        }
+                    } else {
+                        // For Admin, show all by enterprise (bypassing repo's default agency filter if possible)
+                        // Actually, repo's findAllByEntreprise uses $this->user->getAgence(). 
+                        // Let's use findBy criteria instead.
+                        $locataires = $repository->findBy(['entreprise' => $user->getEntreprise()], ['id' => 'DESC']);
+                    }
+                } else {
+                    $locataires = $repository->findByAgence($user->getAgence());
+                }
             } else {
-                $locataires = $repository->findAll();
+                $locataires = [];
             }
 
             if ($withPagination == "true") {
@@ -113,7 +133,24 @@ class ApiLocataireController extends ApiInterface
 
             
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $locataire->setEntreprise($this->getUser()->getEntreprise());
+                $user = $this->getUser();
+                $locataire->setEntreprise($user->getEntreprise());
+                
+                // Set Agence
+                if (isset($data['agence_id'])) {
+                    $agenceId = (int)$data['agence_id'];
+                    $agence = $this->em->getRepository(\App\Entity\Agence::class)->find($agenceId);
+                    if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                        $locataire->setAgence($agence);
+                    }
+                } else {
+                    if (!$user->getAgence()) {
+                        return $this->errorResponse(null, "Vous devez être rattaché à une agence pour effectuer cette action", 400);
+                    }
+                    $locataire->setAgence($user->getAgence());
+                }
+            } else {
+                return $this->errorResponse(null, "Entreprise non trouvée pour l'utilisateur connecté", 400);
             }
 
             $this->updateAuditFields($locataire, true);

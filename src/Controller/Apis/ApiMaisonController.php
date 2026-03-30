@@ -44,18 +44,26 @@ class ApiMaisonController extends ApiInterface
             $user = $this->getUser();
             
             if ($user && $user->getEntreprise()) {
-                if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
-                    $agence = $agenceRepository->find((int)$agenceId);
-                    if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
-                        $maisons = $repository->findBy(['agence' => $agence], ['id' => 'DESC']);
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                
+                if ($isSuperAdmin) {
+                    // Super Admin can filter by agency or see all
+                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                        $agence = $agenceRepository->find((int)$agenceId);
+                        if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                            $maisons = $repository->findByAgence($agence);
+                        } else {
+                            $maisons = [];
+                        }
                     } else {
                         $maisons = $repository->findAllByEntreprise($user->getEntreprise());
                     }
                 } else {
-                    $maisons = $repository->findAllByEntreprise($user->getEntreprise());
+                    // Regular users see ONLY their own agency
+                    $maisons = $repository->findByAgence($user->getAgence());
                 }
             } else {
-                $maisons = $repository->findAll();
+                $maisons = [];
             }
 
             if ($withPagination == "true") {
@@ -92,10 +100,18 @@ class ApiMaisonController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $maison = new Maison();
             
-            // Set Agence if not provided in data
+            // Set Agence
             if (isset($data['agence_id'])) {
-                // ... (check if belongs to entreprise)
+                $agence = $this->em->getRepository(\App\Entity\Agence::class)->find((int)$data['agence_id']);
+                if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                    $maison->setAgence($agence);
+                } else {
+                    return $this->errorResponse(null, "Agence introuvable ou non autorisée", 400);
+                }
             } else {
+                if (!$user->getAgence()) {
+                    return $this->errorResponse(null, "Vous devez être rattaché à une agence pour créer une maison", 400);
+                }
                 $maison->setAgence($user->getAgence());
             }
             if (isset($data['libMaison'])) $maison->setLibMaison($data['libMaison']);

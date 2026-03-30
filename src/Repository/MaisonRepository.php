@@ -42,11 +42,16 @@ class MaisonRepository extends ServiceEntityRepository
     public function findAllByEntreprise($entreprise)
     {
         return $this->createQueryBuilder('m')
-            ->join('m.proprio', 'p') // Assumes Maison is linked to Enterprise via Proprio
-            ->andWhere('p.entreprise = :entreprise')
+            ->leftJoin('m.agence', 'a')
+            ->andWhere('a.entreprise = :entreprise')
             ->setParameter('entreprise', $entreprise)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findByAgence($agence)
+    {
+        return $this->findBy(['agence' => $agence], ['id' => 'DESC']);
     }
 
 

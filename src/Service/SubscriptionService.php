@@ -5,6 +5,10 @@ namespace App\Service;
 use App\Entity\Entreprise;
 use App\Entity\Abonnement;
 use App\Entity\Maison;
+use App\Entity\Agence;
+use App\Entity\Employe;
+use App\Entity\Locataire;
+use App\Entity\User;
 use App\Repository\AbonnementRepository;
 use App\Repository\MaisonRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,9 +22,56 @@ class SubscriptionService
     ) {}
 
     /**
+     * Renouvelle ou change l'abonnement d'une entreprise.
+     */
+    public function renewSubscription(Entreprise $entreprise, \App\Entity\ModuleAbonnement $module, string $type = 'RENOUVELLEMENT'): Abonnement
+    {
+        // 1. Expirer les abonnements actifs
+        $activeAbonnements = $this->abonnementRepo->findBy([
+            'entreprise' => $entreprise,
+            'etat' => 'ACTIF'
+        ]);
+        foreach ($activeAbonnements as $oldAb) {
+            $oldAb->setEtat('EXPIRE');
+            $this->em->persist($oldAb);
+        }
+
+        // 2. Créer le nouvel abonnement
+        $abonnement = new Abonnement();
+        $abonnement->setEntreprise($entreprise);
+        $abonnement->setModuleAbonnement($module);
+        $abonnement->setEtat('ACTIF');
+        $abonnement->setType($type);
+
+        // Date de fin basée sur la durée du module
+        $dateFin = new \DateTime();
+        $dureeEnJours = (int) $module->getDuree();
+        if ($dureeEnJours > 0) {
+            $dateFin->modify("+{$dureeEnJours} days");
+        } else {
+            $dateFin->modify("+30 days"); // Par défaut
+        }
+        $abonnement->setDateFin($dateFin);
+
+        // 3. Mettre à jour l'entreprise
+        $entreprise->setDateFinAbonnement(clone $abonnement->getDateFin());
+        $entreprise->setAbonnement($module->getCode());
+
+        $this->em->persist($abonnement);
+        $this->em->persist($entreprise);
+        
+        // 4. Appliquer les limites immédiatement
+        $this->enforceLimits($entreprise);
+
+        $this->em->flush();
+
+        return $abonnement;
+    }
+
+    /**
      * Applique les limites du plan actuel de l'entreprise.
      * Si l'entreprise dépasse ses quotas (ex: passage de PRO à BASIC),
-     * on désactive les éléments en trop.
+     * on désactive les éléments en trop (plus récents en premier).
      */
     public function enforceLimits(Entreprise $entreprise): void
     {
@@ -31,70 +82,88 @@ class SubscriptionService
         ]);
 
         if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) {
-            // Pas d'abonnement actif ? On pourrait décider de tout désactiver ou ne rien faire.
-            // Pour l'instant on ne fait rien pour éviter de bloquer l'utilisateur s'il y a un délai de grâce.
             return;
         }
 
         $module = $activeAbonnement->getModuleAbonnement();
+
+        // --- A. BIENS (MAISONS) ---
         $maxBiens = $module->getMaxBiens();
+        $this->enforceEntityLimit($entreprise, Maison::class, $maxBiens, 'JOIN entity.agence a WHERE a.entreprise = :entreprise');
 
-        // 2. Vérifier les limites de Biens (Maison)
-        if ($maxBiens !== -1 && $maxBiens !== null) {
-            // Récupérer toutes les maisons de l'entreprise triées par date de création (les plus anciennes d'abord)
-            // On utilise l'id comme substitut de date si createdAt n'est pas fiable
-            $maisons = $this->maisonRepo->findBy(
-                ['agence' => $entreprise->getAgences()], // Note: Maison est liée à Agence
-                ['id' => 'ASC']
-            );
-            
-            // Correction: On doit récupérer via les agences de l'entreprise
-            // Mais l'entité Maison a un champ 'agence'
-            // Une entreprise peut avoir plusieurs agences.
-            
-            $maisons = $this->em->createQuery('SELECT m FROM App\Entity\Maison m 
-                                              JOIN m.agence a 
-                                              WHERE a.entreprise = :entreprise 
-                                              ORDER BY m.id ASC')
-                               ->setParameter('entreprise', $entreprise)
-                               ->getResult();
+        // --- B. AGENCES ---
+        $maxAgences = $module->getMaxAgences();
+        $this->enforceEntityLimit($entreprise, Agence::class, $maxAgences, 'WHERE entity.entreprise = :entreprise');
 
-            $count = count($maisons);
-            if ($count > $maxBiens) {
-                for ($i = 0; $i < $count; $i++) {
-                    if ($i < $maxBiens) {
-                        // Dans la limite -> Actif
-                        $maisons[$i]->setIsActive(true);
-                    } else {
-                        // Au-delà de la limite -> Désactiver
-                        $maisons[$i]->setIsActive(false);
-                    }
-                    $this->em->persist($maisons[$i]);
+        // --- C. EMPLOYES ---
+        $maxEmployes = $module->getMaxEmployes();
+        $this->enforceEntityLimit($entreprise, Employe::class, $maxEmployes, 'WHERE entity.entreprise = :entreprise');
+
+        // --- D. LOCATAIRES MOBILE APP ---
+        $maxLocatairesMobile = $module->getMaxLocatairesMobileApp();
+        $this->enforceMobileAccessLimit($entreprise, $maxLocatairesMobile);
+
+        $this->em->flush();
+    }
+
+    /**
+     * Méthode générique pour limiter le nombre d'entités actives.
+     */
+    private function enforceEntityLimit(Entreprise $entreprise, string $entityClass, ?int $max, string $condition): void
+    {
+        if ($max === null) return;
+
+        $entities = $this->em->createQuery("SELECT entity FROM $entityClass entity $condition ORDER BY entity.id ASC")
+                            ->setParameter('entreprise', $entreprise)
+                            ->getResult();
+
+        $count = count($entities);
+        if ($max === -1) {
+            foreach ($entities as $entity) {
+                if (method_exists($entity, 'setIsActive')) $entity->setIsActive(true);
+            }
+        } else {
+            for ($i = 0; $i < $count; $i++) {
+                $status = ($i < $max);
+                if (method_exists($entities[$i], 'setIsActive')) {
+                    $entities[$i]->setIsActive($status);
+                    $this->em->persist($entities[$i]);
                 }
-            } else {
-                // Tout le monde est dans la limite, on s'assure qu'ils sont actifs (ou on laisse tel quel)
-                // Si l'utilisateur revient à un plan supérieur, on pourrait tout réactiver
-                foreach ($maisons as $maison) {
-                    // On ne réactive que si on est sûr que c'était désactivé à cause du plan
-                    // Mais pour faire simple, on réactive tout ce qui est dans le quota
-                    $maison->setIsActive(true);
-                    $this->em->persist($maison);
+            }
+        }
+    }
+
+    /**
+     * Limite l'accès mobile des locataires.
+     */
+    private function enforceMobileAccessLimit(Entreprise $entreprise, ?int $max): void
+    {
+        if ($max === null) return;
+
+        // On cherche les locataires qui ont un utilisateur associé
+        $locatairesWithUser = $this->em->createQuery('SELECT l FROM App\Entity\Locataire l 
+                                                     JOIN l.user u 
+                                                     WHERE l.entreprise = :entreprise 
+                                                     ORDER BY l.id ASC')
+                                      ->setParameter('entreprise', $entreprise)
+                                      ->getResult();
+
+        $count = count($locatairesWithUser);
+        if ($max === -1) {
+            foreach ($locatairesWithUser as $locataire) {
+                if ($locataire->getUser()) {
+                    $locataire->getUser()->setIsActive(true);
                 }
             }
         } else {
-            // Plan illimité (-1) -> Tout le monde actif
-            $maisons = $this->em->createQuery('SELECT m FROM App\Entity\Maison m 
-                                              JOIN m.agence a 
-                                              WHERE a.entreprise = :entreprise')
-                               ->setParameter('entreprise', $entreprise)
-                               ->getResult();
-            foreach ($maisons as $maison) {
-                $maison->setIsActive(true);
-                $this->em->persist($maison);
+            for ($i = 0; $i < $count; $i++) {
+                $locataire = $locatairesWithUser[$i];
+                if ($locataire->getUser()) {
+                    $locataire->getUser()->setIsActive($i < $max);
+                    $this->em->persist($locataire->getUser());
+                }
             }
         }
-
-        $this->em->flush();
     }
 
     /**
@@ -102,29 +171,58 @@ class SubscriptionService
      */
     public function canAddMaison(Entreprise $entreprise): bool
     {
-        $activeAbonnement = $this->abonnementRepo->findOneBy([
-            'entreprise' => $entreprise,
-            'etat' => 'ACTIF'
-        ]);
+        return $this->canAddEntity($entreprise, Maison::class, 'getMaxBiens', 'JOIN entity.agence a WHERE a.entreprise = :entreprise');
+    }
 
-        if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) {
-            return false; // Pas d'abonnement actif
-        }
+    /**
+     * Vérifie si l'entreprise peut ajouter une nouvelle agence.
+     */
+    public function canAddAgence(Entreprise $entreprise): bool
+    {
+        return $this->canAddEntity($entreprise, Agence::class, 'getMaxAgences', 'WHERE entity.entreprise = :entreprise');
+    }
 
-        $module = $activeAbonnement->getModuleAbonnement();
-        $maxBiens = $module->getMaxBiens();
+    /**
+     * Vérifie si l'entreprise peut ajouter un nouvel employé.
+     */
+    public function canAddEmploye(Entreprise $entreprise): bool
+    {
+        return $this->canAddEntity($entreprise, Employe::class, 'getMaxEmployes', 'WHERE entity.entreprise = :entreprise');
+    }
 
-        if ($maxBiens === -1 || $maxBiens === null) {
-            return true; // Illimité
-        }
+    /**
+     * Vérifie si l'entreprise peut activer l'accès mobile pour un locataire.
+     */
+    public function canAddLocataireMobileApp(Entreprise $entreprise): bool
+    {
+        $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
+        if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) return false;
 
-        // Compter les maisons actives
-        $count = $this->em->createQuery('SELECT COUNT(m.id) FROM App\Entity\Maison m 
-                                        JOIN m.agence a 
-                                        WHERE a.entreprise = :entreprise AND m.isActive = true')
+        $max = $activeAbonnement->getModuleAbonnement()->getMaxLocatairesMobileApp();
+        if ($max === -1 || $max === null) return true;
+
+        $count = $this->em->createQuery('SELECT COUNT(u.id) FROM App\Entity\User u 
+                                        JOIN u.locataire l 
+                                        WHERE l.entreprise = :entreprise AND u.isActive = true')
                          ->setParameter('entreprise', $entreprise)
                          ->getSingleScalarResult();
 
-        return $count < $maxBiens;
+        return $count < $max;
+    }
+
+    private function canAddEntity(Entreprise $entreprise, string $entityClass, string $maxMethod, string $condition): bool
+    {
+        $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
+        if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) return false;
+
+        $max = $activeAbonnement->getModuleAbonnement()->$maxMethod();
+        if ($max === -1 || $max === null) return true;
+
+        $alias = 'entity';
+        $count = $this->em->createQuery("SELECT COUNT($alias.id) FROM $entityClass $alias $condition AND $alias.isActive = true")
+                         ->setParameter('entreprise', $entreprise)
+                         ->getSingleScalarResult();
+
+        return $count < $max;
     }
 }

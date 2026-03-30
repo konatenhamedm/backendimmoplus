@@ -63,6 +63,20 @@ class Employe
     #[Groups(['group1'])]
     private ?Agence $agence = null;
 
+    #[ORM\Column]
+    private ?bool $isActive = true;
+
+    public function isIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+        return $this;
+    }
+
     public function getUser(): ?User
     {
         return $this->user;

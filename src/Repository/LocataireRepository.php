@@ -17,12 +17,14 @@ use Doctrine\Persistence\ManagerRegistry;
 class LocataireRepository extends ServiceEntityRepository
 {
     private $entreprise;
+    private $user;
 
     public function __construct(ManagerRegistry $registry, \Symfony\Bundle\SecurityBundle\Security $security)
     {
         parent::__construct($registry, Locataire::class);
         $user = $security->getUser();
         if ($user instanceof \App\Entity\User) {
+            $this->user = $user;
             $this->entreprise = $user->getEntreprise();
         }
     }
@@ -47,13 +49,27 @@ class LocataireRepository extends ServiceEntityRepository
 
     public function findAllByEntreprise($entreprise)
     {
-        return $this->createQueryBuilder('l')
-            ->andWhere('l.entreprise = :entreprise')
-            ->setParameter('entreprise', $entreprise)
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('l');
+
+        if ($this->user && $this->user->getAgence()) {
+            $qb->andWhere('l.agence = :agence')
+                ->setParameter('agence', $this->user->getAgence());
+        }
+
+        if ($entreprise) {
+            $qb->andWhere('l.entreprise = :entreprise')
+                ->setParameter('entreprise', $entreprise);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
+    public function findByAgence($agence)
+    {
+        return $this->findBy(['agence' => $agence], ['id' => 'DESC']);
+    }
+
+    
     public function withoutAccount()
     {
         $qb = $this->createQueryBuilder('l');
@@ -61,6 +77,11 @@ class LocataireRepository extends ServiceEntityRepository
         $qb->select('l')
             ->leftJoin('l.user', 'u')
             ->andWhere('u.id IS NULL');
+
+        if ($this->user->getAgence()) {
+            $qb->andWhere('l.agence = :agence')
+                ->setParameter('agence', $this->user->getAgence());
+        }
 
         if ($this->entreprise) {
             $qb->andWhere('l.entreprise = :entreprise')

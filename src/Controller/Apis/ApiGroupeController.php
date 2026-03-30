@@ -44,7 +44,20 @@ class ApiGroupeController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            $groupes = $groupeRepository->findAll();
+            
+            $user = $this->getUser();
+            $userGroupCode = ($user && $user->getGroupe()) ? $user->getGroupe()->getCode() : null;
+
+            if ($userGroupCode === 'SADM') {
+                $groupes = $groupeRepository->findAll();
+            } else {
+                // Pour les non-SADM, on cache le groupe SADM
+                $groupes = $groupeRepository->createQueryBuilder('g')
+                    ->where('g.code != :code')
+                    ->setParameter('code', 'SADM')
+                    ->getQuery()
+                    ->getResult();
+            }
 
             if ($withPagination == "true") {
                 $groupes = $this->paginationService->paginate($groupes);

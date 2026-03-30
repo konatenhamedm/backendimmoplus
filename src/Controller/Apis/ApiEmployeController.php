@@ -32,19 +32,30 @@ class ApiEmployeController extends ApiInterface
         tags: ['Employe']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, EmployeRepository $repository): Response
+    public function index(Request $request, EmployeRepository $repository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
+            $agenceId = $request->get('agence_id');
             $user = $this->getUser();
-            if (!$user) return $this->errorResponse(null, "Non authentifié", 401);
-
-            $criteria = [];
-            if ($user->getEntreprise()) {
-                $criteria['entreprise'] = $user->getEntreprise();
+            if (!$user || !$user->getEntreprise()) return $this->errorResponse(null, "Non autorisé", 401);
+            
+            $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+            
+            if ($isSuperAdmin) {
+                if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                    $agence = $agenceRepository->find((int)$agenceId);
+                    if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                        $employes = $repository->findByAgence($agence);
+                    } else {
+                        $employes = [];
+                    }
+                } else {
+                    $employes = $repository->findBy(['entreprise' => $user->getEntreprise()], ['id' => 'DESC']);
+                }
+            } else {
+                $employes = $repository->findByAgence($user->getAgence());
             }
-
-            $employes = $repository->findBy($criteria, ['id' => 'DESC']);
 
             if ($withPagination == "true") {
                 $employes = $this->paginationService->paginate($employes);
@@ -132,7 +143,23 @@ class ApiEmployeController extends ApiInterface
             }
 
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $employe->setEntreprise($this->getUser()->getEntreprise());
+                $user = $this->getUser();
+                $employe->setEntreprise($user->getEntreprise());
+                
+                // Set Agence
+                if (isset($data['agence_id'])) {
+                    $agence = $this->em->getRepository(\App\Entity\Agence::class)->find((int)$data['agence_id']);
+                    if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                        $employe->setAgence($agence);
+                    } else {
+                        return $this->errorResponse(null, "Agence non autorisée ou introuvable", 400);
+                    }
+                } else {
+                    if (!$user->getAgence()) {
+                        return $this->errorResponse(null, "Vous devez être rattaché à une agence pour créer un employé", 400);
+                    }
+                    $employe->setAgence($user->getAgence());
+                }
             }
 
             $this->updateAuditFields($employe, true);

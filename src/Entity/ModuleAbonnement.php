@@ -91,6 +91,18 @@ class ModuleAbonnement
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?bool $hasApiIntegrations = false;
 
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $maxAgences = 1;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $maxEmployes = 10;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $maxLocatairesMobileApp = 40;
+
     public function __construct()
     {
         $this->abonnements = new ArrayCollection();
@@ -319,6 +331,42 @@ class ModuleAbonnement
     public function setHasApiIntegrations(bool $hasApiIntegrations): static
     {
         $this->hasApiIntegrations = $hasApiIntegrations;
+
+        return $this;
+    }
+
+    public function getMaxAgences(): ?int
+    {
+        return $this->maxAgences;
+    }
+
+    public function setMaxAgences(int $maxAgences): static
+    {
+        $this->maxAgences = $maxAgences;
+
+        return $this;
+    }
+
+    public function getMaxEmployes(): ?int
+    {
+        return $this->maxEmployes;
+    }
+
+    public function setMaxEmployes(int $maxEmployes): static
+    {
+        $this->maxEmployes = $maxEmployes;
+
+        return $this;
+    }
+
+    public function getMaxLocatairesMobileApp(): ?int
+    {
+        return $this->maxLocatairesMobileApp;
+    }
+
+    public function setMaxLocatairesMobileApp(int $maxLocatairesMobileApp): static
+    {
+        $this->maxLocatairesMobileApp = $maxLocatairesMobileApp;
 
         return $this;
     }

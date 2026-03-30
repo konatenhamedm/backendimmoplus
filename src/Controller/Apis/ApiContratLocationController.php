@@ -37,17 +37,34 @@ class ApiContratLocationController extends ApiInterface
     )]
     #[OA\Parameter(name: "etat", in: "query", description: "Filtrer par état (1=actif, 0=résilié)", schema: new OA\Schema(type: "integer"))]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
-    public function index(Request $request, ContratLocationRepository $repository): Response
+    public function index(Request $request, ContratLocationRepository $repository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
             $etat = $request->query->get('etat', null);
-
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
+            $agenceId = $request->get('agence_id');
+            $user = $this->getUser();
+            
+            if ($user && $user->getEntreprise()) {
+                $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+                
                 $qb = $repository->createQueryBuilder('c')
-                    ->join('c.locataire', 'l')
-                    ->andWhere('l.entreprise = :entreprise')
-                    ->setParameter('entreprise', $this->getUser()->getEntreprise());
+                    ->join('c.locataire', 'l') // Still needed for empresa filter if preferred or just use agence
+                    ->join('c.appart', 'a')
+                    ->join('a.maisson', 'm')
+                    ->join('m.agence', 'ag')
+                    ->andWhere('ag.entreprise = :entreprise')
+                    ->setParameter('entreprise', $user->getEntreprise());
+
+                if ($isSuperAdmin) {
+                    if ($agenceId && $agenceId !== 'null' && $agenceId !== 'all') {
+                        $qb->andWhere('m.agence = :agence')
+                           ->setParameter('agence', $agenceId);
+                    }
+                } else {
+                    $qb->andWhere('m.agence = :agence')
+                       ->setParameter('agence', $user->getAgence());
+                }
 
                 if ($etat !== null && $etat !== '') {
                     $qb->andWhere('c.etat = :etat')
@@ -56,11 +73,7 @@ class ApiContratLocationController extends ApiInterface
 
                 $contrats = $qb->getQuery()->getResult();
             } else {
-                $criteria = [];
-                if ($etat !== null && $etat !== '') {
-                    $criteria['etat'] = $etat;
-                }
-                $contrats = $repository->findBy($criteria, ['id' => 'DESC']);
+                $contrats = [];
             }
 
             if ($withPagination == "true") {

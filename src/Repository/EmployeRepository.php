@@ -18,18 +18,37 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 class EmployeRepository extends ServiceEntityRepository
 {
-    private $groupe;
     private $entreprise;
+    private $user;
 
     public function __construct(ManagerRegistry $registry, Security $security)
     {
         parent::__construct($registry, Employe::class);
         $user = $security->getUser();
         if ($user instanceof User) {
-             // Access control logic adapted for User entity
-             // $this->groupe = ...; // User has roles, not Groupe entity
+             $this->user = $user;
              $this->entreprise = $user->getEntreprise();
         }
+    }
+
+    public function findAllByEntreprise($entreprise)
+    {
+        $qb = $this->createQueryBuilder('e');
+        
+        $qb->andWhere('e.entreprise = :entreprise')
+           ->setParameter('entreprise', $entreprise);
+
+        if ($this->user && $this->user->getAgence()) {
+            $qb->andWhere('e.agence = :agence')
+               ->setParameter('agence', $this->user->getAgence());
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findByAgence($agence)
+    {
+        return $this->findBy(['agence' => $agence], ['id' => 'DESC']);
     }
 
     public function add(Employe $entity, bool $flush = false): void
