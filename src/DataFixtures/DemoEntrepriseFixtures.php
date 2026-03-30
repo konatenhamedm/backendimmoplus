@@ -8,7 +8,6 @@ use App\Entity\Civilite;
 use App\Entity\ContratLocation;
 use App\Entity\Employe;
 use App\Entity\Entreprise;
-use App\Entity\Fonction;
 use App\Entity\Locataire;
 use App\Entity\Maison;
 use App\Entity\Proprio;
@@ -90,14 +89,7 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
         $quartier = $manager->getRepository(Quartier::class)->findOneBy([]) ?: null;
         $typeMaison = $manager->getRepository(TypeMaison::class)->findOneBy([]) ?: null;
         $civilite = $manager->getRepository(Civilite::class)->findOneBy(['code' => 'M']) ?: null;
-        $fonctionAgent = $manager->getRepository(Fonction::class)->findOneBy(['code' => 'AGENT']) ?: null;
-        if (!$fonctionAgent) {
-            $fonctionAgent = new Fonction();
-            $fonctionAgent->setLibelle("Agent Immobilier");
-            $fonctionAgent->setCode("AGENT");
-            $manager->persist($fonctionAgent);
-        }
-
+        
         // 4. Get or Create Agent User (ID=6)
         $userAgent = $manager->getRepository(User::class)->find(6);
         if (!$userAgent) {
@@ -110,8 +102,8 @@ class DemoEntrepriseFixtures extends Fixture implements DependentFixtureInterfac
             $employeAgent->setEntreprise($entreprise);
             $employeAgent->setAgence($agence1);
             $employeAgent->setIsActive(true);
+            $employeAgent->setFonction('Agent Immobilier');
             if ($civilite) $employeAgent->setCivilite($civilite);
-            if ($fonctionAgent) $employeAgent->setFonction($fonctionAgent);
             $manager->persist($employeAgent);
 
             $userAgent = new User();

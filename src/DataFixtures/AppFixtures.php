@@ -106,11 +106,7 @@ class AppFixtures extends Fixture
         $manager->persist($civilite);
         $employe->setCivilite($civilite);
 
-        $fonction = new \App\Entity\Fonction();
-        $fonction->setLibelle('Administrateur');
-        $fonction->setCode('ADM');
-        $manager->persist($fonction);
-        $employe->setFonction($fonction);
+        $employe->setFonction('Administrateur');
         
         $employe->setEntreprise($entreprise);
         $employe->setContacts('0102030405');
