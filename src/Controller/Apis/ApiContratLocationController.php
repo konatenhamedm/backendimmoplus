@@ -49,7 +49,7 @@ class ApiContratLocationController extends ApiInterface
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
                 
                 $qb = $repository->createQueryBuilder('c')
-                    ->join('c.locataire', 'l') // Still needed for empresa filter if preferred or just use agence
+                   // ->join('c.locataire', 'l') // Still needed for empresa filter if preferred or just use agence
                     ->join('c.appart', 'a')
                     ->join('a.maisson', 'm')
                     ->join('m.agence', 'ag')
