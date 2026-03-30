@@ -57,11 +57,11 @@ class MaisonRepository extends ServiceEntityRepository
     {
         // Forcing inner joins to avoid orphaned record crashes during serialization
         return $this->createQueryBuilder('m')
-            ->join('m.agence', 'a')
-            ->join('m.quartier', 'q')
-            ->join('m.proprio', 'p')
-            ->join('m.typeMaison', 't')
-            ->join('m.idAgent', 'ag')
+            ->leftJoin('m.agence', 'a')
+            ->leftJoin('m.quartier', 'q')
+            ->leftJoin('m.proprio', 'p')
+            ->leftJoin('m.typeMaison', 't')
+            ->leftJoin('m.idAgent', 'ag')
             ->andWhere('m.agence = :agence')
             ->setParameter('agence', $agence)
             ->orderBy('m.id', 'DESC')
