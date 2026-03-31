@@ -99,6 +99,38 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findRelancesByAgentWithFilters($agent, $entreprise, $agence = null, $search = null, $statut = 'impayer')
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.locataire', 'l')
+            ->leftJoin('f.appartement', 'a')
+            ->leftJoin('a.maisson', 'm')
+            ->where('f.entreprise = :entreprise')
+            ->andWhere('m.idAgent = :agent')
+            ->setParameter('entreprise', $entreprise)
+            ->setParameter('agent', $agent);
+
+        if ($agence && $agence !== 'all' && $agence !== 'null') {
+            $qb->andWhere('l.agence = :agence')
+               ->setParameter('agence', $agence);
+        }
+
+        if ($statut && $statut !== 'all') {
+            $qb->andWhere('f.statut = :statut')
+               ->setParameter('statut', $statut);
+        }
+
+        if ($search) {
+            $qb->andWhere('f.libFacture LIKE :search OR l.nom LIKE :search OR l.prenoms LIKE :search OR m.libMaison LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        return $qb->orderBy('f.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
 
     /**
      * @return FactureLocation[] Returns an array of FactureLocation objects

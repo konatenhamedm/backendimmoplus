@@ -75,6 +75,49 @@ class ApiFactureLocationController extends ApiInterface
         }
     }
 
+    #[Route('/relances/agent', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/facture-location/relances/agent",
+        summary: "Lister les factures à relancer (Assignées à l'agent)",
+        description: "Retourne la liste des factures impayées des maisons assignées à l'agent connecté.",
+        tags: ['FactureLocation']
+    )]
+    #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
+    public function getRelancesAgent(Request $request, FactureLocationRepository $repository): Response
+    {
+        try {
+            $withPagination = $request->get('with_pagination', "false");
+            $user = $this->getUser();
+            
+            if (!$user || !$user->getEntreprise()) {
+                return $this->errorResponse(null, "Utilisateur ou entreprise non trouvé", 404);
+            }
+            
+            $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+            $agenceId = $request->get('agence_id');
+            $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
+            $search = $request->get('search');
+            $statut = $request->get('statut') ?: 'impayer';
+            
+            $factures = $repository->findRelancesByAgentWithFilters(
+                $user,
+                $user->getEntreprise(),
+                $agence,
+                $search,
+                $statut
+            );
+
+            if ($withPagination == "true") {
+                $factures = $this->paginationService->paginate($factures);
+            }
+
+            return $this->responseData($factures, 'group1', [], $withPagination == "true" ? true : false);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
     #[Route('/create', methods: ['POST'])]
     #[OA\Post(
         path: "/api/facture-location/create",
