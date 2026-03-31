@@ -3,7 +3,6 @@
 namespace App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
-use App\Entity\TypeDepense;
 use App\Entity\Depenses;
 use App\Repository\TypeDepenseRepository;
 use App\Repository\DepensesRepository;
@@ -17,90 +16,35 @@ use Symfony\Component\Routing\Annotation\Route;
 #[OA\Tag(name: 'Depenses', description: 'Gestion des dépenses agence')]
 class ApiDepensesController extends ApiInterface
 {
-    // ─── TYPES DE DEPENSES ─────────────────────────────────────────────
-
-    #[Route('/types', methods: ['GET'])]
-    public function listTypes(TypeDepenseRepository $repo): Response
+    protected function getUser(): ?\App\Entity\User
     {
-        try {
-            $entreprise = $this->getUser()->getEntreprise();
-            $types = $repo->findBy(['entreprise' => $entreprise], ['libelle' => 'ASC']);
-            return $this->responseData($types, 'group1');
-        } catch (\Exception $e) {
-            $this->setStatusCode(500);
-            return $this->response(['message' => $e->getMessage()]);
-        }
+        return parent::getUser();
     }
 
-    #[Route('/types/create', methods: ['POST'])]
-    public function createType(Request $request, TypeDepenseRepository $repo): Response
-    {
-        try {
-            $data = json_decode($request->getContent(), true) ?? $request->request->all();
-
-            if (empty($data['libelle'])) {
-                $this->setStatusCode(400);
-                return $this->response(['message' => 'Le libellé est requis']);
-            }
-
-            $type = new TypeDepense();
-            $type->setLibelle($data['libelle']);
-            $type->setDescription($data['description'] ?? null);
-            $type->setEntreprise($this->getUser()->getEntreprise());
-
-            $this->updateAuditFields($type, true);
-            $repo->save($type, true);
-
-            return $this->responseData($type, 'group1');
-        } catch (\Exception $e) {
-            $this->setStatusCode(500);
-            return $this->response(['message' => $e->getMessage()]);
-        }
-    }
-
-    #[Route('/types/{id}', methods: ['PUT', 'POST'])]
-    public function updateType(Request $request, TypeDepense $type, TypeDepenseRepository $repo): Response
-    {
-        try {
-            $data = json_decode($request->getContent(), true) ?? $request->request->all();
-
-            if (isset($data['libelle'])) $type->setLibelle($data['libelle']);
-            if (isset($data['description'])) $type->setDescription($data['description']);
-
-            $this->updateAuditFields($type);
-            $repo->save($type, true);
-
-            return $this->responseData($type, 'group1');
-        } catch (\Exception $e) {
-            $this->setStatusCode(500);
-            return $this->response(['message' => $e->getMessage()]);
-        }
-    }
-
-    #[Route('/types/{id}', methods: ['DELETE'])]
-    public function deleteType(TypeDepense $type, TypeDepenseRepository $repo): Response
-    {
-        try {
-            $repo->remove($type, true);
-            return $this->response(['message' => 'Type supprimé avec succès']);
-        } catch (\Exception $e) {
-            $this->setStatusCode(500);
-            return $this->response(['message' => $e->getMessage()]);
-        }
-    }
-
-    // ─── DEPENSES ──────────────────────────────────────────────────────
-
+    /**
+     * Liste les dépenses.
+     * - Non-admin : retourne uniquement les dépenses de l'agence de l'utilisateur connecté.
+     * - Admin : peut filtrer via ?agence_id=X, sinon toutes les dépenses de l'entreprise.
+     */
     #[Route('', methods: ['GET'])]
-    public function listDepenses(Request $request, DepensesRepository $repo): Response
+    public function index(Request $request): Response
     {
         try {
-            $user = $this->getUser();
+            $user       = $this->getUser();
             $entreprise = $user->getEntreprise();
-            $agenceId = $request->query->get('agence_id');
-            $typeId = $request->query->get('type_id');
-            $dateStart = $request->query->get('date_start');
-            $dateEnd = $request->query->get('date_end');
+            $typeId     = $request->query->get('type_id');
+            $dateStart  = $request->query->get('date_start');
+            $dateEnd    = $request->query->get('date_end');
+
+            // Déterminer l'agence à utiliser
+            $isSuperAdmin = $user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SUPER_ADMIN']);
+            if ($isSuperAdmin) {
+                // Admin peut cibler une agence spécifique ou voir tout
+                $agenceId = $request->query->get('agence_id');
+            } else {
+                // Non-admin : forcé sur son agence
+                $agenceId = $user->getAgence() ? $user->getAgence()->getId() : null;
+            }
 
             $qb = $this->em->getRepository(Depenses::class)->createQueryBuilder('d')
                 ->where('d.entreprise = :ent')
@@ -120,23 +64,25 @@ class ApiDepensesController extends ApiInterface
                 $qb->andWhere('d.date <= :dateEnd')->setParameter('dateEnd', $dateEnd);
             }
 
-            $depenses = $qb->getQuery()->getResult();
-            return $this->responseData($depenses, 'group1');
+            return $this->responseData($qb->getQuery()->getResult(), 'group1');
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);
         }
     }
 
+    /**
+     * Créer une nouvelle dépense (multipart/form-data pour le scan).
+     */
     #[Route('/create', methods: ['POST'])]
-    public function createDepense(
+    public function create(
         Request $request,
         DepensesRepository $repo,
         TypeDepenseRepository $typeRepo,
         AgenceRepository $agenceRepo
     ): Response {
         try {
-            $data = json_decode($request->getContent(), true) ?? $request->request->all();
+            $data = $request->request->all() ?: (json_decode($request->getContent(), true) ?? []);
 
             if (empty($data['type_depense_id'])) {
                 $this->setStatusCode(400);
@@ -164,20 +110,19 @@ class ApiDepensesController extends ApiInterface
             }
 
             $depense = new Depenses();
-            // libDepense est auto-rempli depuis le type (plus de saisie manuelle)
-            $depense->setLibDepense($type->getLibelle());
-            $depense->setMontantTTC((int)$data['montantTTC']);
+            $depense->setLibDepense($type->getLibelle()); // auto-rempli depuis le type
+            $depense->setMontantTTC((int) $data['montantTTC']);
             $depense->setDate($data['date'] ?? date('Y-m-d'));
             $depense->setDetails($data['details'] ?? null);
             $depense->setTypeDepense($type);
             $depense->setAgence($agence);
             $depense->setEntreprise($this->getUser()->getEntreprise());
 
-            // Upload scan / justificatif
+            // Upload justificatif (Fichier entity)
             $uploadedScan = $request->files->get('scan');
             if ($uploadedScan) {
                 $filePrefix = $this->slugger->slug('depense_' . uniqid());
-                $filePath = $this->getUploadDir('depenses', true);
+                $filePath   = $this->getUploadDir('depenses', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedScan, 'depenses')) {
                     $depense->setScan($fichier);
                 }
@@ -193,8 +138,11 @@ class ApiDepensesController extends ApiInterface
         }
     }
 
+    /**
+     * Modifier une dépense existante.
+     */
     #[Route('/{id}', methods: ['PUT', 'POST'])]
-    public function updateDepense(
+    public function update(
         Request $request,
         Depenses $depense,
         DepensesRepository $repo,
@@ -202,20 +150,32 @@ class ApiDepensesController extends ApiInterface
         AgenceRepository $agenceRepo
     ): Response {
         try {
-            $data = json_decode($request->getContent(), true) ?? $request->request->all();
+            $data = $request->request->all() ?: (json_decode($request->getContent(), true) ?? []);
 
-            if (isset($data['libDepense'])) $depense->setLibDepense($data['libDepense']);
-            if (isset($data['montantTTC'])) $depense->setMontantTTC((int)$data['montantTTC']);
-            if (isset($data['date'])) $depense->setDate($data['date']);
-            if (isset($data['details'])) $depense->setDetails($data['details']);
+            if (isset($data['montantTTC'])) $depense->setMontantTTC((int) $data['montantTTC']);
+            if (isset($data['date']))       $depense->setDate($data['date']);
+            if (isset($data['details']))    $depense->setDetails($data['details']);
 
             if (!empty($data['type_depense_id'])) {
                 $type = $typeRepo->find($data['type_depense_id']);
-                if ($type) $depense->setTypeDepense($type);
+                if ($type) {
+                    $depense->setTypeDepense($type);
+                    $depense->setLibDepense($type->getLibelle());
+                }
             }
             if (!empty($data['agence_id'])) {
                 $agence = $agenceRepo->find($data['agence_id']);
                 if ($agence) $depense->setAgence($agence);
+            }
+
+            // Remplacement du justificatif
+            $uploadedScan = $request->files->get('scan');
+            if ($uploadedScan) {
+                $filePrefix = $this->slugger->slug('depense_' . uniqid());
+                $filePath   = $this->getUploadDir('depenses', true);
+                if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedScan, 'depenses')) {
+                    $depense->setScan($fichier);
+                }
             }
 
             $this->updateAuditFields($depense);
@@ -228,8 +188,11 @@ class ApiDepensesController extends ApiInterface
         }
     }
 
+    /**
+     * Supprimer une dépense.
+     */
     #[Route('/{id}', methods: ['DELETE'])]
-    public function deleteDepense(Depenses $depense, DepensesRepository $repo): Response
+    public function delete(Depenses $depense, DepensesRepository $repo): Response
     {
         try {
             $repo->remove($depense, true);
