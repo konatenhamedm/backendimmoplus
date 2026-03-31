@@ -21,7 +21,7 @@ class ContratLocation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratLocations')]
@@ -29,20 +29,20 @@ class ContratLocation
     private ?Locataire $locataire = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateDebut')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateFin')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateFin = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 1, name: 'nbMoisCaution')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nbMoisCaution = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntCaution')]
     #[Assert\PositiveOrZero(message: 'Le montant de la caution doit être > 0')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntCaution = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 1, nullable: true, name: 'nbMoisAvance')]
@@ -136,7 +136,7 @@ class ContratLocation
     private ?Campagne $campagne = null;
 
     #[ORM\ManyToOne(inversedBy: 'appartContratLocations')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Appartement $appart = null;
 
     #[ORM\ManyToOne(inversedBy: 'contratlocs')]
