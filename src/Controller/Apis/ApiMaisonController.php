@@ -273,4 +273,24 @@ class ApiMaisonController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
+
+    #[Route('/mes-maisons', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/maison/mes-maisons",
+        summary: "Lister mes maisons (Assignées à l'agent)",
+        tags: ['Maison']
+    )]
+    public function mesMaisons(MaisonRepository $repository): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user) return $this->errorResponse(null, "Non autorisé", 403);
+            
+            $maisons = $repository->findBy(['IdAgent' => $user->getId()]);
+            return $this->responseData($maisons, 'group1');
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
 }

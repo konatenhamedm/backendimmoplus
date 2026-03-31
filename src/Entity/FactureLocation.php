@@ -24,12 +24,10 @@ class FactureLocation
     const ETATS = [
         'oui' => 'oui',
         'non' => 'non',
-
     ];
     const ETATS_STATUT = [
         'payer' => 'payer',
         'impayer' => 'impayer',
-
     ];
 
     #[ORM\Id]
@@ -74,7 +72,6 @@ class FactureLocation
     #[Groups(['group1', 'group1_facture_location'])]
     private ?\DateTimeInterface $dateEmission = null;
 
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateLimite')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?\DateTimeInterface $dateLimite = null;
@@ -111,16 +108,24 @@ class FactureLocation
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fneStatus = null;
 
-    
-    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\ManyToOne(targetEntity: Agence::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?Agence $agence = null;
+
+    #[ORM\OneToMany(mappedBy: 'facture', targetEntity: Relance::class, orphanRemoval: true)]
+    #[Groups(['group1_facture_location'])]
+    private Collection $relances;
+
+    #[ORM\OneToMany(mappedBy: 'factureLocation', targetEntity: Transaction::class)]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private Collection $transactions;
 
     public function __construct()
     {
         $this->reglements = new ArrayCollection();
         $this->transactions = new ArrayCollection();
+        $this->relances = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -136,7 +141,6 @@ class FactureLocation
     public function setCompagne(?Campagne $compagne): static
     {
         $this->compagne = $compagne;
-
         return $this;
     }
 
@@ -148,7 +152,6 @@ class FactureLocation
     public function setMois(?TabMois $mois): static
     {
         $this->mois = $mois;
-
         return $this;
     }
 
@@ -160,7 +163,6 @@ class FactureLocation
     public function setContrat(?ContratLocation $contrat): static
     {
         $this->contrat = $contrat;
-
         return $this;
     }
 
@@ -172,19 +174,17 @@ class FactureLocation
     public function setLocataire(?Locataire $locataire): static
     {
         $this->locataire = $locataire;
-
         return $this;
     }
 
-    public function getAppartement(): ?appartement
+    public function getAppartement(): ?Appartement
     {
         return $this->appartement;
     }
 
-    public function setAppartement(?appartement $appartement): static
+    public function setAppartement(?Appartement $appartement): static
     {
         $this->appartement = $appartement;
-
         return $this;
     }
 
@@ -196,7 +196,6 @@ class FactureLocation
     public function setLibFacture(string $libFacture): static
     {
         $this->libFacture = $libFacture;
-
         return $this;
     }
 
@@ -208,7 +207,6 @@ class FactureLocation
     public function setMntFact(int $mntFact): static
     {
         $this->mntFact = $mntFact;
-
         return $this;
     }
 
@@ -220,7 +218,6 @@ class FactureLocation
     public function setSoldeFactLoc(int $soldeFactLoc): static
     {
         $this->soldeFactLoc = $soldeFactLoc;
-
         return $this;
     }
 
@@ -232,7 +229,6 @@ class FactureLocation
     public function setDateEmission(\DateTimeInterface $dateEmission): static
     {
         $this->dateEmission = $dateEmission;
-
         return $this;
     }
 
@@ -244,13 +240,9 @@ class FactureLocation
     public function setDateLimite(\DateTimeInterface $dateLimite): static
     {
         $this->dateLimite = $dateLimite;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reglements>
-     */
     public function getReglements(): Collection
     {
         return $this->reglements;
@@ -262,19 +254,16 @@ class FactureLocation
             $this->reglements->add($reglement);
             $reglement->setNumFact($this);
         }
-
         return $this;
     }
 
     public function removeReglement(Reglements $reglement): static
     {
         if ($this->reglements->removeElement($reglement)) {
-            // set the owning side to null (unless already changed)
             if ($reglement->getNumFact() === $this) {
                 $reglement->setNumFact(null);
             }
         }
-
         return $this;
     }
 
@@ -286,7 +275,6 @@ class FactureLocation
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
         return $this;
     }
 
@@ -298,17 +286,9 @@ class FactureLocation
     public function setEncaisse(string $encaisse): static
     {
         $this->encaisse = $encaisse;
-
         return $this;
     }
-    #[ORM\OneToMany(mappedBy: 'factureLocation', targetEntity: Transaction::class)]
-    #[Groups(['group1', 'group1_facture_location'])]
-    private Collection $transactions;
 
-    /**
-     * @return Collection<int, Transaction>
-     */
-    #[Groups(['group1', 'group1_facture_location'])]
     public function getTransactions(): Collection
     {
         return $this->transactions;
@@ -320,19 +300,16 @@ class FactureLocation
             $this->transactions->add($transaction);
             $transaction->setFactureLocation($this);
         }
-
         return $this;
     }
 
     public function removeTransaction(Transaction $transaction): static
     {
         if ($this->transactions->removeElement($transaction)) {
-            // set the owning side to null (unless already changed)
             if ($transaction->getFactureLocation() === $this) {
                 $transaction->setFactureLocation(null);
             }
         }
-
         return $this;
     }
 
@@ -344,7 +321,6 @@ class FactureLocation
     public function setEntreprise(?Entreprise $entreprise): static
     {
         $this->entreprise = $entreprise;
-
         return $this;
     }
 
@@ -356,7 +332,6 @@ class FactureLocation
     public function setFneUid(?string $fneUid): static
     {
         $this->fneUid = $fneUid;
-
         return $this;
     }
 
@@ -368,7 +343,6 @@ class FactureLocation
     public function setFneQrCode(?string $fneQrCode): static
     {
         $this->fneQrCode = $fneQrCode;
-
         return $this;
     }
 
@@ -380,7 +354,6 @@ class FactureLocation
     public function setDateDebut(?\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -392,7 +365,6 @@ class FactureLocation
     public function setDateFin(?\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -404,10 +376,8 @@ class FactureLocation
     public function setFneStatus(?string $fneStatus): static
     {
         $this->fneStatus = $fneStatus;
-
         return $this;
     }
-
 
     public function getAgence(): ?Agence
     {
@@ -417,8 +387,30 @@ class FactureLocation
     public function setAgence(?Agence $agence): static
     {
         $this->agence = $agence;
-
         return $this;
     }
 
+    public function getRelances(): Collection
+    {
+        return $this->relances;
+    }
+
+    public function addRelance(Relance $relance): static
+    {
+        if (!$this->relances->contains($relance)) {
+            $this->relances->add($relance);
+            $relance->setFacture($this);
+        }
+        return $this;
+    }
+
+    public function removeRelance(Relance $relance): static
+    {
+        if ($this->relances->removeElement($relance)) {
+            if ($relance->getFacture() === $this) {
+                $relance->setFacture(null);
+            }
+        }
+        return $this;
+    }
 }

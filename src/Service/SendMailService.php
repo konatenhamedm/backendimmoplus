@@ -84,6 +84,26 @@ class SendMailService
         $this->mailer->send($email);
     }
 
+    public function sendCustom(
+        string $from,
+        string $to,
+        string $subject,
+        string $content,
+        ?string $cc = null
+    ): void {
+        $email = (new TemplatedEmail())
+            ->from($from)
+            ->to($to)
+            ->subject($subject)
+            ->html($content);
+
+        if ($cc) {
+            $email->cc($cc);
+        }
+
+        $this->mailer->send($email);
+    }
+
     public function sendNotification($data = [])
     {
         $currentUser = $this->getCurrentUser();

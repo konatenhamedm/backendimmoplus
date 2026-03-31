@@ -98,13 +98,15 @@ class ApiFactureLocationController extends ApiInterface
             $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
             $search = $request->get('search');
             $statut = $request->get('statut') ?: 'impayer';
+            $maisonId = $request->get('maison_id');
             
             $factures = $repository->findRelancesByAgentWithFilters(
                 $user,
                 $user->getEntreprise(),
                 $agence,
                 $search,
-                $statut
+                $statut,
+                $maisonId
             );
 
             if ($withPagination == "true") {

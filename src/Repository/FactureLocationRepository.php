@@ -99,7 +99,7 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findRelancesByAgentWithFilters($agent, $entreprise, $agence = null, $search = null, $statut = 'impayer')
+    public function findRelancesByAgentWithFilters($agent, $entreprise, $agence = null, $search = null, $statut = 'impayer', $maisonId = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -111,13 +111,18 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->setParameter('agent', $agent);
 
         if ($agence && $agence !== 'all' && $agence !== 'null') {
-            $qb->andWhere('l.agence = :agence')
+            $qb->andWhere('f.agence = :agence')
                ->setParameter('agence', $agence);
         }
 
         if ($statut && $statut !== 'all') {
             $qb->andWhere('f.statut = :statut')
                ->setParameter('statut', $statut);
+        }
+
+        if ($maisonId && $maisonId !== 'all' && $maisonId !== 'null') {
+            $qb->andWhere('m.id = :maisonId')
+               ->setParameter('maisonId', $maisonId);
         }
 
         if ($search) {
