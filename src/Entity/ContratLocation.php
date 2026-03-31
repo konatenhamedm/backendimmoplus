@@ -46,38 +46,38 @@ class ContratLocation
     private ?string $mntCaution = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 1, nullable: true, name: 'nbMoisAvance')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nbMoisAvance = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntAvance')]
     #[Assert\PositiveOrZero(message: 'Le montant avance doit être > 0')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntAvance = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyer')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntLoyer = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'autreInfos')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $autreInfos = null;
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Fichier $scanContrat = null;
 
     #[ORM\ManyToOne(targetEntity: Regime::class, inversedBy: 'contratlocs')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Regime $regime = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateEntree')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateEntree = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateProchVers')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateProchVers = null;
 
     #[ORM\ManyToOne(targetEntity: Nature::class, inversedBy: 'contratLocations')]
@@ -86,35 +86,35 @@ class ContratLocation
     private ?Nature $nature = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerPrec')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntLoyerPrec = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerIni')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntLoyerIni = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntLoyerActu')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntLoyerActu = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, nullable: true, name: 'mntArriere')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mntArriere = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'dejaLocataire')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $dejaLocataire = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'statutLoc')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $statutLoc = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 9, scale: 0, name: 'fraisAnex')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fraisanex = null;
 
     #[ORM\Column(nullable: true, name: 'etat')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $etat = null;
 
     #[ORM\Column(nullable: true, name: 'totVerse')]
