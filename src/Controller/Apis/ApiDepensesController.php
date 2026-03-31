@@ -138,38 +138,49 @@ class ApiDepensesController extends ApiInterface
         try {
             $data = json_decode($request->getContent(), true) ?? $request->request->all();
 
-            if (empty($data['libDepense'])) {
+            if (empty($data['type_depense_id'])) {
                 $this->setStatusCode(400);
-                return $this->response(['message' => 'Le libellé est requis']);
+                return $this->response(['message' => 'Le type de dépense est requis']);
             }
             if (empty($data['montantTTC'])) {
                 $this->setStatusCode(400);
                 return $this->response(['message' => 'Le montant est requis']);
             }
+            if (empty($data['agence_id'])) {
+                $this->setStatusCode(400);
+                return $this->response(['message' => "L'agence est requise"]);
+            }
+
+            $type = $typeRepo->find($data['type_depense_id']);
+            if (!$type) {
+                $this->setStatusCode(404);
+                return $this->response(['message' => 'Type de dépense introuvable']);
+            }
+
+            $agence = $agenceRepo->find($data['agence_id']);
+            if (!$agence) {
+                $this->setStatusCode(404);
+                return $this->response(['message' => 'Agence introuvable']);
+            }
 
             $depense = new Depenses();
-            $depense->setLibDepense($data['libDepense']);
+            // libDepense est auto-rempli depuis le type (plus de saisie manuelle)
+            $depense->setLibDepense($type->getLibelle());
             $depense->setMontantTTC((int)$data['montantTTC']);
             $depense->setDate($data['date'] ?? date('Y-m-d'));
             $depense->setDetails($data['details'] ?? null);
+            $depense->setTypeDepense($type);
+            $depense->setAgence($agence);
             $depense->setEntreprise($this->getUser()->getEntreprise());
 
-            if (!empty($data['type_depense_id'])) {
-                $type = $typeRepo->find($data['type_depense_id']);
-                if ($type) $depense->setTypeDepense($type);
-            }
-
-            if (!empty($data['agence_id'])) {
-                $agence = $agenceRepo->find($data['agence_id']);
-                if ($agence) $depense->setAgence($agence);
-            }
-
-            // Upload scan/justificatif
+            // Upload scan / justificatif
             $uploadedScan = $request->files->get('scan');
             if ($uploadedScan) {
                 $filePrefix = $this->slugger->slug('depense_' . uniqid());
                 $filePath = $this->getUploadDir('depenses', true);
-                $depense->setScan($this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedScan, 'depenses'));
+                if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedScan, 'depenses')) {
+                    $depense->setScan($fichier);
+                }
             }
 
             $this->updateAuditFields($depense, true);

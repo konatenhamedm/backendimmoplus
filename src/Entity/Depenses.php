@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+
 #[ORM\Entity(repositoryClass: DepensesRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Depenses
@@ -37,9 +38,10 @@ class Depenses
     #[Groups(['group1'])]
     private ?string $details = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
-    private ?string $scan = null;
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?Fichier $scan = null;
 
     #[ORM\OneToMany(mappedBy: 'depenses', targetEntity: LigneDepense::class)]
     private Collection $ligneDepenses;
@@ -113,12 +115,12 @@ class Depenses
         return $this;
     }
 
-    public function getScan(): ?string
+    public function getScan(): ?Fichier
     {
         return $this->scan;
     }
 
-    public function setScan(?string $scan): static
+    public function setScan(?Fichier $scan): static
     {
         $this->scan = $scan;
         return $this;
