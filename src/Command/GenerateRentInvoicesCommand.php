@@ -50,7 +50,7 @@ class GenerateRentInvoicesCommand extends Command
         // On suppose que 'etat' = 1 signifie actif. Ajustez si nécessaire selon votre logique.
         // Filtrage également par JourGenerationFacture (jour du mois)
         $contracts = $contratRepository->createQueryBuilder('c')
-            ->where('c.JourGenerationFacture = :day')
+            ->where('c.jourGenerationFacture = :day')
             ->andWhere('c.etat = :active')
             ->setParameter('day', $targetDay)
             ->setParameter('active', 1)
