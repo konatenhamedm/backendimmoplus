@@ -51,7 +51,7 @@ class FactureLocationRepository extends ServiceEntityRepository
     /**
      * Centralized query for rent invoices with filters
      */
-    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null)
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -73,6 +73,11 @@ class FactureLocationRepository extends ServiceEntityRepository
         if ($statut) {
             $qb->andWhere('f.statut = :statut')
                ->setParameter('statut', $statut);
+        }
+
+        if ($isValidated && $isValidated !== 'all') {
+            $qb->andWhere('f.isValidated = :isValidated')
+               ->setParameter('isValidated', $isValidated);
         }
 
         if ($search) {

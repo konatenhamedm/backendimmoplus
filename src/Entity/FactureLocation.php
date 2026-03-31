@@ -117,6 +117,10 @@ class FactureLocation
     #[Groups(['group1_facture_location'])]
     private Collection $relances;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $isValidated = 'non';
+
     #[ORM\OneToMany(mappedBy: 'factureLocation', targetEntity: Transaction::class)]
     #[Groups(['group1', 'group1_facture_location'])]
     private Collection $transactions;
@@ -411,6 +415,17 @@ class FactureLocation
                 $relance->setFacture(null);
             }
         }
+        return $this;
+    }
+
+    public function getIsValidated(): ?string
+    {
+        return $this->isValidated;
+    }
+
+    public function setIsValidated(?string $isValidated): static
+    {
+        $this->isValidated = $isValidated;
         return $this;
     }
 }

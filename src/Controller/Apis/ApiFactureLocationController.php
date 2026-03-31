@@ -52,13 +52,15 @@ class ApiFactureLocationController extends ApiInterface
                 $search = $request->get('search');
                 $proprioId = $request->get('proprio_id');
                 $statut = $request->get('statut');
+                $isValidated = $request->get('is_validated');
                 
                 $factures = $repository->findWithFilters(
                     $user->getEntreprise(),
                     $agence,
                     $proprioId,
                     $search,
-                    $statut
+                    $statut,
+                    $isValidated
                 );
             } else {
                 $factures = $repository->findAll();
@@ -467,6 +469,37 @@ class ApiFactureLocationController extends ApiInterface
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => "Erreur de normalisation : " . $exception->getMessage()]);
+        }
+    }
+    #[Route('/{id}/validate-payment', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/facture-location/{id}/validate-payment",
+        summary: "Valider un encaissement (Rôle Comptable)",
+        description: "Confirme que l'argent encaissé par l'agent est bien arrivé en caisse.",
+        tags: ['FactureLocation']
+    )]
+    public function validatePayment(FactureLocation $facture, FactureLocationRepository $repository): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user) return $this->errorResponse(null, "Non autorisé", 401);
+
+            // Autoriser seulement Admin et Bureau (Comptable)
+            $isComptable = ($user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'BUREAU']));
+            if (!$isComptable) {
+                return $this->errorResponse(null, "Accès refusé. Seul un comptable peut valider les encaissements.", 403);
+            }
+
+            if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
+            
+            $facture->setIsValidated('oui');
+            $this->updateAuditFields($facture);
+            $repository->save($facture, true);
+
+            return $this->responseData($facture, 'group1_facture_location', ['message' => 'Encaissement validé avec succès.']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
         }
     }
 }
