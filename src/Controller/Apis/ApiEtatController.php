@@ -802,4 +802,67 @@ class ApiEtatController extends ApiInterface
         }
         return array_values($houses);
     }
+
+    #[Route('/cloture-journee', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/etat/cloture-journee",
+        summary: "Rapport de clôture de journée",
+        description: "Retourne le récapitulatif des encaissements pour la journée sélectionnée.",
+        tags: ['Etats']
+    )]
+    public function getClotureJourneeReport(Request $request): Response
+    {
+        try {
+            $user = $this->getUser();
+            $entreprise = $user->getEntreprise();
+            $dateStr = $request->query->get('date', date('Y-m-d'));
+            $start = new \DateTime($dateStr . ' 00:00:00');
+            $end = new \DateTime($dateStr . ' 23:59:59');
+
+            // 1. Transactions du jour
+            $transactions = $this->em->getRepository(Transaction::class)->createQueryBuilder('t')
+                ->join('t.locataire', 'l')
+                ->where('l.entreprise = :ent')
+                ->andWhere('t.date >= :start AND t.date <= :end')
+                ->setParameter('ent', $entreprise)
+                ->setParameter('start', $start)
+                ->setParameter('end', $end)
+                ->getQuery()
+                ->getResult();
+
+            $total = 0;
+            $byMode = [];
+            $byAgent = [];
+            
+            foreach ($transactions as $t) {
+                $amount = (float)$t->getAmount();
+                $total += $amount;
+                
+                $mode = $t->getMode() ?: 'ESPÈCE';
+                $byMode[$mode] = ($byMode[$mode] ?? 0) + $amount;
+                
+                $agentName = $t->getAgent() ? $t->getAgent()->getNomPrenoms() : 'Système';
+                $byAgent[$agentName] = ($byAgent[$agentName] ?? 0) + $amount;
+            }
+
+            return $this->response([
+                'date' => $dateStr,
+                'total_collected' => $total,
+                'by_mode' => $byMode,
+                'by_agent' => $byAgent,
+                'transactions' => array_map(fn($t) => [
+                    'id' => $t->getId(),
+                    'reference' => $t->getReference(),
+                    'locataire' => $t->getLocataire()->getNom() . ' ' . $t->getLocataire()->getPrenoms(),
+                    'amount' => (float)$t->getAmount(),
+                    'mode' => $t->getMode() ?: 'ESPÈCE',
+                    'agent' => $t->getAgent() ? $t->getAgent()->getNomPrenoms() : 'Système',
+                    'time' => $t->getDate()->format('H:i')
+                ], $transactions)
+            ]);
+        } catch (\Exception $e) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $e->getMessage()]);
+        }
+    }
 }

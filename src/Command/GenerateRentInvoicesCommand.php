@@ -191,6 +191,7 @@ class GenerateRentInvoicesCommand extends Command
         if ($avance >= $montantLoyer) {
             $facture->setSoldeFactLoc(0);
             $facture->setStatut('paye');
+            $facture->setIsValidated('oui');
             $facture->setEncaisse((string)$montantLoyer);
 
             $contract->setMntAvance((string)($avance - $montantLoyer));
@@ -213,6 +214,7 @@ class GenerateRentInvoicesCommand extends Command
             $facture->setSoldeFactLoc($montantLoyer);
             $facture->setStatut('impayer');
             $facture->setEncaisse('0');
+            $facture->setIsValidated('non');
         }
 
         // Dates
