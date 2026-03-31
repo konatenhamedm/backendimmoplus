@@ -286,7 +286,7 @@ class ApiMaisonController extends ApiInterface
             $user = $this->getUser();
             if (!$user) return $this->errorResponse(null, "Non autorisé", 403);
             
-            $maisons = $repository->findBy(['IdAgent' => $user->getId()]);
+            $maisons = $repository->findBy(['idAgent' => $user]);
             return $this->responseData($maisons, 'group1');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
