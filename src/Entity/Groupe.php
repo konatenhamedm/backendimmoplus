@@ -42,6 +42,7 @@ class Groupe
 
 
     #[ORM\OneToMany(mappedBy: 'groupeUser', targetEntity: ModuleGroupePermition::class ,orphanRemoval: true, cascade:['persist'])]
+    #[Groups(['group1'])]
     private Collection $moduleGroupePermitions;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: User::class)]
