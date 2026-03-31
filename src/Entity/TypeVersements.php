@@ -16,15 +16,15 @@ class TypeVersements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $libType = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $codTyp = null;
 
     #[ORM\OneToMany(mappedBy: 'type_versement', targetEntity: VersementProprio::class)]

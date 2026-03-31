@@ -15,30 +15,30 @@ class Reglements
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reglements')]
     private ?FactureLocation $numFact = null;
 
     #[ORM\ManyToOne(inversedBy: 'reglements')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Fournisseurs $fournisseur = null;
 
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $montantVerse = null;
 
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $date = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $numchq = null;
 
     #[ORM\ManyToOne(inversedBy: 'reglements')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?TypeVersements $typeversement = null;
 
     public function getId(): ?int

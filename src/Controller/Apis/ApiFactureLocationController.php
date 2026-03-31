@@ -68,7 +68,7 @@ class ApiFactureLocationController extends ApiInterface
                 $factures = $this->paginationService->paginate($factures);
             }
 
-            return $this->responseData($factures, 'group1', [], $withPagination == "true" ? true : false);
+            return $this->responseData($factures, 'group1_facture_location', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -111,7 +111,7 @@ class ApiFactureLocationController extends ApiInterface
                 $factures = $this->paginationService->paginate($factures);
             }
 
-            return $this->responseData($factures, 'group1', [], $withPagination == "true" ? true : false);
+            return $this->responseData($factures, 'group1_facture_location', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -253,7 +253,7 @@ class ApiFactureLocationController extends ApiInterface
 
             $repository->save($facture, true);
 
-            return $this->responseData($facture, 'group1');
+            return $this->responseData($facture, 'group1_facture_location');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -311,7 +311,7 @@ class ApiFactureLocationController extends ApiInterface
             // checking repo again. findAllFactureLocataire uses 'impayer'.
             // I should just use findBy if I want all.
             $factures = $repository->findBy(['locataire' => $id]);
-            return $this->responseData($factures, 'group1');
+            return $this->responseData($factures, 'group1_facture_location');
         } catch (\Exception $exception) {
              $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -334,7 +334,7 @@ class ApiFactureLocationController extends ApiInterface
             }
             
             $factures = $repository->findBy(['locataire' => $user->getLocataire()->getId()], ['dateEmission' => 'DESC']);
-            return $this->responseData($factures, 'group1');
+            return $this->responseData($factures, 'group1_facture_location');
         } catch (\Exception $exception) {
              $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -423,7 +423,7 @@ class ApiFactureLocationController extends ApiInterface
                 ]);
             }
 
-            return $this->responseData($facture, 'group1');
+            return $this->responseData($facture, 'group1_facture_location');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);

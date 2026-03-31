@@ -17,11 +17,11 @@ class SituationMatrimoniale
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $libSituation = null;
 
     #[ORM\OneToMany(mappedBy: 'situationMatri', targetEntity: Locataire::class)]

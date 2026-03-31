@@ -40,102 +40,102 @@ class Locataire
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $prenoms = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateNaiss')]
     #[Assert\NotNull(message: "Le champs date de naissance est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateNaiss = null;
 
     #[ORM\Column(length: 255, name: 'lieuNaiss')]
     #[Assert\NotNull(message: "Le champs  lieu de naissance est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $lieuNaiss = null;
 
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Fichier $infoPiece = null;
 
 
     #[ORM\Column(length: 255, name: 'profession')]
     #[Assert\NotNull(message: "Le champs profession est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $profession = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'ethnie')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $ethnie = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nbEnfts')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nbEnfts = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nbPersChge')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nbPersChge = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'pere')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $pere = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'mere')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mere = null;
 
     #[ORM\Column(length: 255, name: 'contacts')]
     #[Assert\NotNull(message: "Le champs contact est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $contacts = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'email')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'nPConjointe')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $nPConjointe = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'profConj')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $profConj = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'ethnieConj')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $ethnieConj = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'contactConj')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $contactConj = null;
 
     #[ORM\Column(length: 255, name: 'genre')]
     #[Assert\NotNull(message: "Le champs genre est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $genre = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'vivezAvec')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $vivezAvec = null;
 
     #[ORM\ManyToOne(inversedBy: 'locataires')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?SituationMatrimoniale $situationMatri = null;
 
     #[ORM\ManyToOne(targetEntity: Agence::class, inversedBy: 'locataires')]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Agence $agence = null;
 
     #[ORM\OneToMany(mappedBy: 'locataire', targetEntity: ContratLocation::class)]
@@ -148,12 +148,12 @@ class Locataire
     private Collection $facturelocs;
 
     #[ORM\ManyToOne(inversedBy: 'locataires')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Entreprise $entreprise = null;
 
     #[ORM\Column(length: 255, name: 'numpiece')]
     #[Assert\NotNull(message: "Le champs numéro de pièce est requis")]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $numpiece = null;
 
 

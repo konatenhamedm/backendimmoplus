@@ -17,23 +17,23 @@ class Agence
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $adresse = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $contact = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(targetEntity: Entreprise::class, inversedBy: 'agences')]

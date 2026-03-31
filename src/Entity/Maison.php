@@ -20,36 +20,36 @@ class Maison
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, name: 'libMaison')]
     #[Assert\NotNull(message: "Le champs libelle est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $libMaison = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'localisation')]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $localisation = null;
 
     #[ORM\Column(length: 255, name: 'lot')]
     #[Assert\NotNull(message: "Le champs Lot est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $lot = null;
 
     #[ORM\Column(length: 255, name: 'ilot')]
     #[Assert\NotNull(message: "Le champs Ilot est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $ilot = null;
 
     #[ORM\Column(length: 255, nullable: true, name: 'tFoncier')]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $tFoncier = null;
 
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: '0', nullable: false, name: 'mntCom')]
     #[Assert\NotNull(message: "Le champs commission est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?string $mntCom = null;
 
     #[ORM\OneToMany(mappedBy: 'maisson', targetEntity: Appartement::class, orphanRemoval: true, cascade: ['persist'])]
@@ -58,17 +58,17 @@ class Maison
 
     #[ORM\ManyToOne(inversedBy: 'quartierMaisons')]
     #[Assert\NotNull(message: "Le champs quartier est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?Quartier $quartier = null;
 
     #[ORM\ManyToOne(inversedBy: 'proprioMaisons')]
     #[Assert\NotNull(message: "Le champs proprio est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?Proprio $proprio = null;
 
     #[ORM\ManyToOne(inversedBy: 'typeMaisonMaisons')]
     #[Assert\NotNull(message: "Le champs type maison est requis")]
-    #[Groups(['group1', 'appartement-groupe'])]
+    #[Groups(['group1', 'appartement-groupe', 'group1_facture_location'])]
     private ?TypeMaison $typeMaison = null;
 
     #[ORM\ManyToOne(inversedBy: 'maisons')]

@@ -18,7 +18,7 @@ class FactureLocation
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Entreprise $entreprise = null;
 
     const ETATS = [
@@ -35,78 +35,78 @@ class FactureLocation
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturelocs')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Campagne $compagne = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturelocs')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?TabMois $mois = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturelocs')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?ContratLocation $contrat = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturelocs')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Locataire $locataire = null;
 
     #[ORM\ManyToOne(inversedBy: 'facturelocs')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Appartement $appartement = null;
 
     #[ORM\Column(length: 255, name: 'libFacture')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $libFacture = null;
 
     #[ORM\Column(name: 'mntFact')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $mntFact = null;
 
     #[ORM\Column(name: 'soldeFactLoc')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?int $soldeFactLoc = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateEmission')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?\DateTimeInterface $dateEmission = null;
 
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateLimite')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?\DateTimeInterface $dateLimite = null;
 
     #[ORM\OneToMany(mappedBy: 'numFact', targetEntity: Reglements::class)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private Collection $reglements;
 
     #[ORM\Column(length: 255, name: 'statut')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $statut = null;
 
     #[ORM\Column(length: 255, name: 'encaisse')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $encaisse = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fneUid = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fneQrCode = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fneStatus = null;
 
     
     #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?Agence $agence = null;
 
     public function __construct()
@@ -294,13 +294,13 @@ class FactureLocation
         return $this;
     }
     #[ORM\OneToMany(mappedBy: 'factureLocation', targetEntity: Transaction::class)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private Collection $transactions;
 
     /**
      * @return Collection<int, Transaction>
      */
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     public function getTransactions(): Collection
     {
         return $this->transactions;
