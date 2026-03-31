@@ -7,40 +7,57 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DepensesRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Depenses
 {
     use TraitEntity;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['group1'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['group1'])]
     private ?string $libDepense = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
+    #[Groups(['group1'])]
     private ?int $montantTTC = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group1'])]
     private ?string $date = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['group1'])]
     private ?string $details = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['group1'])]
     private ?string $scan = null;
 
     #[ORM\OneToMany(mappedBy: 'depenses', targetEntity: LigneDepense::class)]
     private Collection $ligneDepenses;
 
-    
-    #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
+    #[ORM\ManyToOne(targetEntity: Agence::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
     private ?Agence $agence = null;
+
+    #[ORM\ManyToOne(targetEntity: TypeDepense::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?TypeDepense $typeDepense = null;
+
+    #[ORM\ManyToOne(targetEntity: Entreprise::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?Entreprise $entreprise = null;
 
     public function __construct()
     {
@@ -60,7 +77,6 @@ class Depenses
     public function setLibDepense(string $libDepense): static
     {
         $this->libDepense = $libDepense;
-
         return $this;
     }
 
@@ -69,10 +85,9 @@ class Depenses
         return $this->montantTTC;
     }
 
-    public function setMontantTTC(int $montantTTC): static
+    public function setMontantTTC(?int $montantTTC): static
     {
         $this->montantTTC = $montantTTC;
-
         return $this;
     }
 
@@ -81,10 +96,9 @@ class Depenses
         return $this->date;
     }
 
-    public function setDate(string $date): static
+    public function setDate(?string $date): static
     {
         $this->date = $date;
-
         return $this;
     }
 
@@ -93,10 +107,9 @@ class Depenses
         return $this->details;
     }
 
-    public function setDetails(string $details): static
+    public function setDetails(?string $details): static
     {
         $this->details = $details;
-
         return $this;
     }
 
@@ -105,16 +118,12 @@ class Depenses
         return $this->scan;
     }
 
-    public function setScan(string $scan): static
+    public function setScan(?string $scan): static
     {
         $this->scan = $scan;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, LigneDepense>
-     */
     public function getLigneDepenses(): Collection
     {
         return $this->ligneDepenses;
@@ -126,22 +135,18 @@ class Depenses
             $this->ligneDepenses->add($ligneDepense);
             $ligneDepense->setDepenses($this);
         }
-
         return $this;
     }
 
     public function removeLigneDepense(LigneDepense $ligneDepense): static
     {
         if ($this->ligneDepenses->removeElement($ligneDepense)) {
-            // set the owning side to null (unless already changed)
             if ($ligneDepense->getDepenses() === $this) {
                 $ligneDepense->setDepenses(null);
             }
         }
-
         return $this;
     }
-
 
     public function getAgence(): ?Agence
     {
@@ -151,8 +156,28 @@ class Depenses
     public function setAgence(?Agence $agence): static
     {
         $this->agence = $agence;
-
         return $this;
     }
 
+    public function getTypeDepense(): ?TypeDepense
+    {
+        return $this->typeDepense;
+    }
+
+    public function setTypeDepense(?TypeDepense $typeDepense): static
+    {
+        $this->typeDepense = $typeDepense;
+        return $this;
+    }
+
+    public function getEntreprise(): ?Entreprise
+    {
+        return $this->entreprise;
+    }
+
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+        return $this;
+    }
 }
