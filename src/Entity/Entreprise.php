@@ -19,11 +19,11 @@ class Entreprise
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $denomination = null;
 
     #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Employe::class)]
@@ -37,7 +37,7 @@ class Entreprise
     private Collection $proprios;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $sigle = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -45,40 +45,40 @@ class Entreprise
     private ?string $agrements = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $situation_geo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $contacts = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $adresse = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $mobile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $fax = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?Fichier $logo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $site_web = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?string $directeur = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -90,7 +90,7 @@ class Entreprise
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\ManyToOne(inversedBy: 'entreprises')]
-    #[Groups(["group1"])]
+    #[Groups(["group1","group1_facture_location"])]
     private ?Pays $pays = null;
 
     #[ORM\OneToMany(mappedBy: 'entreprise', targetEntity: Locataire::class)]

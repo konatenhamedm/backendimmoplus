@@ -19,25 +19,25 @@ class Fichier
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(["fichier", "groupe_batis", "group1","group_modeleBoutique","paiement_boutique","paiement_boutique_reservation", "group_modeleBoutique","group_modeleBoutique_autre"])]
+    #[Groups(["fichier", "groupe_batis", "group1", "group1_facture_location"])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $size = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["fichier", "groupe_batis", 'group_user', 'group_pro', "group1","group_modeleBoutique","paiement_boutique","paiement_boutique_reservation", "group_modeleBoutique","group_modeleBoutique_autre"])]
+    #[Groups(["fichier", "groupe_batis", 'group_user', 'group_pro', "group1", "group1_facture_location"])]
     private ?string $path = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["fichier", "groupe_batis", 'group_user', 'group_pro', "group1","group_modeleBoutique","paiement_boutique","paiement_boutique_reservation", "group_modeleBoutique","group_modeleBoutique_autre"])]
+    #[Groups(["fichier", "groupe_batis", 'group_user', 'group_pro', "group1", "group1_facture_location"])]
     private ?string $alt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(length: 5, nullable: true)]
-    #[Groups(["fichier", "groupe_batis", 'group_pro'])]
+    #[Groups(["fichier", "groupe_batis", 'group_pro', "group1_facture_location"])]
     private ?string $url = null;
 
     #[Assert\NotNull(message: "Veuillez sélectionner un fichier", groups: ["FileRequired"])]
