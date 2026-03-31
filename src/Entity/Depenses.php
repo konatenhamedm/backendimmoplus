@@ -51,7 +51,7 @@ class Depenses
     #[Groups(['group1'])]
     private ?Agence $agence = null;
 
-    #[ORM\ManyToOne(targetEntity: TypeDepense::class)]
+    #[ORM\ManyToOne(targetEntity: TypeDepense::class, inversedBy: 'depenses')]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
     private ?TypeDepense $typeDepense = null;
