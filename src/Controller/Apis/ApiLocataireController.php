@@ -78,7 +78,8 @@ class ApiLocataireController extends ApiInterface
         try {
             $user = $this->getUser();
             if (!$subscriptionService->canAddLocataire($user->getEntreprise())) {
-                return $this->errorResponse(null, "Limite de locataires atteinte pour votre abonnement actuel.", 403);
+                $planName = $subscriptionService->getCurrentPlanName($user->getEntreprise());
+                return $this->errorResponse(null, "Limite de locataires atteinte pour votre abonnement actuel ($planName).", 403);
             }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {

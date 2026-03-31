@@ -253,4 +253,16 @@ class SubscriptionService
 
         return $count < $max;
     }
+
+    /**
+     * Retourne le nom de l'abonnement actuel de l'entreprise.
+     */
+    public function getCurrentPlanName(Entreprise $entreprise): string
+    {
+        $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
+        if ($activeAbonnement && $activeAbonnement->getModuleAbonnement()) {
+            return $activeAbonnement->getModuleAbonnement()->getCode();
+        }
+        return 'GRATUIT';
+    }
 }

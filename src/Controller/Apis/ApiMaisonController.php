@@ -85,7 +85,8 @@ class ApiMaisonController extends ApiInterface
 
             // Vérifier la limite de l'abonnement
             if (!$subscriptionService->canAddMaison($user->getEntreprise())) {
-                return $this->errorResponse(null, "Limite de biens atteinte pour votre abonnement actuel. Veuillez passer à un plan supérieur.", 403);
+                $planName = $subscriptionService->getCurrentPlanName($user->getEntreprise());
+                return $this->errorResponse(null, "Limite de biens atteinte pour votre abonnement actuel ($planName). Veuillez passer à un plan supérieur.", 403);
             }
 
             $data = json_decode($request->getContent(), true);

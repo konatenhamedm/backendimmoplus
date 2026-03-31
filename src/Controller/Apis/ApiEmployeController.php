@@ -110,7 +110,8 @@ class ApiEmployeController extends ApiInterface
         try {
             $user = $this->getUser();
             if (!$subscriptionService->canAddEmploye($user->getEntreprise())) {
-                return $this->errorResponse(null, "Limite d'employés atteinte pour votre abonnement actuel.", 403);
+                $planName = $subscriptionService->getCurrentPlanName($user->getEntreprise());
+                return $this->errorResponse(null, "Limite d'employés atteinte pour votre abonnement actuel ($planName).", 403);
             }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {

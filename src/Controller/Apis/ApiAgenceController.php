@@ -83,7 +83,8 @@ class ApiAgenceController extends ApiInterface
         try {
             $user = $this->getUser();
             if (!$subscriptionService->canAddAgence($user->getEntreprise())) {
-                return $this->errorResponse(null, "Limite d'agences atteinte pour votre abonnement actuel.", 403);
+                $planName = $subscriptionService->getCurrentPlanName($user->getEntreprise());
+                return $this->errorResponse(null, "Limite d'agences atteinte pour votre abonnement actuel ($planName).", 403);
             }
             $data = json_decode($request->getContent(), true);
             if (!$user || !in_array($user->getGroupe()->getCode(), ['ADMIN', 'SADM'])) {
