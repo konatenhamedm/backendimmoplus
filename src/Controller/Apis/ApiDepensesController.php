@@ -73,6 +73,8 @@ class ApiDepensesController extends ApiInterface
 
     /**
      * Créer une nouvelle dépense (multipart/form-data pour le scan).
+     * - Agent/Gestionnaire : l'agence est prise automatiquement depuis son profil.
+     * - Admin/Super-admin : doit passer agence_id dans la payload.
      */
     #[Route('/create', methods: ['POST'])]
     public function create(
@@ -83,6 +85,7 @@ class ApiDepensesController extends ApiInterface
     ): Response {
         try {
             $data = $request->request->all() ?: (json_decode($request->getContent(), true) ?? []);
+            $user = $this->getUser();
 
             if (empty($data['type_depense_id'])) {
                 $this->setStatusCode(400);
@@ -92,10 +95,6 @@ class ApiDepensesController extends ApiInterface
                 $this->setStatusCode(400);
                 return $this->response(['message' => 'Le montant est requis']);
             }
-            if (empty($data['agence_id'])) {
-                $this->setStatusCode(400);
-                return $this->response(['message' => "L'agence est requise"]);
-            }
 
             $type = $typeRepo->find($data['type_depense_id']);
             if (!$type) {
@@ -103,20 +102,36 @@ class ApiDepensesController extends ApiInterface
                 return $this->response(['message' => 'Type de dépense introuvable']);
             }
 
-            $agence = $agenceRepo->find($data['agence_id']);
-            if (!$agence) {
-                $this->setStatusCode(404);
-                return $this->response(['message' => 'Agence introuvable']);
+            // Résolution de l'agence
+            $isSuperAdmin = $user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SUPER_ADMIN']);
+            if ($isSuperAdmin) {
+                // L'admin doit fournir une agence (active_agence_id envoyée depuis le frontend)
+                if (empty($data['agence_id'])) {
+                    $this->setStatusCode(400);
+                    return $this->response(['message' => "Veuillez sélectionner une agence active dans le tableau de bord."]);
+                }
+                $agence = $agenceRepo->find($data['agence_id']);
+                if (!$agence) {
+                    $this->setStatusCode(404);
+                    return $this->response(['message' => 'Agence introuvable']);
+                }
+            } else {
+                // Utilisateur non-admin : on prend son agence directement
+                $agence = $user->getAgence();
+                if (!$agence) {
+                    $this->setStatusCode(422);
+                    return $this->response(['message' => "Votre compte n'est pas rattaché à une agence."]);
+                }
             }
 
             $depense = new Depenses();
-            $depense->setLibDepense($type->getLibelle()); // auto-rempli depuis le type
+            $depense->setLibDepense($type->getLibelle());
             $depense->setMontantTTC((int) $data['montantTTC']);
             $depense->setDate($data['date'] ?? date('Y-m-d'));
             $depense->setDetails($data['details'] ?? null);
             $depense->setTypeDepense($type);
             $depense->setAgence($agence);
-            $depense->setEntreprise($this->getUser()->getEntreprise());
+            $depense->setEntreprise($user->getEntreprise());
 
             // Upload justificatif (Fichier entity)
             $uploadedScan = $request->files->get('scan');
