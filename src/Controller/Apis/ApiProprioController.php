@@ -67,9 +67,13 @@ class ApiProprioController extends ApiInterface
         description: "Ajoute un nouveau propriétaire.",
         tags: ['proprio']
     )]
-    public function create(Request $request, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository, \App\Repository\AgenceRepository $agenceRepository): Response
+    public function create(Request $request, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository, \App\Repository\AgenceRepository $agenceRepository, \App\Service\SubscriptionService $subscriptionService): Response
     {
         try {
+            $user = $this->getUser();
+            if (!$subscriptionService->canAddProprio($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite de propriétaires atteinte pour votre abonnement actuel.", 403);
+            }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {
                 $data = $request->request->all();

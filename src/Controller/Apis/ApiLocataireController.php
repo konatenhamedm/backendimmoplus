@@ -73,9 +73,13 @@ class ApiLocataireController extends ApiInterface
         description: "Ajoute un nouveau locataire.",
         tags: ['Locataire']
     )]
-    public function create(Request $request, LocataireRepository $repository, \App\Repository\SituationMatrimonialeRepository $situationRepo): Response
+    public function create(Request $request, LocataireRepository $repository, \App\Repository\SituationMatrimonialeRepository $situationRepo, \App\Service\SubscriptionService $subscriptionService): Response
     {
         try {
+            $user = $this->getUser();
+            if (!$subscriptionService->canAddLocataire($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite de locataires atteinte pour votre abonnement actuel.", 403);
+            }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {
                 $data = $request->request->all();

@@ -67,9 +67,13 @@ class ApiUserController extends ApiInterface
         description: "Ajoute un nouvel utilisateur.",
         tags: ['User']
     )]
-    public function create(Request $request, EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository, \App\Repository\AgenceRepository $agenceRepository): Response
+    public function create(Request $request, EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository, \App\Repository\AgenceRepository $agenceRepository, \App\Service\SubscriptionService $subscriptionService): Response
     {
         try {
+            $user = $this->getUser();
+            if (!$subscriptionService->canAddUser($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite d'utilisateurs atteinte pour votre abonnement actuel.", 403);
+            }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {
                 $data = $request->request->all();

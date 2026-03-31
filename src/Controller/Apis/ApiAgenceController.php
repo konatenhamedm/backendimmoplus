@@ -78,10 +78,14 @@ class ApiAgenceController extends ApiInterface
             ]
         )
     )]
-    public function create(Request $request, AgenceRepository $agenceRepository, \Doctrine\ORM\EntityManagerInterface $em): Response
+    public function create(Request $request, AgenceRepository $agenceRepository, \Doctrine\ORM\EntityManagerInterface $em, \App\Service\SubscriptionService $subscriptionService): Response
     {
         try {
             $user = $this->getUser();
+            if (!$subscriptionService->canAddAgence($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite d'agences atteinte pour votre abonnement actuel.", 403);
+            }
+            $data = json_decode($request->getContent(), true);
             if (!$user || !in_array($user->getGroupe()->getCode(), ['ADMIN', 'SADM'])) {
                 return $this->json(['message' => 'Non autorisé ou rôle insuffisant'], 403);
             }

@@ -175,6 +175,30 @@ class SubscriptionService
     }
 
     /**
+     * Vérifie si l'entreprise peut ajouter un nouveau propriétaire.
+     */
+    public function canAddProprio(Entreprise $entreprise): bool
+    {
+        return $this->canAddEntity($entreprise, \App\Entity\Proprio::class, 'getMaxBiens', 'JOIN entity.agence a WHERE a.entreprise = :entreprise');
+    }
+
+    /**
+     * Vérifie si l'entreprise peut ajouter un nouveau locataire.
+     */
+    public function canAddLocataire(Entreprise $entreprise): bool
+    {
+        return $this->canAddEntity($entreprise, Locataire::class, 'getMaxLocatairesMobileApp', 'WHERE entity.entreprise = :entreprise');
+    }
+
+    /**
+     * Vérifie si l'entreprise peut ajouter un nouvel utilisateur classique.
+     */
+    public function canAddUser(Entreprise $entreprise): bool
+    {
+        return $this->canAddEntity($entreprise, User::class, 'getMaxEmployes', 'JOIN entity.agence a WHERE a.entreprise = :entreprise');
+    }
+
+    /**
      * Vérifie si l'entreprise peut ajouter une nouvelle agence.
      */
     public function canAddAgence(Entreprise $entreprise): bool
@@ -213,10 +237,14 @@ class SubscriptionService
     private function canAddEntity(Entreprise $entreprise, string $entityClass, string $maxMethod, string $condition): bool
     {
         $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
-        if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) return false;
-
-        $max = $activeAbonnement->getModuleAbonnement()->$maxMethod();
-        if ($max === -1 || $max === null) return true;
+        
+        $max = 1; // Default quota pour abonnement Gratuit (ou sans abonnement)
+        
+        if ($activeAbonnement && $activeAbonnement->getModuleAbonnement()) {
+            $limit = $activeAbonnement->getModuleAbonnement()->$maxMethod();
+            if ($limit === -1 || $limit === null) return true;
+            $max = $limit;
+        }
 
         $alias = 'entity';
         $count = $this->em->createQuery("SELECT COUNT($alias.id) FROM $entityClass $alias $condition AND $alias.isActive = true")

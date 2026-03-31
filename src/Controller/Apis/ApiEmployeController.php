@@ -105,9 +105,13 @@ class ApiEmployeController extends ApiInterface
         description: "Ajoute un nouvel employé.",
         tags: ['Employe']
     )]
-    public function create(Request $request, EmployeRepository $repository, CiviliteRepository $civiliteRepository): Response
+    public function create(Request $request, EmployeRepository $repository, CiviliteRepository $civiliteRepository, \App\Service\SubscriptionService $subscriptionService): Response
     {
         try {
+            $user = $this->getUser();
+            if (!$subscriptionService->canAddEmploye($user->getEntreprise())) {
+                return $this->errorResponse(null, "Limite d'employés atteinte pour votre abonnement actuel.", 403);
+            }
             $data = json_decode($request->getContent(), true);
             if (null === $data) {
                 $data = $request->request->all();
