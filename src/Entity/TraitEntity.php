@@ -11,25 +11,25 @@ trait TraitEntity
 {
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Group(["group_user", "group1", "group_type", "group_user_trx", "group_pro", "group_modeleBoutique", "paiement_boutique", "group_details"])]
+    #[Group(["group_user", "group1", "group_type", "group_user_trx", "group_details", "group1_facture_location",'appartement-groupe'])]
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    #[Group(["group_user", "group_details"])]
+    #[Group(["group_user", "group_details", "group1_facture_location",'appartement-groupe'])]
     private ?DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
-    #[Group(["group_pro", "group_modeleBoutique"])]
+    #[Group(["group_pro", "group1_facture_location",'appartement-groupe'])]
     private ?User $createdBy = null;
     
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: true)]
-    #[Group(["group_pro", "group_modeleBoutique"])]
+    #[Group(["group_pro", "group1_facture_location",'appartement-groupe'])]
     private ?User $updatedBy = null;
 
     #[ORM\Column]
-    #[Group(["group1", "group_type", "group_modeleBoutique", "group_details"])]
+    #[Group(["group1", "group_type", "group_details", "group1_facture_location",'appartement-groupe'])]
     private ?bool $isActive = true; // ✅ Valeur par défaut ajoutée
 
     #[ORM\PrePersist]

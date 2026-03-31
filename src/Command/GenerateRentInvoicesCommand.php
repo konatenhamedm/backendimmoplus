@@ -84,7 +84,7 @@ class GenerateRentInvoicesCommand extends Command
 
             // 3. Trouver ou créer la CAMPAGNE
             $campagneLib = "Loyer " . $mois->getLibMois() . " " . $currentYear;
-            $campagne = $this->getOrCreateCampagne($campagneLib, $annee, $mois, $entreprise);
+            $campagne = $this->getOrCreateCampagne($campagneLib, $annee, $mois, $entreprise, $contract->getAgence());
 
             // 4. Vérifier si la facture existe déjà
             $existingInvoice = $this->entityManager->getRepository(FactureLocation::class)->findOneBy([
@@ -132,13 +132,18 @@ class GenerateRentInvoicesCommand extends Command
         return $this->entityManager->getRepository(TabMois::class)->findOneBy(['numMois' => $monthNum]);
     }
 
-    private function getOrCreateCampagne(string $libelle, Annee $annee, TabMois $mois, Entreprise $entreprise): Campagne
+    private function getOrCreateCampagne(string $libelle, Annee $annee, TabMois $mois, Entreprise $entreprise, ?\App\Entity\Agence $agence = null): Campagne
     {
         $repo = $this->entityManager->getRepository(Campagne::class);
-        $campagne = $repo->findOneBy([
+        $criteria = [
             'libCampagne' => $libelle,
             'entreprise' => $entreprise
-        ]);
+        ];
+        if ($agence) {
+            $criteria['agence'] = $agence;
+        }
+
+        $campagne = $repo->findOneBy($criteria);
 
         if (!$campagne) {
             $campagne = new Campagne();
@@ -146,6 +151,9 @@ class GenerateRentInvoicesCommand extends Command
             $campagne->setAnnee($annee);
             $campagne->setMois($mois);
             $campagne->setEntreprise($entreprise);
+            if ($agence) {
+                $campagne->setAgence($agence);
+            }
             $campagne->setNbreProprio(0);
             $campagne->setNbreLocataire(0);
             $campagne->setMntTotal(0);
@@ -166,6 +174,7 @@ class GenerateRentInvoicesCommand extends Command
         $facture->setAppartement($contract->getAppart());
         $facture->setCompagne($campagne);
         $facture->setMois($mois);
+        $facture->setAgence($contract->getAgence());
         $facture->setEntreprise($contract->getEntreprise());
 
         // Générer le numéro de facture / Libellé
