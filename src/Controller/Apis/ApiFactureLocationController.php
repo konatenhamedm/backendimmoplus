@@ -125,7 +125,7 @@ class ApiFactureLocationController extends ApiInterface
         description: "Crée une nouvelle facture de location.",
         tags: ['FactureLocation']
     )]
-    public function create(Request $request, FactureLocationRepository $repository, LocataireRepository $locataireRepository, ContratLocationRepository $contratRepository, AppartementRepository $appartementRepository, CampagneRepository $campagneRepository, TabMoisRepository $moisRepository): Response
+    public function create(Request $request, FactureLocationRepository $repository, LocataireRepository $locataireRepository, ContratLocationRepository $contratRepository, AppartementRepository $appartementRepository, CampagneRepository $campagneRepository, TabMoisRepository $moisRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -170,6 +170,13 @@ class ApiFactureLocationController extends ApiInterface
             if (isset($data['dateEmission'])) $facture->setDateEmission(new \DateTime($data['dateEmission']));
             if (isset($data['dateLimite'])) $facture->setDateLimite(new \DateTime($data['dateLimite']));
 
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $facture->setAgence($agence);
+            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
+                $facture->setAgence($this->getUser()->getAgence());
+            }
+
             $this->updateAuditFields($facture, true);
 
             $repository->save($facture, true);
@@ -188,7 +195,7 @@ class ApiFactureLocationController extends ApiInterface
         description: "Met à jour une facture existante.",
         tags: ['FactureLocation']
     )]
-    public function update(Request $request, FactureLocation $facture, FactureLocationRepository $repository, LocataireRepository $locataireRepository, ContratLocationRepository $contratRepository, AppartementRepository $appartementRepository, CampagneRepository $campagneRepository, TabMoisRepository $moisRepository): Response
+    public function update(Request $request, FactureLocation $facture, FactureLocationRepository $repository, LocataireRepository $locataireRepository, ContratLocationRepository $contratRepository, AppartementRepository $appartementRepository, CampagneRepository $campagneRepository, TabMoisRepository $moisRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
@@ -234,6 +241,13 @@ class ApiFactureLocationController extends ApiInterface
             
             if (isset($data['dateEmission'])) $facture->setDateEmission(new \DateTime($data['dateEmission']));
             if (isset($data['dateLimite'])) $facture->setDateLimite(new \DateTime($data['dateLimite']));
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $facture->setAgence($agence);
+            } elseif (!$facture->getAgence() && $this->getUser() && $this->getUser()->getAgence()) {
+                $facture->setAgence($this->getUser()->getAgence());
+            }
 
             $this->updateAuditFields($facture);
 

@@ -80,7 +80,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Crée un nouveau contrat de location.",
         tags: ['ContratLocation']
     )]
-    public function create(Request $request, ContratLocationRepository $repository, AppartementRepository $appartementRepository, LocataireRepository $locataireRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository): Response
+    public function create(Request $request, ContratLocationRepository $repository, AppartementRepository $appartementRepository, LocataireRepository $locataireRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -162,6 +162,13 @@ class ApiContratLocationController extends ApiInterface
                 $contrat->setEntreprise($this->getUser()->getEntreprise());
             }
 
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $contrat->setAgence($agence);
+            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
+                $contrat->setAgence($this->getUser()->getAgence());
+            }
+
             $this->updateAuditFields($contrat, true);
 
             $repository->save($contrat, true);
@@ -190,7 +197,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Met à jour un contrat existant.",
         tags: ['ContratLocation']
     )]
-    public function update(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository): Response
+    public function update(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
@@ -290,6 +297,13 @@ class ApiContratLocationController extends ApiInterface
                 $appartementRepository->save($newAppart, true);
 
                 $contrat->setAppart($newAppart);
+            }
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $contrat->setAgence($agence);
+            } elseif (!$contrat->getAgence() && $this->getUser() && $this->getUser()->getAgence()) {
+                $contrat->setAgence($this->getUser()->getAgence());
             }
 
             $this->updateAuditFields($contrat);

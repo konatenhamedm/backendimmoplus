@@ -407,25 +407,27 @@ $this->setStatusCode(500);
 
     public function errorResponse($DTO, string $customMessage = '', int $statusCode = 400): ?JsonResponse
     {
-        $errors = $this->validator->validate($DTO);
+        if ($DTO !== null) {
+            $errors = $this->validator->validate($DTO);
 
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();
+            if (count($errors) > 0) {
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[] = $error->getMessage();
+                }
+
+                $response = [
+                    'code' => $statusCode,
+                    'message' => 'Validation failed',
+                    'errors' => $errorMessages
+                ];
+
+                return new JsonResponse($response, $statusCode);
             }
+        }
 
-            //array_push($arerrorMessagesray, 4)
-
-            $response = [
-                'code' => $statusCode,
-                'message' => 'Validation failed',
-                'errors' => $errorMessages
-            ];
-
-            return new JsonResponse($response, $statusCode);
-        } elseif ($customMessage != '') {
-            $errorMessages[] = $customMessage;
+        if ($customMessage != '') {
+            $errorMessages = [$customMessage];
             $response = [
                 'code' => $statusCode,
                 'message' => 'Validation failed',

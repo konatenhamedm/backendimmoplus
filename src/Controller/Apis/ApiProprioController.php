@@ -67,7 +67,7 @@ class ApiProprioController extends ApiInterface
         description: "Ajoute un nouveau propriétaire.",
         tags: ['proprio']
     )]
-    public function create(Request $request, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository): Response
+    public function create(Request $request, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -137,6 +137,13 @@ class ApiProprioController extends ApiInterface
                 $proprio->setEntreprise($this->getUser()->getEntreprise());
             }
 
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $proprio->setAgence($agence);
+            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
+                $proprio->setAgence($this->getUser()->getAgence());
+            }
+
             $this->updateAuditFields($proprio, true);
 
             $repository->save($proprio, true);
@@ -155,7 +162,7 @@ class ApiProprioController extends ApiInterface
         description: "Met à jour un propriétaire existant.",
         tags: ['proprio']
     )]
-    public function update(Request $request, Proprio $proprio, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository): Response
+    public function update(Request $request, Proprio $proprio, ProprioRepository $repository, EntrepriseRepository $entrepriseRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             if (!$proprio) return $this->errorResponse(null, "Propriétaire non trouvé", 404);
@@ -214,6 +221,13 @@ class ApiProprioController extends ApiInterface
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedLien, 'proprios')) {
                     $proprio->setLien($fichier);
                 }
+            }
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $proprio->setAgence($agence);
+            } elseif (!$proprio->getAgence() && $this->getUser() && $this->getUser()->getAgence()) {
+                $proprio->setAgence($this->getUser()->getAgence());
             }
 
             $this->updateAuditFields($proprio);

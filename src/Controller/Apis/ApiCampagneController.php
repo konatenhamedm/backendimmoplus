@@ -94,7 +94,8 @@ class ApiCampagneController extends ApiInterface
         VersmtProprioRepository $versmtRepo,
         TypeVersementsRepository $typeVersmtRepo,
         TabMoisRepository $moisRepo,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        \App\Repository\AgenceRepository $agenceRepository
     ): Response
     {
         try {
@@ -106,6 +107,13 @@ class ApiCampagneController extends ApiInterface
             
             $campagne = new Campagne();
             $campagne->setEntreprise($entreprise);
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $campagne->setAgence($agence);
+            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
+                $campagne->setAgence($this->getUser()->getAgence());
+            }
             
             if (isset($data['libCampagne'])) $campagne->setLibCampagne($data['libCampagne']);
              // We need a Mois linked to campagne usually? Original code linked 'mois' to Factureloc, not Campagne directly?
@@ -177,7 +185,6 @@ class ApiCampagneController extends ApiInterface
                 $em->persist($cc);
                 // $campagne->addCampagneContrat($cc); 
 
-                // 2. Create FactureLocation
                 $facture = new FactureLocation();
                 $facture->setCompagne($campagne);
                 $facture->setContrat($contrat);
@@ -187,6 +194,9 @@ class ApiCampagneController extends ApiInterface
                 $facture->setLibFacture($campagne->getLibCampagne());
                 $facture->setDateEmission(new \DateTime());
                 $facture->setDateLimite($dateMoisSuivant);
+                if ($campagne->getAgence()) {
+                    $facture->setAgence($campagne->getAgence());
+                }
                 if ($moisObj) $facture->setMois($moisObj);
 
                 // Handle Advance Payment

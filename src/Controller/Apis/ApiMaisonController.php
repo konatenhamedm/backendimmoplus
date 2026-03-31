@@ -94,7 +94,7 @@ class ApiMaisonController extends ApiInterface
             // Set Agence
             if (isset($data['agence_id'])) {
                 $agence = $this->em->getRepository(\App\Entity\Agence::class)->find((int)$data['agence_id']);
-                if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                if ($agence && $agence->getEntreprise() && $user->getEntreprise() && $agence->getEntreprise()->getId() === $user->getEntreprise()->getId()) {
                     $maison->setAgence($agence);
                 } else {
                     return $this->errorResponse(null, "Agence introuvable ou non autorisée", 400);
@@ -203,7 +203,7 @@ class ApiMaisonController extends ApiInterface
                     if (isset($appartData['id'])) {
                         // Update existing apartment if it belongs to this maison
                         $appartement = $appartementRepository->find($appartData['id']);
-                        if ($appartement && $appartement->getMaisson() === $maison) {
+                        if ($appartement && $appartement->getMaisson() && $appartement->getMaisson()->getId() === $maison->getId()) {
                             if (isset($appartData['libAppart'])) $appartement->setLibAppart($appartData['libAppart']);
                             if (isset($appartData['nbrePieces'])) $appartement->setNbrePieces($appartData['nbrePieces']);
                             if (isset($appartData['numEtage'])) $appartement->setNumEtage($appartData['numEtage']);

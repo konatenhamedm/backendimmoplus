@@ -67,7 +67,7 @@ class ApiUserController extends ApiInterface
         description: "Ajoute un nouvel utilisateur.",
         tags: ['User']
     )]
-    public function create(Request $request, EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
+    public function create(Request $request, EmployeRepository $employeRepository, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -142,6 +142,13 @@ class ApiUserController extends ApiInterface
                 $user->setEntreprise($this->getUser()->getEntreprise());
             }
 
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $user->setAgence($agence);
+            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
+                $user->setAgence($this->getUser()->getAgence());
+            }
+
             $repository->save($user, true);
 
             return $this->responseData($user, 'group1');
@@ -158,7 +165,7 @@ class ApiUserController extends ApiInterface
         description: "Met à jour un utilisateur existant.",
         tags: ['User']
     )]
-    public function update(Request $request, EmployeRepository $employeRepository, User $user, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository): Response
+    public function update(Request $request, EmployeRepository $employeRepository, User $user, UserRepository $repository, UserPasswordHasherInterface $hasher, \App\Repository\GroupeRepository $groupeRepository, \App\Repository\LocataireRepository $locataireRepository, \App\Repository\AgenceRepository $agenceRepository): Response
     {
         try {
             if (!$user) return $this->errorResponse(null, "Utilisateur non trouvé", 404);
@@ -227,6 +234,13 @@ class ApiUserController extends ApiInterface
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'avatars')) {
                     $user->setLogo($fichier);
                 }
+            }
+
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+                if ($agence) $user->setAgence($agence);
+            } elseif (!$user->getAgence() && $this->getUser() && $this->getUser()->getAgence()) {
+                $user->setAgence($this->getUser()->getAgence());
             }
 
             $repository->save($user, true);
