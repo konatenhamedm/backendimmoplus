@@ -20,7 +20,7 @@ class Quartier
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group1_facture_location'])]
     private ?string $libQuartier = null;
 
 

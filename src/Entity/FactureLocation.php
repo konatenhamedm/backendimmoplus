@@ -91,6 +91,14 @@ class FactureLocation
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $encaisse = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?\DateTimeInterface $dateDebut = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?\DateTimeInterface $dateFin = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $fneUid = null;
@@ -360,6 +368,30 @@ class FactureLocation
     public function setFneQrCode(?string $fneQrCode): static
     {
         $this->fneQrCode = $fneQrCode;
+
+        return $this;
+    }
+
+    public function getDateDebut(): ?\DateTimeInterface
+    {
+        return $this->dateDebut;
+    }
+
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static
+    {
+        $this->dateDebut = $dateDebut;
+
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeInterface
+    {
+        return $this->dateFin;
+    }
+
+    public function setDateFin(?\DateTimeInterface $dateFin): static
+    {
+        $this->dateFin = $dateFin;
 
         return $this;
     }

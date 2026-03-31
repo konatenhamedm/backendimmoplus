@@ -219,6 +219,12 @@ class GenerateRentInvoicesCommand extends Command
         $facture->setDateEmission(new \DateTime());
         $facture->setDateLimite($targetDate);
 
+        // Billing Period (Start and End of the target month)
+        $dateDebut = (clone $targetDate)->modify('first day of this month')->setTime(0, 0, 0);
+        $dateFin = (clone $targetDate)->modify('last day of this month')->setTime(23, 59, 59);
+        $facture->setDateDebut($dateDebut);
+        $facture->setDateFin($dateFin);
+
         $this->entityManager->persist($facture);
     }
 
