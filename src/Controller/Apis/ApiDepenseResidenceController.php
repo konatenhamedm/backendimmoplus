@@ -21,6 +21,7 @@ class ApiDepenseResidenceController extends ApiInterface
     public function index(Request $request, DepenseResidenceRepository $repo): Response
     {
         try {
+            $withPagination = $request->query->get('with_pagination', "false");
             $qb = $repo->createQueryBuilder('d')
                 ->leftJoin('d.residence', 'r')
                 ->leftJoin('d.typeDepense', 't')
@@ -34,7 +35,14 @@ class ApiDepenseResidenceController extends ApiInterface
                 $qb->andWhere('a.id = :aid')->setParameter('aid', (int)$request->query->get('agence_id'));
             }
 
-            $depenses = $qb->orderBy('d.dateDepense', 'DESC')->getQuery()->getResult();
+            $qb->orderBy('d.dateDepense', 'DESC');
+
+            if ($withPagination === "true") {
+                $depenses = $this->paginationService->paginate($qb);
+                return $this->responseData($depenses, 'group1', [],  true);
+            }
+
+            $depenses = $qb->getQuery()->getResult();
             return $this->responseData($depenses, 'group1');
         } catch (\Exception $e) {
             $this->setStatusCode(500);

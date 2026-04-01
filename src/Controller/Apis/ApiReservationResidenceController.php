@@ -20,6 +20,7 @@ class ApiReservationResidenceController extends ApiInterface
     public function index(Request $request, ReservationResidenceRepository $repo): Response
     {
         try {
+            $withPagination = $request->query->get('with_pagination', "false");
             $qb = $repo->createQueryBuilder('r')
                 ->leftJoin('r.residence', 'res');
 
@@ -35,8 +36,15 @@ class ApiReservationResidenceController extends ApiInterface
                 $qb->andWhere('r.etat = :etat')->setParameter('etat', $request->query->get('etat'));
             }
 
-            $reservations = $qb->orderBy('r.dateDebut', 'DESC')->getQuery()->getResult();
-            return $this->responseData($reservations, 'group1');
+            $qb->orderBy('r.dateDebut', 'DESC');
+
+            if ($withPagination === "true") {
+                $reservations = $this->paginationService->paginate($qb);
+                return $this->responseData($reservations, ['group1', 'group2'], [], $withPagination == "true" ? true : false);
+            }
+
+            $reservations = $qb->getQuery()->getResult();
+            return $this->responseData($reservations, ['group1', 'group2']);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);

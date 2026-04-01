@@ -20,6 +20,7 @@ class ApiResidenceController extends ApiInterface
     {
         try {
             $user = $this->getUser();
+            $withPagination = $request->get('with_pagination', "false");
             $isSuperAdmin = $user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SUPER_ADMIN', 'SADM']);
 
             if ($isSuperAdmin && $request->query->get('agence_id')) {
@@ -43,7 +44,11 @@ class ApiResidenceController extends ApiInterface
                 $residences = $qb->getQuery()->getResult();
             }
 
-            return $this->responseData($residences, 'group1');
+            if ($withPagination === "true") {
+                $residences = $this->paginationService->paginate($qb);
+            }
+
+            return $this->responseData($residences, 'group1', [], $withPagination == "true" ? true : false);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);
