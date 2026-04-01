@@ -39,11 +39,11 @@ class ApiDepenseResidenceController extends ApiInterface
 
             if ($withPagination === "true") {
                 $depenses = $this->paginationService->paginate($qb);
-                return $this->responseData($depenses, 'group1', [],  true);
+                return $this->responseData($depenses, ['group1', 'group2'], [],  true);
             }
 
             $depenses = $qb->getQuery()->getResult();
-            return $this->responseData($depenses, 'group1');
+            return $this->responseData($depenses, ['group1', 'group2']);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);
@@ -107,7 +107,7 @@ class ApiDepenseResidenceController extends ApiInterface
     public function show(DepenseResidence $depense): Response
     {
         try {
-            return $this->responseData($depense, 'group1');
+            return $this->responseData($depense, ['group1', 'group2']);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);
@@ -147,7 +147,7 @@ class ApiDepenseResidenceController extends ApiInterface
             $this->updateAuditFields($depense);
             $repo->save($depense, true);
 
-            return $this->responseData($depense, 'group1');
+            return $this->responseData($depense,['group1', 'group2']);
         } catch (\Exception $e) {
             $this->setStatusCode(500);
             return $this->response(['message' => $e->getMessage()]);

@@ -20,10 +20,11 @@ class DepenseResidence
 
     #[ORM\ManyToOne(targetEntity: Residence::class, inversedBy: 'depenses')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['group1', 'group2'])]
     private ?Residence $residence = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?string $libelle = null;
 
     #[ORM\Column]
