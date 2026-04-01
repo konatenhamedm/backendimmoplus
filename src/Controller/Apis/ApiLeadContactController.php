@@ -61,7 +61,7 @@ class ApiLeadContactController extends ApiInterface
             // Envoi de l'email à l'administration
             try {
                 $mailService->send(
-                    'contact@motiplus.pro', // From
+                    'supports@ateliya.com', // From
                     'konate@motiplus.pro', // To (Admin)
                     "🚀 Nouvelle demande de plan annuel : " . ($data['planName'] ?? 'Contact'),
                     'lead_contact',
