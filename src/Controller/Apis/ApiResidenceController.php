@@ -64,7 +64,9 @@ class ApiResidenceController extends ApiInterface
 
             $isSuperAdmin = $user->getGroupe() && in_array($user->getGroupe()->getCode(), ['ADMIN', 'SUPER_ADMIN', 'SADM']);
 
-            if ($isSuperAdmin && !empty($data['agence_id'])) {
+            // Priorité : agence_id envoyé (super-admin ou utilisateur multi-agence)
+            // Fallback : agence liée au profil utilisateur
+            if (!empty($data['agence_id'])) {
                 $agence = $agenceRepo->find($data['agence_id']);
             } else {
                 $agence = $user->getAgence();
