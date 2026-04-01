@@ -15,91 +15,91 @@ class Residence
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $libelle = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $adresse = null;
 
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private int $montantLocation = 0;
 
     /** Nombre de pièces */
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?int $nombrePiece = null;
 
     /** DISPONIBLE | OCCUPEE | MAINTENANCE */
     #[ORM\Column(length: 50, options: ['default' => 'DISPONIBLE'])]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private string $etat = 'DISPONIBLE';
 
     /** L'agence loue cette résidence chez un particulier et la sous-loue */
     #[ORM\Column(options: ['default' => false])]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private bool $chargeLoyer = false;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?int $montantLoyer = null;
 
     /** MENSUEL | SEMESTRIEL | ANNUEL */
     #[ORM\Column(length: 20, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $periodiciteLoyer = null;
 
     // ─── Infos propriétaire (si chargeLoyer = true) ───────────────────────────
     #[ORM\Column(length: 150, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $nomProprietaire = null;
 
     #[ORM\Column(length: 30, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $telephoneProprietaire = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?string $emailProprietaire = null;
 
     #[ORM\ManyToOne(targetEntity: Agence::class)]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?Agence $agence = null;
 
     #[ORM\ManyToOne(targetEntity: Fichier::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?Fichier $photo = null;
 
     #[ORM\OneToMany(mappedBy: 'residence', targetEntity: ReservationResidence::class, cascade: ['persist'], orphanRemoval: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private Collection $reservations;
 
     #[ORM\OneToMany(mappedBy: 'residence', targetEntity: LoyerResidence::class, cascade: ['persist'], orphanRemoval: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private Collection $loyerPaiements;
 
     #[ORM\OneToMany(mappedBy: 'residence', targetEntity: DepenseResidence::class, cascade: ['persist'], orphanRemoval: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private Collection $depenses;
 
     #[ORM\ManyToOne(targetEntity: Entreprise::class)]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?Entreprise $entreprise = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1','group2'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]

@@ -13,11 +13,12 @@ class ReservationResidence
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Residence::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['group1', 'group2'])]
     private ?Residence $residence = null;
 
     #[ORM\Column(length: 100)]
@@ -25,49 +26,49 @@ class ReservationResidence
     private ?string $nomLocataire = null;
 
     #[ORM\Column(length: 100)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?string $prenomLocataire = null;
 
     #[ORM\Column(length: 30, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 150, nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?string $email = null;
 
     #[ORM\ManyToOne(targetEntity: Fichier::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?Fichier $carteIdentite = null;
 
     #[ORM\Column(type: 'date')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: 'date')]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private int $montant = 0;
 
     /** EN_ATTENTE | CONFIRMEE | TERMINEE | ANNULEE */
     #[ORM\Column(length: 20, options: ['default' => 'EN_ATTENTE'])]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private string $etat = 'EN_ATTENTE';
 
     #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?string $notes = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['group1', 'group2'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
