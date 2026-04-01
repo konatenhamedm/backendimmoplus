@@ -1,58 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { box-sizing: border-box; }
-        .main { width: 100%; padding: 20px; color: #334155; }
-        .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 20px 0; }
-        .footer { background-color: #7C3AED; color: white; text-align: center; padding: 15px; border-radius: 8px; margin-top: 20px; }
-        .label { font-weight: bold; color: #64748b; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
-        .value { color: #1e293b; font-weight: 600; margin-bottom: 12px; }
-    </style>
-</head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; background-color: #f1f5f9; padding: 20px;">
+{% extends 'emails/base.html.twig' %}
 
-<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 16px; overflow: hidden; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-    <div style="background-color: #7C3AED; padding: 30px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">Nouvelle Demande Immoplus</h1>
+{% block title %}NOUVELLE DEMANDE{% endblock %}
+
+{% block body %}
+    <p>Bonjour l'équipe,</p>
+    <p>Une nouvelle demande de plan annuel a été soumise depuis la landing page.</p>
+
+    <div class="card">
+        <div class="label">Plan souhaité</div>
+        <div class="value" style="color: #7C3AED; font-size: 18px;">{{ planName }}</div>
+
+        <div class="label">Nom complet</div>
+        <div class="value">{{ name }}</div>
+
+        <div class="label">Agence / Entreprise</div>
+        <div class="value">{{ company }}</div>
+
+        <div class="label">Email de contact</div>
+        <div class="value"><a href="mailto:{{ email_content }}" style="color: #7C3AED;">{{ email_content }}</a></div>
+
+        <div class="label">Téléphone</div>
+        <div class="value">{{ phone }}</div>
+
+        {% if message %}
+        <hr>
+        <div class="label">Message / Précisions</div>
+        <div class="value" style="font-style: italic; font-weight: 400;">"{{ message }}"</div>
+        {% endif %}
     </div>
 
-    <div class="main">
-        <p>Bonjour l'équipe,</p>
-        <p>Une nouvelle demande de plan annuel a été soumise depuis la landing page.</p>
-
-        <div class="card">
-            <div class="label">Plan souhaité</div>
-            <div class="value" style="color: #7C3AED; font-size: 18px;">{{ planName }}</div>
-
-            <div class="label">Nom complet</div>
-            <div class="value">{{ name }}</div>
-
-            <div class="label">Agence / Entreprise</div>
-            <div class="value">{{ company }}</div>
-
-            <div class="label">Email de contact</div>
-            <div class="value"><a href="mailto:{{ email_content }}" style="color: #7C3AED;">{{ email_content }}</a></div>
-
-            <div class="label">Téléphone</div>
-            <div class="value">{{ phone }}</div>
-
-            {% if message %}
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed #cbd5e1;">
-                <div class="label">Message / Précisions</div>
-                <div class="value" style="font-style: italic; font-weight: 400;">"{{ message }}"</div>
-            </div>
-            {% endif %}
-        </div>
-
-        <p>Veuillez recontacter ce prospect dans les plus brefs délais pour finaliser son inscription.</p>
-    </div>
-
-    <div class="footer">
-        <p style="margin: 0; font-size: 12px; font-weight: bold;">© {{ "now"|date("Y") }} Motiplus - Gestion Immobilière Intelligente</p>
-    </div>
-</div>
-
-</body>
-</html>
+    <p>Veuillez recontacter ce prospect dans les plus brefs délais pour finaliser son inscription.</p>
+{% endblock %}

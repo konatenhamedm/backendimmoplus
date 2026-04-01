@@ -1,125 +1,45 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<style>
-			* {
-				box-sizing: border-box;
-			}
+{% extends 'emails/base.html.twig' %}
 
-			.menu {
-				float: left;
-				width: 20%;
-				text-align: center;
-			}
+{% block title %}SUIVI DE VOTRE DOSSIER{% endblock %}
 
-			.menu a {
-				background-color: #e5e5e5;
-				padding: 8px;
-				margin-top: 7px;
-				display: block;
-				width: 100%;
-				color: black;
-			}
+{% block body %}
+    {% if info_user.etape == "acceptation" %}
+        <div class="card">
+            <h3 style="margin-top: 0; color: #1e293b;">Accusé de réception</h3>
+            <p><strong>À l'attention de M/Mme {{ info_user.nom }},</strong></p>
 
-			.main {
-				float: left;
-				width: 60%;
-				padding: 0 20px;
-			}
+            <p>Nous tenons à confirmer que nous avons bien reçu votre demande et que votre dossier est actuellement en cours d'instruction.</p>
+            <p>Une suite sera donnée prochainement à votre demande relative à l’inscription au registre des <strong>{{ info_user.profession }}</strong>.</p>
+            
+            <hr>
+            <p style="font-size: 13px; color: #64748b;">Pour toute information complémentaire, veuillez nous contacter directement au <strong>07 68 15 32 21</strong>.</p>
+        </div>
+    {% elseif info_user.etape == "validation" %}
+        <div class="card" style="border-left: 4px solid #059669;">
+            <h3 style="margin-top: 0; color: #059669;">Avis Favorable</h3>
+            <p><strong>À l'attention de M/Mme {{ info_user.nom }},</strong></p>
 
-			.right {
-				background-color: #e5e5e5;
-				float: left;
-				width: 20%;
-				padding: 15px;
-				margin-top: 7px;
-				text-align: center;
-			}
-			p {
-				font-size: 16px;
-				font-weight: bolder !important;
-				color: #000;
-			}
-			@media only screen and(max-width: 620px) {
-				/* For mobile phones: */
-				.menu,
-				.main,
-				.right {
-					width: 100%;
-				}
-			}
-		</style>
-	</head>
-	<body style="font-family:Verdana;color:#aaaaaa;">
+            <p>Après instruction de votre dossier et tenue de la commission de recensement, nous avons le plaisir de vous annoncer que <strong>votre demande a été acceptée</strong>.</p>
 
-		<div style="background-color:#ffff;padding:15px;text-align:center;">
-			<img src="https://mydepps.net/_files/logo-depps.png" width="200" height="200">
-		</div>
-		<hr size="10" style="background-color:#2AD10F;">
-		<div style="overflow:auto">
+            <p>Vous êtes inscrit au registre des <strong>{{ info_user.profession }}</strong> habilité(e) à exercer au titre de l’année <strong>{{ info_user.annee }}</strong>.</p>
 
+            <p>À cet effet, vous êtes priés de vous rendre à nos bureaux pour le retrait de votre attestation d’inscription et de votre carte professionnelle.</p>
+        </div>
+    {% else %}
+        <div class="card">
+            {% if info_user.message is not empty %}
+                <p>{{ info_user.message }}</p>
+            {% else %}
+                <p>Votre dossier vient de franchir l'étape : <strong>{{ info_user.etape }}</strong></p>
+                <p style="font-size: 13px; color: #64748b;">Traité par {{ info_user.user }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
 
-			{% if info_user.etape == "acceptation" %}
-				<div style="background-color:rgb(255, 255, 255); padding: 20px; border-radius: 10px; color: #000;">
-					<p>
-						<strong>Courrier - réponse</strong>
-					</p>
-					<p>A</p>
-					<p>M/Mme {{ info_user.nom }}, </p>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="https://web.motiplus.pro/dashboard" class="button">Suivre mon dossier en ligne</a>
+    </div>
 
-					<p>Merci d’avoir contacté la Direction des établissements privées et des professions sanitaires (DEPPS). 
-						Nous tenons à confirmer que nous avons bien reçu votre demande et que votre dossier est en instruction. 
-						Une suite sera donnée à votre demande relative à l’inscription au registre des {{ info_user.profession }}</p>
-
-					<p>Pour toute information complémentaire, veuillez contacter la Direction des Etablissements privées 
-																		                et des Professions Sanitaires directement au
-						<strong>07 68 15 32 21</strong>.</p>
-				</div>
-			{% elseif info_user.etape == "validation" %}
-				<div style="background-color: rgb(255, 255, 255); padding: 20px; border-radius: 10px; color: #000;">
-					<p>
-						<strong>Courrier - réponse</strong>
-					</p>
-					<p>
-						<strong>Avis favorable</strong>
-					</p>
-					<p>M /Mme {{ info_user.nom }},</p>
-
-					<p>Après instruction de votre dossier et la tenue de la commission de recensement, nous avons le plaisir de vous annoncer que votre demande a été acceptée.</p>
-
-					<p>Vous êtes inscrit au registre des {{ info_user.profession }}<em>(Profession)</em> habilité(e) à exercer au titre de l’année {{ info_user.annee }} <em>(Année)</em>.</p>
-
-					<p>À cet effet vous êtes priés de vous rendre à la Direction des Etablissements Privés et des Professions Sanitaires (DEPPS) pour le retrait de votre attestation d’inscription au Registre des {{ info_user.profession }} et de la Carte Professionnelle au titre de l’ année {{ info_user.annee }}</p>
-					<p>Pour toute information complémentaire, veuillez contacter la Direction des Etablissements Privés et des Professions Sanitaires au  07 68 15 32 21</p>
-				</div>
-
-			{% else %}
-				<div class="main">
-					{#if message is not empty #}
-					{% if info_user.message is not empty %}
-
-						<p>{{ info_user.message }}
-						</p>
-					{% else %}
-
-						<p>Votre dossier vient passer l'étape
-							{{ info_user.etape }}
-							traité par
-							{{ info_user.user }}
-						</p>
-					{% endif %}
-
-				</div>
-
-			{% endif %}
-
-
-		</div>
-		<br>
-		<div style="background-color:#4b9bd8;text-align:center;padding:10px;margin-top:7px;">
-			<h3 style="color: white;">© copyright DEPPS</h3>
-		</div>
-
-	</body>
-</html>
+    <p>Cordialement,</p>
+    <p>L'équipe Administrative Immoplus</p>
+{% endblock %}

@@ -1,121 +1,38 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nouveau Abonnement</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f7fa;
-      margin: 0;
-      padding: 30px 15px;
-    }
+{% extends 'emails/base.html.twig' %}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
-      border: 1px solid #e6e9ec;
-      animation: fadeIn 0.7s ease-out;
-    }
+{% block title %}VOTRE ABONNEMENT IMMOPLUS{% endblock %}
 
-    .header {
-      background: #f0f9fa;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 2px solid #53B0B7;
-    }
+{% block body %}
+    <p>Bonjour,</p>
+    <p>Félicitations ! Votre souscription au plan <strong>{{ abonnement.moduleAbonnement.code }}</strong> a été activée. Vous profitez désormais de toutes les fonctionnalités avancées de gestion immobilière de votre offre.</p>
 
-    .header img {
-      max-width: 140px;
-      height: auto;
-      margin-bottom: 8px;
-    }
+    <div class="card">
+        <div class="label">Référence Contrat</div>
+        <div class="value" style="font-family: monospace;">{{ abonnement.numAbonnement }}</div>
 
-    .header h1 {
-      margin: 0;
-      font-size: 20px;
-      color: #53B0B7;
-    }
+        <div class="label">Plan Actif</div>
+        <div class="value" style="color: #7C3AED; font-size: 18px;">{{ abonnement.moduleAbonnement.code|upper }}</div>
 
-    .content {
-      padding: 30px 25px;
-      font-size: 15px;
-      color: #444;
-      line-height: 1.6;
-      text-align: center;
-    }
+        <div class="label">Prochaine Échéance</div>
+        <div class="value" style="color: #dc3545;">{{ abonnement.dateFin|date("d/m/Y") }}</div>
 
-    .content h2 {
-      font-size: 20px;
-      margin-bottom: 15px;
-      color: #222;
-    }
-
-    .highlight {
-      background: #eaf7f8;
-      border: 1px solid #53B0B7;
-      border-radius: 8px;
-      text-align: center;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 18px;
-      font-weight: bold;
-      color: #53B0B7;
-    }
-
-    .details {
-      margin-top: 15px;
-      font-size: 15px;
-      color: #333;
-      line-height: 1.8;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      padding: 15px;
-      border-top: 1px solid #e6e9ec;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- HEADER -->
-    <div class="header">
-      <img src="http://backend.ateliya.com/logo_text.png" alt="Logo Ateliya">
-      <h1>📢 Nouveau Abonnement</h1>
+        <div class="label">Statut</div>
+        <div class="value" style="color: #059669;">{{ (abonnement.etat) ? 'ACTIF' : 'INACTIF' }}</div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-      <h2>Une entreprise vient de souscrire 🎉</h2>
+    <h3 style="color: #1e293b; font-size: 14px; text-transform: uppercase; margin-top: 30px;">Ce qui est inclus dans votre offre :</h3>
+    <ul style="padding-left: 20px; font-size: 14px;">
+        <li>Nombre d'agences : {{ (abonnement.moduleAbonnement.maxAgences == -1) ? 'Illimité' : abonnement.moduleAbonnement.maxAgences }}</li>
+        <li>Nombre d'employés : {{ (abonnement.moduleAbonnement.maxEmployes == -1) ? 'Illimité' : abonnement.moduleAbonnement.maxEmployes }}</li>
+        <li>Nombre de biens : {{ (abonnement.moduleAbonnement.maxBiens == -1) ? 'Illimité' : abonnement.moduleAbonnement.maxBiens }}</li>
+        <li>Nombre de résidences : {{ (abonnement.moduleAbonnement.maxResidences == -1) ? 'Illimité' : abonnement.moduleAbonnement.maxResidences }}</li>
+    </ul>
 
-      <!-- Nom entreprise -->
-      <div class="highlight">
-        {{ entreprise }}
-      </div>
-
-      <div class="details">
-        ✅ <b>Formule choisie :</b> {{ abonnement }} <br>
-        🕒 <b>Date :</b> {{ date }}
-      </div>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="https://web.motiplus.pro/dashboard" class="button">Accéder à mon tableau de bord</a>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-      Notification automatique — ATELIYA
-    </div>
-  </div>
-</body>
-</html>
+    <p>Besoin d'un accompagnement pour configurer votre compte ? Contactez notre support technique.</p>
+    
+    <p>L'équipe Success Immoplus</p>
+{% endblock %}

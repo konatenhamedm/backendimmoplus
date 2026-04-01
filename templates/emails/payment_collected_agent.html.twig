@@ -1,152 +1,45 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nouveau Paiement Encaissé</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f8fafc;
-      margin: 0;
-      padding: 40px 10px;
-      color: #334155;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #ffffff;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      overflow: hidden;
-      border: 1px solid #e2e8f0;
-    }
-    .header {
-      background: linear-gradient(135deg, #ff6600 0%, #ff8c00 100%);
-      padding: 40px 20px;
-      text-align: center;
-      color: white;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-    .content {
-      padding: 40px 30px;
-      line-height: 1.6;
-    }
-    .greeting {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #1e293b;
-    }
-    .highlight-card {
-      background: #f1f5f9;
-      border-radius: 15px;
-      padding: 25px;
-      margin: 25px 0;
-      text-align: center;
-    }
-    .amount {
-      font-size: 32px;
-      font-weight: 900;
-      color: #ff6600;
-      margin: 10px 0;
-    }
-    .details-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    .details-table td {
-      padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 14px;
-    }
-    .label {
-      color: #64748b;
-      font-weight: 600;
-      width: 150px;
-    }
-    .value {
-      color: #1e293b;
-      font-weight: 700;
-      text-align: right;
-    }
-    .footer {
-      background: #f8fafc;
-      padding: 25px;
-      text-align: center;
-      font-size: 12px;
-      color: #94a3b8;
-      border-top: 1px solid #e2e8f0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 14px 30px;
-      background: #ff6600;
-      color: white;
-      text-decoration: none;
-      border-radius: 12px;
-      font-weight: 700;
-      margin-top: 30px;
-      box-shadow: 0 4px 12px rgba(255,102,0,0.2);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>💰 NOUVEAU PAIEMENT</h1>
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}💰 NOUVEAU PAIEMENT ENCAISSÉ{% endblock %}
+
+{% block body %}
+    <p>Bonjour {{ admin_name }},</p>
+    <p>Une nouvelle opération d'encaissement a été enregistrée avec succès par l'un de vos agents sur la plateforme.</p>
+
+    <div class="card" style="text-align: center; border-bottom: 4px solid #7C3AED;">
+        <div class="label">Montant Encaissé</div>
+        <div class="value" style="font-size: 32px; color: #7C3AED; margin: 10px 0;">{{ amount|number_format(0, ',', ' ') }} FCFA</div>
+        <div style="font-size: 11px; color: #059669; font-weight: bold;">✅ TRANSACTION TERMINÉE</div>
     </div>
 
-    <div class="content">
-      <p class="greeting">Bonjour {{ admin_name }},</p>
-      <p>Une nouvelle opération d'encaissement a été enregistrée avec succès sur la plateforme.</p>
-
-      <div class="highlight-card">
-        <div style="font-size: 14px; color: #64748b; font-weight: 600;">MONTANT ENCAISSÉ</div>
-        <div class="amount">{{ amount|number_format(0, ',', ' ') }} FCFA</div>
-        <div style="font-size: 12px; color: #22c55e; font-weight: 700;">✅ Transaction Terminée</div>
-      </div>
-
-      <table class="details-table">
-        <tr>
-          <td class="label">Agent</td>
-          <td class="value">{{ agent_name }}</td>
-        </tr>
-        <tr>
-          <td class="label">Locataire</td>
-          <td class="value">{{ locataire_name }}</td>
-        </tr>
-        <tr>
-          <td class="label">Facture</td>
-          <td class="value">{{ facture_libelle }}</td>
-        </tr>
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <span class="label">Agent</span>
+            <span class="value" style="margin: 0;">{{ agent_name }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <span class="label">Locataire</span>
+            <span class="value" style="margin: 0;">{{ locataire_name }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <span class="label">Facture</span>
+            <span class="value" style="margin: 0;">{{ facture_libelle }}</span>
+        </div>
         {% if mode is defined %}
-        <tr>
-          <td class="label">Mode</td>
-          <td class="value">{{ mode }}</td>
-        </tr>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <span class="label">Mode</span>
+            <span class="value" style="margin: 0;">{{ mode }}</span>
+        </div>
         {% endif %}
-        <tr>
-          <td class="label">Date</td>
-          <td class="value">{{ date|date("d/m/Y H:i") }}</td>
-        </tr>
-      </table>
-
-      <div style="text-align: center;">
-        <a href="https://immoplus.com/admin/factures" class="btn">Consulter sur le Dashboard</a>
-      </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span class="label">Date / Heure</span>
+            <span class="value" style="margin: 0;">{{ date|date("d/m/Y H:i") }}</span>
+        </div>
     </div>
 
-    <div class="footer">
-      <p>Cet email a été envoyé automatiquement par le système IMMO PLUS.</p>
-      <p>&copy; 2026 IMMO PLUS. Tous droits réservés.</p>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="https://web.motiplus.pro/facture-location" class="button">Consulter sur le Dashboard</a>
     </div>
-  </div>
-</body>
-</html>
+
+    <p style="font-size: 11px; color: #64748b; text-align: center;">Système automatisé de suivi des encaissements Immoplus</p>
+{% endblock %}

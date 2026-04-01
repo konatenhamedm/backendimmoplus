@@ -1,126 +1,46 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notification de Vente</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f7fa;
-      margin: 0;
-      padding: 30px 15px;
-    }
+{% extends 'emails/base.html.twig' %}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
-      border: 1px solid #e6e9ec;
-      animation: fadeIn 0.7s ease-out;
-    }
+{% block title %}CONFIRMATION DE VENTE{% endblock %}
 
-    .header {
-      background: #f0f9fa;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 2px solid #53B0B7;
-    }
+{% block body %}
+    <p>Bonjour {{ name }},</p>
+    <p>Merci pour votre achat ! Votre commande a été enregistrée avec succès. Voici les détails de votre transaction :</p>
 
-    .header img {
-      max-width: 140px;
-      height: auto;
-      margin-bottom: 8px;
-    }
+    <div class="card">
+        <div class="label">Date de Transaction</div>
+        <div class="value">{{ date|date("d/m/Y H:i") }}</div>
 
-    .header h1 {
-      margin: 0;
-      font-size: 20px;
-      color: #53B0B7;
-    }
+        <div class="label">Montant Total</div>
+        <div class="value" style="color: #7C3AED; font-size: 20px;">{{ amount|number_format(0, ',', ' ') }} FCFA</div>
 
-    .content {
-      padding: 30px 25px;
-      font-size: 15px;
-      color: #444;
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    .content h2 {
-      font-size: 20px;
-      margin-bottom: 15px;
-      color: #222;
-    }
-
-    .vente {
-      background: #eaf7f8;
-      border: 1px solid #53B0B7;
-      border-radius: 8px;
-      text-align: center;
-      padding: 18px;
-      margin: 20px auto;
-      font-size: 20px;
-      font-weight: bold;
-      color: #53B0B7;
-      display: inline-block;
-      min-width: 220px;
-    }
-
-    .details {
-      margin-top: 15px;
-      font-size: 15px;
-      color: #333;
-      line-height: 1.8;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      padding: 15px;
-      border-top: 1px solid #e6e9ec;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- HEADER -->
-    <div class="header">
-      <img src="http://backend.ateliya.com/logo_text.png" alt="Logo Ateliya">
-      <h1>💰 Notification de Vente</h1>
+        <div class="label">ID de Commande</div>
+        <div class="value" style="font-family: monospace;">{{ transactionId }}</div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-      <h2>Nouvelle Vente ✅</h2>
-      <p>Une vente vient d’être effectuée dans la boutique :</p>
+    <h3 style="color: #1e293b; font-size: 14px; text-transform: uppercase; margin-top: 30px;">Détails de la commande</h3>
+    <table width="100%" style="border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #e2e8f0;">
+                <th align="left" style="padding: 12px 0;"><span class="label">Article</span></th>
+                <th align="center" style="padding: 12px 0;"><span class="label">Qté</span></th>
+                <th align="right" style="padding: 12px 0;"><span class="label">Total</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 12px 0;"><div class="value" style="margin: 0; font-size: 14px;">{{ item.name }}</div></td>
+                <td align="center" style="padding: 12px 0;"><div class="value" style="margin: 0; font-size: 14px;">{{ item.quantity }}</div></td>
+                <td align="right" style="padding: 12px 0;"><div class="value" style="margin: 0; font-size: 14px;">{{ item.total|number_format(0, ',', ' ') }} FCFA</div></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-      <!-- Nom boutique -->
-      <div class="vente">
-        {{ boutique_libelle }}
-      </div>
-
-      <!-- Montant si défini -->
-      {% if montant is defined %}
-      <div class="details">
-        💵 <strong>Montant :</strong> {{ montant }} FCFA
-      </div>
-      {% endif %}
+    <div style="text-align: center; margin-top: 30px;">
+        <p>Merci de votre fidélité !</p>
+        <a href="https://web.motiplus.pro/dashboard" class="button">Accéder à mon compte</a>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-      © ATELIYA — Gestion des ventes
-    </div>
-  </div>
-</body>
-</html>
+    <p>L'équipe Commerciale Immoplus</p>
+{% endblock %}

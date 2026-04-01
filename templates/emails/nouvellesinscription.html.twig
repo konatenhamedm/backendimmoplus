@@ -1,123 +1,38 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nouveau Abonnement</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f7fa;
-      margin: 0;
-      padding: 30px 15px;
-    }
+{% extends 'emails/base.html.twig' %}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
-      border: 1px solid #e6e9ec;
-      animation: fadeIn 0.7s ease-out;
-    }
+{% block title %}NOUVELLE INSCRIPTION ENTREPRISE{% endblock %}
 
-    .header {
-      background: #f0f9fa;
-      padding: 20px;
-      text-align: center;
-      border-bottom: 2px solid #53B0B7;
-    }
+{% block body %}
+    <p>Bonjour l'équipe,</p>
+    <p>Une nouvelle inscription entreprise a été effectuée sur la plateforme.</p>
 
-    .header img {
-      max-width: 140px;
-      height: auto;
-      margin-bottom: 8px;
-    }
+    <div class="card">
+        <div class="label">Date d'inscription</div>
+        <div class="value">{{ "now"|date("d/m/Y H:i") }}</div>
 
-    .header h1 {
-      margin: 5px 0 0;
-      font-size: 20px;
-      color: #53B0B7;
-    }
+        <div class="label">Dénomination Entreprise</div>
+        <div class="value" style="color: #7C3AED; font-size: 18px;">{{ entreprise.libelle }}</div>
 
-    .content {
-      padding: 30px 25px;
-      font-size: 15px;
-      color: #444;
-      line-height: 1.6;
-    }
+        {% if entreprise.sigle %}
+        <div class="label">Sigle</div>
+        <div class="value">{{ entreprise.sigle }}</div>
+        {% endif %}
 
-    .content h2 {
-      font-size: 18px;
-      margin-bottom: 15px;
-      color: #222;
-      text-align: center;
-    }
+        <div class="label">Nom Administrateur</div>
+        <div class="value">{{ admin.nom }} {{ admin.prenoms }}</div>
 
-    .highlight {
-      background: #eaf7f8;
-      border: 1px solid #53B0B7;
-      border-radius: 8px;
-      text-align: center;
-      padding: 15px;
-      margin: 20px 0;
-      font-size: 18px;
-      font-weight: bold;
-      color: #53B0B7;
-    }
+        <div class="label">Contacts</div>
+        <div class="value">{{ entreprise.contacts }}</div>
 
-    .details {
-      margin-top: 15px;
-      font-size: 15px;
-      color: #333;
-      line-height: 1.8;
-    }
-
-    .footer {
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      padding: 15px;
-      border-top: 1px solid #e6e9ec;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- HEADER -->
-    <div class="header">
-      <img src="https://via.placeholder.com/140x40?text=ATELIYA" alt="Logo Ateliya">
-      <h1>📢 Nouvelle inscription</h1>
+        <div class="label">Email</div>
+        <div class="value"><a href="mailto:{{ entreprise.email }}" style="color: #7C3AED;">{{ entreprise.email }}</a></div>
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
-      <h2>Une entreprise vient de rejoindre Ateliya 🎉</h2>
+    <p>Le compte a été créé par défaut. Veuillez effectuer les vérifications administratives si nécessaire.</p>
 
-      <p>Bienvenue à :</p>
-
-      <!-- Nom entreprise -->
-      <div class="highlight">
-        {{ entreprise }}
-      </div>
-
-      <div class="details">
-        ✅ <b>Formule choisie :</b> {{ abonnement }} <br>
-        🕒 <b>Date :</b> {{ date }}
-      </div>
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="https://web.motiplus.pro/dashboard" class="button">Accéder au Panneau d'Administration</a>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-      Notification automatique — ATELIYA
-    </div>
-  </div>
-</body>
-</html>
+    <p>Équipe de surveillance Immoplus</p>
+{% endblock %}
