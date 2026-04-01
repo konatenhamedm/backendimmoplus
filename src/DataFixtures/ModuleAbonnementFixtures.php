@@ -28,16 +28,36 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             // --- BASIC ---
             [
                 'code' => 'BASIC (Mensuel)',
-                'description' => 'Petites agences et gestionnaires indépendants. Jusqu\'à 50 biens, 1 agence, 10 employés, 40 locataires mobile.',
-                'montant' => '25000',
+                'description' => 'Petites agences et gestionnaires indépendants. 5 sites, 5 résidences, 1 agence, 5 employés.',
+                'montant' => '95000',
                 'duree' => '30',
-                'maxBiens' => 50,
+                'maxBiens' => 5,
+                'maxResidences' => 5,
                 'maxAgences' => 1,
-                'maxEmployes' => 10,
+                'maxEmployes' => 5,
                 'maxLocatairesMobileApp' => 40,
                 'hasFacturationAuto' => true,
                 'hasRelancesAuto' => false,
-                'hasMobileMoney' => false,
+                'hasMobileMoney' => true,
+                'hasRapportsAvances' => false,
+                'hasGestionDepenses' => false,
+                'signatureElectronique' => 'NONE',
+                'hasMultiAgences' => false,
+                'hasApiIntegrations' => false
+            ],
+            [
+                'code' => 'BASIC (Semestriel)',
+                'description' => 'Option 6 mois. Idéal pour petites agences. 5 sites, 5 résidences.',
+                'montant' => '250000',
+                'duree' => '180',
+                'maxBiens' => 5,
+                'maxResidences' => 5,
+                'maxAgences' => 1,
+                'maxEmployes' => 5,
+                'maxLocatairesMobileApp' => 40,
+                'hasFacturationAuto' => true,
+                'hasRelancesAuto' => false,
+                'hasMobileMoney' => true,
                 'hasRapportsAvances' => false,
                 'hasGestionDepenses' => false,
                 'signatureElectronique' => 'NONE',
@@ -46,16 +66,17 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             ],
             [
                 'code' => 'BASIC (Annuel)',
-                'description' => '2 mois offerts ! Idéal pour petites agences. Jusqu\'à 50 biens, 1 agence.',
-                'montant' => '250000',
+                'description' => '2 mois offerts ! Idéal pour petites agences. 5 sites, 5 résidences.',
+                'montant' => '950000',
                 'duree' => '365',
-                'maxBiens' => 50,
+                'maxBiens' => 5,
+                'maxResidences' => 5,
                 'maxAgences' => 1,
-                'maxEmployes' => 10,
+                'maxEmployes' => 5,
                 'maxLocatairesMobileApp' => 40,
                 'hasFacturationAuto' => true,
                 'hasRelancesAuto' => false,
-                'hasMobileMoney' => false,
+                'hasMobileMoney' => true,
                 'hasRapportsAvances' => false,
                 'hasGestionDepenses' => false,
                 'signatureElectronique' => 'NONE',
@@ -66,13 +87,14 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             // --- PRO ---
             [
                 'code' => 'PRO (Mensuel)',
-                'description' => 'Agences professionnelles en croissance. Jusqu\'à 300 biens, 5 agences, 20 employés, 100 locataires mobile.',
-                'montant' => '50000',
+                'description' => 'Agences professionnelles en croissance. 10 sites, 10 résidences, 2 agences, 20 employés, 120 locataires mobile.',
+                'montant' => '190000',
                 'duree' => '30',
-                'maxBiens' => 300,
-                'maxAgences' => 5,
+                'maxBiens' => 10,
+                'maxResidences' => 10,
+                'maxAgences' => 2,
                 'maxEmployes' => 20,
-                'maxLocatairesMobileApp' => 100,
+                'maxLocatairesMobileApp' => 120,
                 'hasFacturationAuto' => true,
                 'hasRelancesAuto' => true,
                 'hasMobileMoney' => true,
@@ -84,13 +106,14 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             ],
             [
                 'code' => 'PRO (Semestriel)',
-                'description' => 'Option 6 mois. Jusqu\'à 300 biens, 5 agences, 20 employés.',
-                'montant' => '120000',
+                'description' => 'Option 6 mois. 10 sites, 10 résidences, 2 agences, 20 employés.',
+                'montant' => '520000',
                 'duree' => '180',
-                'maxBiens' => 300,
-                'maxAgences' => 5,
+                'maxBiens' => 10,
+                'maxResidences' => 10,
+                'maxAgences' => 2,
                 'maxEmployes' => 20,
-                'maxLocatairesMobileApp' => 100,
+                'maxLocatairesMobileApp' => 120,
                 'hasFacturationAuto' => true,
                 'hasRelancesAuto' => true,
                 'hasMobileMoney' => true,
@@ -102,13 +125,14 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             ],
             [
                 'code' => 'PRO (Annuel)',
-                'description' => '2 mois offerts ! Jusqu\'à 300 biens, 5 agences, 20 employés.',
-                'montant' => '500000',
+                'description' => '2 mois offerts ! 10 sites, 10 résidences, 2 agences, 20 employés.',
+                'montant' => '1900000',
                 'duree' => '365',
-                'maxBiens' => 300,
-                'maxAgences' => 5,
+                'maxBiens' => 10,
+                'maxResidences' => 10,
+                'maxAgences' => 2,
                 'maxEmployes' => 20,
-                'maxLocatairesMobileApp' => 100,
+                'maxLocatairesMobileApp' => 120,
                 'hasFacturationAuto' => true,
                 'hasRelancesAuto' => true,
                 'hasMobileMoney' => true,
@@ -122,10 +146,11 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             // --- ENTERPRISE ---
             [
                 'code' => 'ENTERPRISE (Mensuel)',
-                'description' => 'Grandes agences et groupes. Biens illimités, multi-agences, API, support dédié.',
-                'montant' => '80000',
+                'description' => 'Grandes agences et groupes. 50 sites, 50 résidences, multi-agences, API, support dédié.',
+                'montant' => '250000',
                 'duree' => '30',
-                'maxBiens' => -1,
+                'maxBiens' => 50,
+                'maxResidences' => 50,
                 'maxAgences' => -1,
                 'maxEmployes' => -1,
                 'maxLocatairesMobileApp' => -1,
@@ -140,10 +165,11 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             ],
             [
                 'code' => 'ENTERPRISE (Semestriel)',
-                'description' => 'Option 6 mois. Grandes agences, multi-sites.',
-                'montant' => '200000',
+                'description' => 'Option 6 mois. Grandes agences, multi-sites. 50 sites, 50 résidences.',
+                'montant' => '700000',
                 'duree' => '180',
-                'maxBiens' => -1,
+                'maxBiens' => 50,
+                'maxResidences' => 50,
                 'maxAgences' => -1,
                 'maxEmployes' => -1,
                 'maxLocatairesMobileApp' => -1,
@@ -158,10 +184,11 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
             ],
             [
                 'code' => 'ENTERPRISE (Annuel)',
-                'description' => '2 mois offerts ! Grandes agences, promoteurs, multi-sites.',
-                'montant' => '800000',
+                'description' => '2 mois offerts ! Grandes agences, promoteurs, multi-sites. 50 sites, 50 résidences.',
+                'montant' => '2500000',
                 'duree' => '365',
-                'maxBiens' => -1,
+                'maxBiens' => 50,
+                'maxResidences' => 50,
                 'maxAgences' => -1,
                 'maxEmployes' => -1,
                 'maxLocatairesMobileApp' => -1,
@@ -189,6 +216,7 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 $module->setEtat(true);
 
                 $module->setMaxBiens($data['maxBiens']);
+                $module->setMaxResidences($data['maxResidences'] ?? 0);
                 $module->setMaxAgences($data['maxAgences']);
                 $module->setMaxEmployes($data['maxEmployes']);
                 $module->setMaxLocatairesMobileApp($data['maxLocatairesMobileApp']);
@@ -213,6 +241,7 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 $existing->setMontant($data['montant']);
                 $existing->setDuree($data['duree']);
                 $existing->setMaxBiens($data['maxBiens']);
+                $existing->setMaxResidences($data['maxResidences'] ?? 0);
                 $existing->setMaxAgences($data['maxAgences']);
                 $existing->setMaxEmployes($data['maxEmployes']);
                 $existing->setMaxLocatairesMobileApp($data['maxLocatairesMobileApp']);
