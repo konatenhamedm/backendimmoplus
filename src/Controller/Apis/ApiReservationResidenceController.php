@@ -23,8 +23,12 @@ class ApiReservationResidenceController extends ApiInterface
             $qb = $repo->createQueryBuilder('r')
                 ->leftJoin('r.residence', 'res');
 
+            if ($request->query->get('agence_id')) {
+                $qb->andWhere('res.agence = :aid')->setParameter('aid', (int)$request->query->get('agence_id'));
+            }
+
             if ($request->query->get('residence_id')) {
-                $qb->where('res.id = :rid')->setParameter('rid', (int)$request->query->get('residence_id'));
+                $qb->andWhere('res.id = :rid')->setParameter('rid', (int)$request->query->get('residence_id'));
             }
 
             if ($request->query->get('etat')) {
