@@ -99,7 +99,6 @@ class ResetPasswordController extends AbstractController
                 ]
             );
         } catch (\Exception $e) {
-$this->setStatusCode(500);
             return $this->json(
                 ['message' => $e->getMessage()],
                 Response::HTTP_BAD_REQUEST
@@ -199,7 +198,7 @@ $this->setStatusCode(500);
                 'success' => true
             ]);
         } catch (\Exception $e) {
-$this->setStatusCode(500);
+
             return $this->json(
                 ['message' => 'Erreur lors de la réinitialisation du mot de passe'],
                 Response::HTTP_INTERNAL_SERVER_ERROR
@@ -325,7 +324,7 @@ $this->setStatusCode(500);
                 'success' => true
             ]);
         } catch (\Exception $e) {
-$this->setStatusCode(500);
+
             return $this->json(
                 ['message' => 'Erreur lors de la modification du mot de passe'],
                 Response::HTTP_INTERNAL_SERVER_ERROR

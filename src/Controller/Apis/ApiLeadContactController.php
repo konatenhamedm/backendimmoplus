@@ -35,11 +35,10 @@ class ApiLeadContactController extends ApiInterface
         )
     )]
     public function create(
-        Request $request, 
-        EntityManagerInterface $em, 
+        Request $request,
+        EntityManagerInterface $em,
         SendMailService $mailService
-    ): Response
-    {
+    ): Response {
         try {
             $data = json_decode($request->getContent(), true);
 
@@ -59,30 +58,25 @@ class ApiLeadContactController extends ApiInterface
             $em->flush();
 
             // Envoi de l'email à l'administration
-            try {
-                $mailService->send(
-                    'supports@ateliya.com', // From
-                    'konate@motiplus.pro', // To (Admin)
-                    "🚀 Nouvelle demande de plan annuel : " . ($data['planName'] ?? 'Contact'),
-                    'lead_contact',
-                    [
-                        'name' => $lead->getName(),
-                        'email' => $lead->getEmail(),
-                        'phone' => $lead->getPhone(),
-                        'company' => $lead->getCompany(),
-                        'planName' => $lead->getPlanName(),
-                        'message' => $lead->getMessage()
-                    ]
-                );
-            } catch (\Exception $mailEx) {
-                // On log l'erreur mail mais on ne bloque pas la réponse client
-                error_log("Erreur envoi email LeadContact: " . $mailEx->getMessage());
-            }
+
+            $mailService->send(
+                'supports@ateliya.com', // From
+                'konatenhamed@gmail.com,', // To (Admin)
+                "🚀 Nouvelle demande de plan annuel : " . ($data['planName'] ?? 'Contact'),
+                'lead_contact',
+                [
+                    'name' => $lead->getName(),
+                    'email' => $lead->getEmail(),
+                    'phone' => $lead->getPhone(),
+                    'company' => $lead->getCompany(),
+                    'planName' => $lead->getPlanName(),
+                    'message' => $lead->getMessage()
+                ]
+            );
 
             return $this->response([
                 'message' => 'Votre demande a été enregistrée avec succès. Notre équipe vous contactera sous peu.'
             ]);
-
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
