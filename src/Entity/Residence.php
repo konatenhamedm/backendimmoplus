@@ -54,7 +54,7 @@ class Residence
     #[Groups(['group1'])]
     private ?Agence $agence = null;
 
-    #[ORM\ManyToOne(targetEntity: Fichier::class)]
+    #[ORM\ManyToOne(targetEntity: Fichier::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
     private ?Fichier $photo = null;
