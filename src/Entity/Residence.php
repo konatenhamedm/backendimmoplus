@@ -30,6 +30,11 @@ class Residence
     #[Groups(['group1'])]
     private int $montantLocation = 0;
 
+    /** Nombre de pièces */
+    #[ORM\Column(nullable: true)]
+    #[Groups(['group1'])]
+    private ?int $nombrePiece = null;
+
     /** DISPONIBLE | OCCUPEE | MAINTENANCE */
     #[ORM\Column(length: 50, options: ['default' => 'DISPONIBLE'])]
     #[Groups(['group1'])]
@@ -49,6 +54,19 @@ class Residence
     #[Groups(['group1'])]
     private ?string $periodiciteLoyer = null;
 
+    // ─── Infos propriétaire (si chargeLoyer = true) ───────────────────────────
+    #[ORM\Column(length: 150, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $nomProprietaire = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $telephoneProprietaire = null;
+
+    #[ORM\Column(length: 150, nullable: true)]
+    #[Groups(['group1'])]
+    private ?string $emailProprietaire = null;
+
     #[ORM\ManyToOne(targetEntity: Agence::class)]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
@@ -66,6 +84,10 @@ class Residence
     #[ORM\OneToMany(mappedBy: 'residence', targetEntity: LoyerResidence::class, cascade: ['persist'], orphanRemoval: true)]
     #[Groups(['group1'])]
     private Collection $loyerPaiements;
+
+    #[ORM\OneToMany(mappedBy: 'residence', targetEntity: DepenseResidence::class, cascade: ['persist'], orphanRemoval: true)]
+    #[Groups(['group1'])]
+    private Collection $depenses;
 
     #[ORM\ManyToOne(targetEntity: Entreprise::class)]
     #[ORM\JoinColumn(nullable: true)]
@@ -92,6 +114,7 @@ class Residence
     {
         $this->reservations   = new ArrayCollection();
         $this->loyerPaiements = new ArrayCollection();
+        $this->depenses       = new ArrayCollection();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -101,6 +124,8 @@ class Residence
     public function setAdresse(?string $v): static { $this->adresse = $v; return $this; }
     public function getMontantLocation(): int { return $this->montantLocation; }
     public function setMontantLocation(int $v): static { $this->montantLocation = $v; return $this; }
+    public function getNombrePiece(): ?int { return $this->nombrePiece; }
+    public function setNombrePiece(?int $v): static { $this->nombrePiece = $v; return $this; }
     public function getEtat(): string { return $this->etat; }
     public function setEtat(string $v): static { $this->etat = $v; return $this; }
     public function isChargeLoyer(): bool { return $this->chargeLoyer; }
@@ -109,6 +134,12 @@ class Residence
     public function setMontantLoyer(?int $v): static { $this->montantLoyer = $v; return $this; }
     public function getPeriodiciteLoyer(): ?string { return $this->periodiciteLoyer; }
     public function setPeriodiciteLoyer(?string $v): static { $this->periodiciteLoyer = $v; return $this; }
+    public function getNomProprietaire(): ?string { return $this->nomProprietaire; }
+    public function setNomProprietaire(?string $v): static { $this->nomProprietaire = $v; return $this; }
+    public function getTelephoneProprietaire(): ?string { return $this->telephoneProprietaire; }
+    public function setTelephoneProprietaire(?string $v): static { $this->telephoneProprietaire = $v; return $this; }
+    public function getEmailProprietaire(): ?string { return $this->emailProprietaire; }
+    public function setEmailProprietaire(?string $v): static { $this->emailProprietaire = $v; return $this; }
     public function getAgence(): ?Agence { return $this->agence; }
     public function setAgence(?Agence $v): static { $this->agence = $v; return $this; }
     public function getPhoto(): ?Fichier { return $this->photo; }
@@ -126,31 +157,31 @@ class Residence
 
     public function getReservations(): Collection { return $this->reservations; }
     public function addReservation(ReservationResidence $r): static {
-        if (!$this->reservations->contains($r)) {
-            $this->reservations->add($r);
-            $r->setResidence($this);
-        }
+        if (!$this->reservations->contains($r)) { $this->reservations->add($r); $r->setResidence($this); }
         return $this;
     }
     public function removeReservation(ReservationResidence $r): static {
-        if ($this->reservations->removeElement($r) && $r->getResidence() === $this) {
-            $r->setResidence(null);
-        }
+        if ($this->reservations->removeElement($r) && $r->getResidence() === $this) { $r->setResidence(null); }
         return $this;
     }
 
     public function getLoyerPaiements(): Collection { return $this->loyerPaiements; }
     public function addLoyerPaiement(LoyerResidence $l): static {
-        if (!$this->loyerPaiements->contains($l)) {
-            $this->loyerPaiements->add($l);
-            $l->setResidence($this);
-        }
+        if (!$this->loyerPaiements->contains($l)) { $this->loyerPaiements->add($l); $l->setResidence($this); }
         return $this;
     }
     public function removeLoyerPaiement(LoyerResidence $l): static {
-        if ($this->loyerPaiements->removeElement($l) && $l->getResidence() === $this) {
-            $l->setResidence(null);
-        }
+        if ($this->loyerPaiements->removeElement($l) && $l->getResidence() === $this) { $l->setResidence(null); }
+        return $this;
+    }
+
+    public function getDepenses(): Collection { return $this->depenses; }
+    public function addDepense(DepenseResidence $d): static {
+        if (!$this->depenses->contains($d)) { $this->depenses->add($d); $d->setResidence($this); }
+        return $this;
+    }
+    public function removeDepense(DepenseResidence $d): static {
+        if ($this->depenses->removeElement($d) && $d->getResidence() === $this) { $d->setResidence(null); }
         return $this;
     }
 }

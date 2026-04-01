@@ -76,10 +76,14 @@ class ApiResidenceController extends ApiInterface
             $residence->setLibelle($data['libelle']);
             $residence->setAdresse($data['adresse'] ?? null);
             $residence->setMontantLocation((int)($data['montantLocation'] ?? 0));
+            $residence->setNombrePiece(!empty($data['nombrePiece']) ? (int)$data['nombrePiece'] : null);
             $residence->setEtat($data['etat'] ?? 'DISPONIBLE');
             $residence->setChargeLoyer(!empty($data['chargeLoyer']) && $data['chargeLoyer'] !== 'false');
             $residence->setMontantLoyer(!empty($data['montantLoyer']) ? (int)$data['montantLoyer'] : null);
             $residence->setPeriodiciteLoyer($data['periodiciteLoyer'] ?? null);
+            $residence->setNomProprietaire($data['nomProprietaire'] ?? null);
+            $residence->setTelephoneProprietaire($data['telephoneProprietaire'] ?? null);
+            $residence->setEmailProprietaire($data['emailProprietaire'] ?? null);
             $residence->setAgence($agence);
             $residence->setEntreprise($user->getEntreprise());
 
@@ -123,10 +127,14 @@ class ApiResidenceController extends ApiInterface
             if (!empty($data['libelle'])) $residence->setLibelle($data['libelle']);
             if (array_key_exists('adresse', $data)) $residence->setAdresse($data['adresse']);
             if (!empty($data['montantLocation'])) $residence->setMontantLocation((int)$data['montantLocation']);
+            if (array_key_exists('nombrePiece', $data)) $residence->setNombrePiece(!empty($data['nombrePiece']) ? (int)$data['nombrePiece'] : null);
             if (!empty($data['etat'])) $residence->setEtat($data['etat']);
             if (array_key_exists('chargeLoyer', $data)) $residence->setChargeLoyer($data['chargeLoyer'] && $data['chargeLoyer'] !== 'false');
             if (array_key_exists('montantLoyer', $data)) $residence->setMontantLoyer(!empty($data['montantLoyer']) ? (int)$data['montantLoyer'] : null);
             if (array_key_exists('periodiciteLoyer', $data)) $residence->setPeriodiciteLoyer($data['periodiciteLoyer'] ?: null);
+            if (array_key_exists('nomProprietaire', $data)) $residence->setNomProprietaire($data['nomProprietaire'] ?: null);
+            if (array_key_exists('telephoneProprietaire', $data)) $residence->setTelephoneProprietaire($data['telephoneProprietaire'] ?: null);
+            if (array_key_exists('emailProprietaire', $data)) $residence->setEmailProprietaire($data['emailProprietaire'] ?: null);
 
             // Photo update
             $photoFile = $request->files->get('photo');
