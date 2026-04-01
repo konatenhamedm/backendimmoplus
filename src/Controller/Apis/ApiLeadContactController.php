@@ -62,7 +62,7 @@ class ApiLeadContactController extends ApiInterface
             try {
                 $mailService->send(
                     'contact@motiplus.pro', // From
-                    'contact@motiplus.pro', // To (Admin)
+                    'konate@motiplus.pro', // To (Admin)
                     "🚀 Nouvelle demande de plan annuel : " . ($data['planName'] ?? 'Contact'),
                     'lead_contact',
                     [
