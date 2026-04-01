@@ -86,7 +86,7 @@ class ResetPasswordController extends AbstractController
             $this->entityManager->flush();
 
             $sendMailService->send(
-                "supports@ateliya.com",
+                "contact@motiplus.pro",
                 $data['email'],
                 "Réinitialisation du mot de passe",
                 "otp",
@@ -206,7 +206,7 @@ class ResetPasswordController extends AbstractController
         }
     }
 
-        public function errorResponse($DTO,string $customMessage = ''): ?JsonResponse
+    public function errorResponse($DTO, string $customMessage = ''): ?JsonResponse
     {
         $errors = $this->validator->validate($DTO);
 
@@ -223,9 +223,9 @@ class ResetPasswordController extends AbstractController
                 'message' => 'Validation failed',
                 'errors' => $errorMessages
             ];
-            
+
             return new JsonResponse($response, 400);
-        }elseif ($customMessage != '') {
+        } elseif ($customMessage != '') {
             $errorMessages[] = $customMessage;
             $response = [
                 'code' => 400,
@@ -279,9 +279,9 @@ class ResetPasswordController extends AbstractController
         }
         $user = $token->getUser();
 
-           $errorResponse = $request->get('confirmPassword') !== $request->get('newPassword') ?   $this->errorResponse($user, "Les mots de passe ne sont pas identiques") :  $this->errorResponse($user);
+        $errorResponse = $request->get('confirmPassword') !== $request->get('newPassword') ?   $this->errorResponse($user, "Les mots de passe ne sont pas identiques") :  $this->errorResponse($user);
         if ($errorResponse !== null) {
-            return $errorResponse; 
+            return $errorResponse;
         }
 
         if (!$user instanceof User) {
