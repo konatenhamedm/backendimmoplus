@@ -67,6 +67,8 @@ class SyncMenusCommand extends Command
             'UserCog' => 'Configuration User',
             'TrendingDown' => 'Dépenses',
             'Tag' => 'Types de dépenses',
+            'Hotel' => 'Résidences',
+            'KeyRound' => 'Réservations',
         ];
 
         $icons = [];
@@ -186,6 +188,12 @@ class SyncMenusCommand extends Command
                     ['titre' => 'Types de Dépenses', 'lien' => '/type-depense', 'icon' => 'Tag'],
                 ]
             ],
+            'Résidences' => [
+                'icon' => 'Hotel', 'ordre' => 9,
+                'items' => [
+                    ['titre' => 'Résidences', 'lien' => '/residence', 'icon' => 'Hotel'],
+                ]
+            ],
         ];
 
         // 5. Build Menu and Assign
@@ -250,6 +258,8 @@ class SyncMenusCommand extends Command
         } elseif ($modTitle === 'Gestion Comptable') {
             if ($itemTitle === 'Dépenses Agence') $assignedTo = ['SADM', 'ADMIN', 'COMPTABLE', 'AGENT', 'CAISSE'];
             if ($itemTitle === 'Types de Dépenses')  $assignedTo = ['SADM', 'ADMIN', 'COMPTABLE'];
+        } elseif ($modTitle === 'Résidences') {
+            $assignedTo = ['SADM', 'ADMIN', 'COMPTABLE', 'AGENT', 'CAISSE'];
         }
 
         foreach ($assignedTo as $code) {

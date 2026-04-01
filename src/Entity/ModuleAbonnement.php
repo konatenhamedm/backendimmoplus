@@ -103,6 +103,10 @@ class ModuleAbonnement
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?int $maxLocatairesMobileApp = 40;
 
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $maxResidences = 0;
+
     public function __construct()
     {
         $this->abonnements = new ArrayCollection();
@@ -367,6 +371,18 @@ class ModuleAbonnement
     public function setMaxLocatairesMobileApp(int $maxLocatairesMobileApp): static
     {
         $this->maxLocatairesMobileApp = $maxLocatairesMobileApp;
+
+        return $this;
+    }
+
+    public function getMaxResidences(): ?int
+    {
+        return $this->maxResidences;
+    }
+
+    public function setMaxResidences(int $maxResidences): static
+    {
+        $this->maxResidences = $maxResidences;
 
         return $this;
     }

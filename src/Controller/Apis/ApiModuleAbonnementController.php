@@ -68,10 +68,19 @@ class ApiModuleAbonnementController extends ApiInterface
             $module->setMontant($data['montant']);
             $module->setDuree($data['duree']);
             $module->setEtat($data['etat'] ?? true);
-            
-            if (isset($data['numero'])) {
-                $module->setNumero($data['numero']);
-            }
+            $module->setMaxBiens((int)($data['maxBiens'] ?? 0));
+            $module->setMaxAgences((int)($data['maxAgences'] ?? 1));
+            $module->setMaxEmployes((int)($data['maxEmployes'] ?? 10));
+            $module->setMaxLocatairesMobileApp((int)($data['maxLocatairesMobileApp'] ?? 40));
+            $module->setMaxResidences((int)($data['maxResidences'] ?? 0));
+            $module->setHasFacturationAuto((bool)($data['hasFacturationAuto'] ?? false));
+            $module->setHasRelancesAuto((bool)($data['hasRelancesAuto'] ?? false));
+            $module->setHasMobileMoney((bool)($data['hasMobileMoney'] ?? false));
+            $module->setHasRapportsAvances((bool)($data['hasRapportsAvances'] ?? false));
+            $module->setHasGestionDepenses((bool)($data['hasGestionDepenses'] ?? false));
+            $module->setHasMultiAgences((bool)($data['hasMultiAgences'] ?? false));
+            $module->setHasApiIntegrations((bool)($data['hasApiIntegrations'] ?? false));
+            $module->setSignatureElectronique($data['signatureElectronique'] ?? 'NONE');
 
             if (isset($data['pays_id'])) {
                 $pays = $paysRepo->find($data['pays_id']);
@@ -140,6 +149,19 @@ class ApiModuleAbonnementController extends ApiInterface
             if (isset($data['duree'])) $module->setDuree($data['duree']);
             if (isset($data['etat'])) $module->setEtat($data['etat']);
             if (isset($data['numero'])) $module->setNumero($data['numero']);
+            if (isset($data['maxBiens'])) $module->setMaxBiens((int)$data['maxBiens']);
+            if (isset($data['maxAgences'])) $module->setMaxAgences((int)$data['maxAgences']);
+            if (isset($data['maxEmployes'])) $module->setMaxEmployes((int)$data['maxEmployes']);
+            if (isset($data['maxLocatairesMobileApp'])) $module->setMaxLocatairesMobileApp((int)$data['maxLocatairesMobileApp']);
+            if (isset($data['maxResidences'])) $module->setMaxResidences((int)$data['maxResidences']);
+            if (isset($data['hasFacturationAuto'])) $module->setHasFacturationAuto((bool)$data['hasFacturationAuto']);
+            if (isset($data['hasRelancesAuto'])) $module->setHasRelancesAuto((bool)$data['hasRelancesAuto']);
+            if (isset($data['hasMobileMoney'])) $module->setHasMobileMoney((bool)$data['hasMobileMoney']);
+            if (isset($data['hasRapportsAvances'])) $module->setHasRapportsAvances((bool)$data['hasRapportsAvances']);
+            if (isset($data['hasGestionDepenses'])) $module->setHasGestionDepenses((bool)$data['hasGestionDepenses']);
+            if (isset($data['hasMultiAgences'])) $module->setHasMultiAgences((bool)$data['hasMultiAgences']);
+            if (isset($data['hasApiIntegrations'])) $module->setHasApiIntegrations((bool)$data['hasApiIntegrations']);
+            if (isset($data['signatureElectronique'])) $module->setSignatureElectronique($data['signatureElectronique']);
 
             if (isset($data['pays_id'])) {
                 $pays = $paysRepo->find($data['pays_id']);
