@@ -36,7 +36,7 @@ class ReservationResidence
     #[Groups(['group1'])]
     private ?string $email = null;
 
-    #[ORM\ManyToOne(targetEntity: Fichier::class)]
+    #[ORM\ManyToOne(targetEntity: Fichier::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
     private ?Fichier $carteIdentite = null;
