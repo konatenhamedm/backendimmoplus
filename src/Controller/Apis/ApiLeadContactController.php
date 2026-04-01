@@ -61,7 +61,7 @@ class ApiLeadContactController extends ApiInterface
 
             $mailService->send(
                 'supports@ateliya.com', // From
-                'konatenhamed@gmail.com,', // To (Admin)
+                'konatenhamed@gmail.com', // To (Admin)
                 "🚀 Nouvelle demande de plan annuel : " . ($data['planName'] ?? 'Contact'),
                 'lead_contact',
                 [
