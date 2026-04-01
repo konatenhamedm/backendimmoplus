@@ -17,15 +17,18 @@ use OpenApi\Attributes as OA;
 class ApiModuleAbonnementController extends ApiInterface
 {
     #[Route('/', methods: ['GET'])]
-    #[OA\Get(
-        path: "/api/module-abonnement/",
-        summary: "Lister les modules d'abonnement",
-        description: "Retourne la liste complète des modules d'abonnement disponibles.",
-    )]
-    public function index(ModuleAbonnementRepository $repository): Response
+    public function index(Request $request, ModuleAbonnementRepository $repository): Response
     {
         try {
-            $modules = $repository->findAll();
+            $withPagination = $request->query->get('with_pagination', "false");
+            $qb = $repository->createQueryBuilder('m')->orderBy('m.id', 'DESC');
+
+            if ($withPagination === "true") {
+                $modules = $this->paginationService->paginate($qb);
+                return $this->responseData($modules, 'group_abonnement', [], true);
+            }
+
+            $modules = $qb->getQuery()->getResult();
             return $this->responseData($modules, 'group_abonnement');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);

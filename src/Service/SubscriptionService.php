@@ -167,6 +167,35 @@ class SubscriptionService
     }
 
     /**
+     * Vérifie si l'entreprise peut ajouter une nouvelle résidence.
+     */
+    public function canAddResidence(Entreprise $entreprise): bool
+    {
+        $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
+        
+        if (!$activeAbonnement || !$activeAbonnement->getModuleAbonnement()) {
+            return false;
+        }
+
+        $module = $activeAbonnement->getModuleAbonnement();
+        $maxResidences = $module->getMaxResidences();
+
+        if ($maxResidences === -1 || $maxResidences === null) {
+            return true;
+        }
+
+        if ($maxResidences === 0) {
+            return false;
+        }
+
+        $count = $this->em->createQuery('SELECT COUNT(r.id) FROM App\Entity\Residence r WHERE r.entreprise = :entreprise')
+                         ->setParameter('entreprise', $entreprise)
+                         ->getSingleScalarResult();
+
+        return (int)$count < (int)$maxResidences;
+    }
+
+    /**
      * Vérifie si l'entreprise peut ajouter une nouvelle maison.
      */
     public function canAddMaison(Entreprise $entreprise): bool

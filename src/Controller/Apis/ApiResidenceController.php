@@ -56,11 +56,24 @@ class ApiResidenceController extends ApiInterface
     }
 
     #[Route('/create', methods: ['POST'])]
-    public function create(Request $request, ResidenceRepository $repo, AgenceRepository $agenceRepo): Response
-    {
+    public function create(
+        Request $request,
+        ResidenceRepository $repo,
+        AgenceRepository $agenceRepo,
+        \App\Service\SubscriptionService $subscriptionService
+    ): Response {
         try {
-            $data = $request->request->all() ?: (json_decode($request->getContent(), true) ?? []);
             $user = $this->getUser();
+            $entreprise = $user->getEntreprise();
+
+            if (!$subscriptionService->canAddResidence($entreprise)) {
+                $this->setStatusCode(403);
+                return $this->response([
+                    'message' => "Désolée, votre abonnement actuel ne vous permet pas d'ajouter de nouvelles résidences."
+                ]);
+            }
+
+            $data = $request->request->all() ?: (json_decode($request->getContent(), true) ?? []);
 
             if (empty($data['libelle'])) {
                 $this->setStatusCode(400);
