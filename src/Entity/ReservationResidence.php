@@ -18,7 +18,6 @@ class ReservationResidence
 
     #[ORM\ManyToOne(targetEntity: Residence::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['group1'])]
     private ?Residence $residence = null;
 
     #[ORM\Column(length: 100)]

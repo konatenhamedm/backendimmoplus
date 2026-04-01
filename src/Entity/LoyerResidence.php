@@ -18,7 +18,6 @@ class LoyerResidence
 
     #[ORM\ManyToOne(targetEntity: Residence::class, inversedBy: 'loyerPaiements')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['group1'])]
     private ?Residence $residence = null;
 
     #[ORM\Column]
