@@ -64,7 +64,9 @@ class SyncMenusCommand extends Command
             'Briefcase' => 'RH',
             'ClipboardList' => 'Référentiels',
             'Globe2' => 'Pays',
-            'UserCog' => 'Configuration User'
+            'UserCog' => 'Configuration User',
+            'TrendingDown' => 'Dépenses',
+            'Tag' => 'Types de dépenses',
         ];
 
         $icons = [];
@@ -176,7 +178,14 @@ class SyncMenusCommand extends Command
                     ['titre' => 'Motifs', 'lien' => '/motif', 'icon' => 'FileText'],
                     ['titre' => 'Années', 'lien' => '/annee', 'icon' => 'Calendar']
                 ]
-            ]
+            ],
+            'Gestion Comptable' => [
+                'icon' => 'Receipt', 'ordre' => 8,
+                'items' => [
+                    ['titre' => 'Dépenses Agence', 'lien' => '/depenses', 'icon' => 'TrendingDown'],
+                    ['titre' => 'Types de Dépenses', 'lien' => '/type-depense', 'icon' => 'Tag'],
+                ]
+            ],
         ];
 
         // 5. Build Menu and Assign
@@ -238,6 +247,9 @@ class SyncMenusCommand extends Command
         } elseif ($modTitle === 'Référentiels') {
             if ($itemTitle === 'Quartiers') $assignedTo = ['SADM', 'ADMIN'];
             else $assignedTo = ['SADM'];
+        } elseif ($modTitle === 'Gestion Comptable') {
+            if ($itemTitle === 'Dépenses Agence') $assignedTo = ['SADM', 'ADMIN', 'COMPTABLE', 'AGENT', 'CAISSE'];
+            if ($itemTitle === 'Types de Dépenses')  $assignedTo = ['SADM', 'ADMIN', 'COMPTABLE'];
         }
 
         foreach ($assignedTo as $code) {

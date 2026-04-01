@@ -331,54 +331,78 @@ class ApiGroupeController extends ApiInterface
 
             // Handle permissions update
             if (isset($data['lignes']) && is_array($data['lignes'])) {
+
+                // ── 1. Supprimer les lignes qui ont été retirées côté frontend ──────────
+                // Collecter les IDs des lignes qui arrivent dans la payload
+                $incomingIds = array_filter(
+                    array_map(fn($l) => $l['id'] ?? null, $data['lignes']),
+                    fn($id) => $id !== null && $id !== 0
+                );
+
+                // Pour chaque permission existante du groupe (de cette entreprise), si son
+                // ID n'est plus dans la payload → on la supprime
+                $userEntrId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise())
+                    ? $this->getUser()->getEntreprise()->getId()
+                    : null;
+
+                foreach ($groupe->getModuleGroupePermitions() as $existingPerm) {
+                    $permEntrId = $existingPerm->getEntreprise() ? $existingPerm->getEntreprise()->getId() : null;
+                    // Ne toucher qu'aux permissions de l'entreprise de l'utilisateur courant
+                    if ($permEntrId !== $userEntrId) {
+                        continue;
+                    }
+                    if (!in_array($existingPerm->getId(), $incomingIds, true)) {
+                        $groupe->removeModuleGroupePermition($existingPerm);
+                        $permissionRepository->getEntityManager()->remove($existingPerm);
+                    }
+                }
+
+                // ── 2. Upsert des lignes reçues ──────────────────────────────────────
                 foreach ($data['lignes'] as $permData) {
                     $permission = null;
-                    
-                    // If ID is provided, try to find and update existing permission
-                    if (isset($permData['id']) && $permData['id'] !== null) {
+
+                    // Si un ID est fourni, on cherche la permission existante
+                    if (isset($permData['id']) && $permData['id'] !== null && $permData['id'] !== 0) {
                         $permission = $permissionRepository->find($permData['id']);
-                        
-                        // Verify the permission belongs to this groupe and this entreprise
+
                         if ($permission) {
+                            // Vérifier qu'elle appartient bien à ce groupe
                             if ($permission->getGroupeUser() !== $groupe) {
                                 continue;
                             }
-                            $permEntrId = $permission->getEntreprise() ? $permission->getEntreprise()->getId() : null;
-                            $userEntrId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
-                            
-                            // If it belongs to another enterprise, don't modify it, create a new one instead or skip.
-                            if ($permEntrId !== $userEntrId) {
-                                $permission = null; // Forces creation of a new permission for this enterprise
+                            $permEntrId2 = $permission->getEntreprise() ? $permission->getEntreprise()->getId() : null;
+                            if ($permEntrId2 !== $userEntrId) {
+                                $permission = null; // Crée une nouvelle pour cette entreprise
                             }
                         }
                     }
-                    
-                    // If no existing permission found, create a new one
+
+                    // Création si pas trouvée
                     if (!$permission) {
                         $permission = new ModuleGroupePermition();
                         $groupe->addModuleGroupePermition($permission);
                     }
-                    
-                    // Update permission fields
+
+                    // Mise à jour des champs
                     if (isset($permData['module_id'])) {
                         $module = $moduleRepository->find($permData['module_id']);
                         if ($module) $permission->setModule($module);
                     }
-                    
+
                     if (isset($permData['permition_id'])) {
                         $permition = $permitionRepository->find($permData['permition_id']);
                         if ($permition) $permission->setPermition($permition);
                     }
-                    
+
                     if (isset($permData['groupe_module_id'])) {
                         $groupeModule = $groupeModuleRepository->find($permData['groupe_module_id']);
                         if ($groupeModule) $permission->setGroupeModule($groupeModule);
                     }
-                    
+
                     if (isset($permData['ordre'])) $permission->setOrdre($permData['ordre']);
                     if (isset($permData['ordre_groupe'])) $permission->setOrdreGroupe($permData['ordre_groupe']);
                     if (isset($permData['menu_principal'])) $permission->setMenuPrincipal($permData['menu_principal']);
-                    
+
                     if ($this->getUser() && method_exists($this->getUser(), 'getEntreprise')) {
                         $permission->setEntreprise($this->getUser()->getEntreprise());
                     }
