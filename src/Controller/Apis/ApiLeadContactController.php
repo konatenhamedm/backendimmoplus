@@ -66,7 +66,7 @@ class ApiLeadContactController extends ApiInterface
                 'lead_contact',
                 [
                     'name' => $lead->getName(),
-                    'email' => $lead->getEmail(),
+                    'email_content' => $lead->getEmail(),
                     'phone' => $lead->getPhone(),
                     'company' => $lead->getCompany(),
                     'planName' => $lead->getPlanName(),
