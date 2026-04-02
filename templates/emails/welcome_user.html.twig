@@ -3,28 +3,34 @@
 {% block title %}BIENVENUE SUR L'APPLICATION{% endblock %}
 
 {% block body %}
-    <p>Bonjour {{ user.nom }} {{ user.prenoms }},</p>
-    <p>Votre compte a été créé avec succès par l'administrateur de votre entreprise. Vous pouvez désormais accéder à la plateforme Immoplus.</p>
+    <p style="margin-bottom: 20px;">Bonjour {{ user.nom }} {{ user.prenoms }},</p>
+    <p style="margin-bottom: 25px;">Votre compte a été créé avec succès. Vous pouvez désormais accéder à la plateforme Immoplus pour gérer votre activité immobilière.</p>
 
-    <div class="card">
-        <div class="label">Identifiant de connexion</div>
-        <div class="value" style="color: #7C3AED;">{{ user.login }}</div>
+    <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; margin: 25px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 4px;">Identifiant de connexion</div>
+        <div style="color: #7C3AED; font-weight: 800; margin-bottom: 16px; font-size: 18px;">{{ user.login }}</div>
 
-        <div class="label">Première connexion</div>
-        <div class="value" style="font-weight: 400; font-style: italic;">Saisissez le mot de passe qui vous a été communiqué.</div>
+        {% if user.password is defined %}
+        <div style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 4px;">Mot de passe temporaire</div>
+        <div style="color: #1e293b; font-weight: 700; margin-bottom: 16px; font-size: 16px;">{{ user.password }}</div>
+        {% else %}
+        <div style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; margin-bottom: 4px;">Mot de passe</div>
+        <div style="color: #475569; font-weight: 400; font-size: 14px; font-style: italic;">Utilisez le mot de passe défini lors de l'inscription.</div>
+        {% endif %}
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
-        <p>Veuillez cliquer sur le bouton suivant pour vous connecter :</p>
-        <a href="https://web.motiplus.pro/login" class="button">Se connecter maintenant</a>
+    <div style="text-align: center; margin: 35px 0;">
+        <p style="margin-bottom: 15px; font-size: 14px; color: #64748b;">Veuillez cliquer sur le bouton suivant pour vous connecter :</p>
+        <a href="https://web.motiplus.pro/login" style="display: inline-block; padding: 16px 32px; background-color: #7C3AED; color: white !important; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.4);">Se connecter maintenant</a>
     </div>
 
-    <p style="font-size: 11px; color: #64748b; margin-top: 20px;">
-        N'oubliez pas de modifier votre mot de passe dès votre première connexion pour assurer la sécurité de votre compte utilisateur.
-    </p>
+    <div style="background-color: #fef2f2; border-radius: 12px; padding: 15px; border-left: 4px solid #ef4444;">
+        <p style="font-size: 11px; color: #991b1b; margin: 0;">
+            <strong>Sécurité :</strong> N'oubliez pas de modifier votre mot de passe dès votre première connexion pour assurer la sécurité de votre compte utilisateur.
+        </p>
+    </div>
 
-    <p>Besoin d'aide pour débuter ? Notre équipe de support est disponible pour vous accompagner.</p>
+    <p style="margin-top: 30px;">Besoin d'aide pour débuter ? Notre équipe de support est disponible pour vous accompagner.</p>
     
-    <p>Bienvenue dans votre nouvel outil de gestion immobilière !</p>
-    <p>L'équipe support Immoplus</p>
+    <p style="margin-top: 20px; font-weight: 700;">L'équipe support Immoplus</p>
 {% endblock %}

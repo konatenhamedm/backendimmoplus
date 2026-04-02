@@ -206,11 +206,20 @@ class ApiEntrepriseController extends ApiInterface
     #[Route('/initiate-payment', methods: ['POST'])]
     public function initiateRegistrationPayment(
         Request $request,
+        EntityManagerInterface $em,
         \App\Repository\ModuleAbonnementRepository $moduleAbonnementRepo,
         \App\Service\PaiementService $paiementService
     ): Response {
         try {
             $data = json_decode($request->getContent(), true);
+
+            // On vérifie si l'utilisateur existe déjà avant de lancer le paiement
+            if (isset($data['admin_login'])) {
+                $existingUser = $em->getRepository(User::class)->findOneBy(['login' => $data['admin_login']]);
+                if ($existingUser) {
+                    return $this->errorResponse(null, "Le compte utilisateur (login: " . $data['admin_login'] . ") existe déjà. Veuillez en choisir un autre pour votre inscription.", 400);
+                }
+            }
             
             if (!isset($data['module_abonnement_id'])) {
                 return $this->errorResponse(null, "Module abonnement requis pour le paiement", 400);
@@ -267,7 +276,7 @@ class ApiEntrepriseController extends ApiInterface
             }
 
             $abonnementMode = '';
-            $abonnement = new \App\Entity\Abonnement();
+            $abonnement = new Abonnement();
             $abonnement->setEntreprise($entreprise);
             $abonnement->setType('RENOUVELLEMENT');
             $abonnement->setEtat('ACTIF');

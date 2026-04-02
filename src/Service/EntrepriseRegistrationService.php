@@ -24,7 +24,8 @@ class EntrepriseRegistrationService
         private GroupeRepository $groupeRepo,
         private CiviliteRepository $civiliteRepo,
         private ModuleAbonnementRepository $moduleAbonnementRepo,
-        private MenuGeneratorService $menuService
+        private MenuGeneratorService $menuService,
+        private SendMailService $mailService
     ) {}
 
     public function processRegistration(array $data): Entreprise
@@ -32,6 +33,12 @@ class EntrepriseRegistrationService
         $pays = $this->paysRepo->find($data['pays_id']);
         if (!$pays) {
             throw new \Exception("Pays introuvable");
+        }
+
+        // --- VÉRIFICATION DE L'UTILISATEUR ---
+        $existingUser = $this->em->getRepository(User::class)->findOneBy(['login' => $data['admin_login']]);
+        if ($existingUser) {
+            throw new \Exception("Le compte utilisateur associé (login: " . $data['admin_login'] . ") existe déjà.");
         }
 
         // --- CREATION DE L'ENTREPRISE ---
@@ -135,6 +142,27 @@ class EntrepriseRegistrationService
         $this->em->persist($user);
 
         $this->em->flush();
+
+        // --- ENVOI DE L'EMAIL DE BIENVENUE ---
+        try {
+            $this->mailService->send(
+                'contact@motiplus.pro',
+                $data['email'] ?? $data['admin_login'],
+                "Bienvenue sur Immoplus - Vos accès",
+                'welcome_user',
+                [
+                    'user' => [
+                        'nom' => $data['admin_nom'],
+                        'prenoms' => $data['admin_prenoms'] ?? '',
+                        'login' => $data['admin_login'],
+                        'password' => $data['admin_password'] // Shown for the first time
+                    ]
+                ]
+            );
+        } catch (\Exception $e) {
+            // Ne pas bloquer la transaction si l'email échoue
+            error_log("Erreur envoi email bienvenue: " . $e->getMessage());
+        }
 
         return $entreprise;
     }
