@@ -3,18 +3,18 @@
 {% block title %}VOTRE CODE DE VÉRIFICATION{% endblock %}
 
 {% block body %}
-    <p>Bonjour,</p>
-    <p>Pour des raisons de sécurité, vous devez saisir le code de vérification suivant pour terminer votre opération :</p>
+    <p style="margin: 0 0 20px 0;">Bonjour,</p>
+    <p style="margin: 0 0 25px 0;">Pour des raisons de sécurité, vous devez saisir le code de vérification suivant pour terminer votre opération :</p>
 
-    <div class="card" style="text-align: center; background-color: #f1f5f9; border: 2px dashed #cbd5e1; padding: 30px;">
-        <div class="label">Votre code OTP</div>
-        <div class="value" style="font-size: 32px; letter-spacing: 0.3em; color: #7C3AED; font-family: monospace;">{{ otp_code }}</div>
+    <div style="background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 40px 20px; text-align: center; margin-bottom: 25px;">
+        <div style="font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; margin-bottom: 8px;">Votre code OTP</div>
+        <div style="font-size: 36px; letter-spacing: 0.3em; color: #7C3AED; font-family: 'Courier New', Courier, monospace; font-weight: 800; line-height: 1;">{{ otp_code }}</div>
     </div>
 
-    <p style="text-align: center; font-size: 11px; color: #64748b; margin-top: 20px;">
-        Ce code est valable pour une durée limitée. Ne le partagez jamais avec personne.
+    <p style="text-align: center; font-size: 11px; color: #64748b; margin-top: 20px; line-height: 1.5;">
+        Ce code est valable pour une durée limitée. Pour des raisons de sécurité, ne le partagez jamais avec personne.
     </p>
 
-    <p>Merci de votre confiance.</p>
-    <p>L'équipe de sécurité Immoplus</p>
+    <p style="margin-top: 30px;">Merci de votre confiance.</p>
+    <p style="margin: 5px 0 0 0; font-weight: 700; color: #7C3AED;">L'équipe de sécurité Immoplus</p>
 {% endblock %}
