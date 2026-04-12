@@ -1,0 +1,58 @@
+{% extends 'emails/base.html.twig' %}
+
+{% block title %}VOTRE ABONNEMENT A ÉTÉ MIS À JOUR{% endblock %}
+
+{% block body %}
+    <p style="margin-bottom: 20px;">Bonjour,</p>
+    <p style="margin-bottom: 25px;">Nous vous informons que votre abonnement à la plateforme <strong>Immoplus</strong> a été mis à jour avec succès par notre équipe de support.</p>
+
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 30px; margin: 30px 0; border-left: 6px solid #7C3AED;">
+        <h3 style="color: #7C3AED; margin-top: 0; margin-bottom: 20px; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Détails de la nouvelle formule : {{ module.code }}</h3>
+        
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Durée de validité</td>
+                <td style="padding: 10px 0; color: #1e293b; font-weight: 700; text-align: right; border-bottom: 1px solid #f1f5f9;">{{ module.duree }} Jours</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Date d'expiration</td>
+                <td style="padding: 10px 0; color: #7C3AED; font-weight: 700; text-align: right; border-bottom: 1px solid #f1f5f9;">{{ expiration_date|date('d/m/Y') }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Nombre max. de biens</td>
+                <td style="padding: 10px 0; color: #1e293b; font-weight: 700; text-align: right; border-bottom: 1px solid #f1f5f9;">{{ module.maxBiens == -1 ? 'Illimité' : module.maxBiens }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Nombre max. d'agences</td>
+                <td style="padding: 10px 0; color: #1e293b; font-weight: 700; text-align: right; border-bottom: 1px solid #f1f5f9;">{{ module.maxAgences }}</td>
+            </tr>
+            {% if module.maxResidences > 0 %}
+            <tr>
+                <td style="padding: 10px 0; color: #64748b; font-size: 14px; border-bottom: 1px solid #f1f5f9;">Nombre max. de résidences</td>
+                <td style="padding: 10px 0; color: #1e293b; font-weight: 700; text-align: right; border-bottom: 1px solid #f1f5f9;">{{ module.maxResidences }}</td>
+            </tr>
+            {% endif %}
+        </table>
+        
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 2px dashed #e2e8f0;">
+            <p style="font-size: 13px; color: #475569; font-style: italic; margin: 0;">
+                "{{ module.description }}"
+            </p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0;">
+        <p style="margin-bottom: 20px; font-size: 15px; color: #1e293b; font-weight: 600;">Accédez dès maintenant à vos nouvelles fonctionnalités :</p>
+        <a href="https://web.motiplus.pro/mon-abonnement" style="display: inline-block; padding: 18px 36px; background-color: #7C3AED; color: white !important; text-decoration: none; border-radius: 14px; font-weight: 700; font-size: 15px; box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);">Voir mon abonnement</a>
+    </div>
+
+    <div style="background-color: #f0fdf4; border-radius: 16px; padding: 20px; border: 1px dashed #4ade80;">
+        <p style="font-size: 13px; color: #166534; margin: 0; line-height: 1.6;">
+            <strong>Note :</strong> Toutes vos données existantes sont conservées. Les nouvelles limites ont été appliquées immédiatement à votre compte.
+        </p>
+    </div>
+
+    <p style="margin-top: 35px; color: #64748b;">Si vous avez des questions concernant cette mise à jour, n'hésitez pas à contacter votre conseiller dédié ou notre support technique.</p>
+    
+    <p style="margin-top: 25px; font-weight: 800; font-size: 16px; color: #1e293b;">L'équipe commerciale Immoplus</p>
+{% endblock %}

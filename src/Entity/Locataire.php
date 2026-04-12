@@ -156,6 +156,26 @@ class Locataire
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $numpiece = null;
 
+    #[ORM\Column(length: 255, nullable: true, name: 'telWhatsapp')]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $telWhatsapp = null;
+
+    #[ORM\Column(length: 255, nullable: true, name: 'employeur')]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $employeur = null;
+
+    #[ORM\Column(length: 255, nullable: true, name: 'ressourcesExactes')]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $ressourcesExactes = null;
+
+    #[ORM\Column(length: 255, nullable: true, name: 'animalCompagnie')]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $animalCompagnie = null;
+
+    #[ORM\Column(length: 255, nullable: true, name: 'emailConjoint')]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private ?string $emailConjoint = null;
+
 
 
 
@@ -554,6 +574,61 @@ class Locataire
             }
         }
 
+        return $this;
+    }
+
+    public function getTelWhatsapp(): ?string
+    {
+        return $this->telWhatsapp;
+    }
+
+    public function setTelWhatsapp(?string $telWhatsapp): static
+    {
+        $this->telWhatsapp = $telWhatsapp;
+        return $this;
+    }
+
+    public function getEmployeur(): ?string
+    {
+        return $this->employeur;
+    }
+
+    public function setEmployeur(?string $employeur): static
+    {
+        $this->employeur = $employeur;
+        return $this;
+    }
+
+    public function getRessourcesExactes(): ?string
+    {
+        return $this->ressourcesExactes;
+    }
+
+    public function setRessourcesExactes(?string $ressourcesExactes): static
+    {
+        $this->ressourcesExactes = $ressourcesExactes;
+        return $this;
+    }
+
+    public function getAnimalCompagnie(): ?string
+    {
+        return $this->animalCompagnie;
+    }
+
+    public function setAnimalCompagnie(?string $animalCompagnie): static
+    {
+        $this->animalCompagnie = $animalCompagnie;
+        return $this;
+    }
+
+    public function getEmailConjoint(): ?string
+    {
+        return $this->emailConjoint;
+    }
+
+    public function setEmailConjoint(?string $emailConjoint): static
+    {
+        $this->emailConjoint = $emailConjoint;
         return $this;
     }
 

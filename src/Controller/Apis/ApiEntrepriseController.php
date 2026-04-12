@@ -33,6 +33,14 @@ class ApiEntrepriseController extends ApiInterface
         return parent::getUser();
     }
 
+    private \App\Service\SendMailService $mailService;
+
+    public function __construct(
+        \App\Service\SendMailService $mailService
+    ) {
+        $this->mailService = $mailService;
+    }
+
     #[Route('/', methods: ['GET'])]
     #[OA\Get(
         path: "/api/entreprise/",
@@ -320,6 +328,88 @@ class ApiEntrepriseController extends ApiInterface
                 'message' => 'Abonnement renouvelé avec succès.',
                 'nouvelleDateFin' => $entreprise->getDateFinAbonnement()->format('Y-m-d H:i:s'),
                 'typeAbonnement' => $entreprise->getAbonnement()
+            ], 'group1');
+
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/{id}/admin-renew-subscription', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/entreprise/{id}/admin-renew-subscription",
+        summary: "Mise à jour administrative de l'abonnement",
+        description: "Permet à l'administrateur de mettre à jour l'abonnement d'une entreprise manuellement et d'envoyer un email de notification.",
+        tags: ['Entreprise']
+    )]
+    public function adminRenewSubscription(
+        Request $request, 
+        Entreprise $entreprise, 
+        EntityManagerInterface $em, 
+        \App\Repository\ModuleAbonnementRepository $moduleRepo
+    ): Response
+    {
+        try {
+            if (!$entreprise) return $this->errorResponse(null, "Entreprise non trouvée", 404);
+
+            $data = json_decode($request->getContent(), true);
+            $moduleId = $data['module_abonnement_id'] ?? null;
+            $module = $moduleId ? $moduleRepo->find($moduleId) : null;
+
+            if (!$module) {
+                return $this->errorResponse(null, "Un module d'abonnement valide est requis pour cette opération administrative.", 400);
+            }
+
+            // Calculer la nouvelle date de fin (repart de la date actuelle ou prolonge)
+            $newDateFin = new \DateTime();
+            $dureeJours = ((int) $module->getDuree()) > 0 ? (int) $module->getDuree() : 30;
+            $newDateFin->modify("+{$dureeJours} days");
+
+            $abonnement = new Abonnement();
+            $abonnement->setEntreprise($entreprise);
+            $abonnement->setType('MISE_A_JOUR_ADMIN');
+            $abonnement->setEtat('ACTIF');
+            $abonnement->setModuleAbonnement($module);
+            $abonnement->setDateFin(clone $newDateFin);
+
+            $entreprise->setDateFinAbonnement($newDateFin);
+            $entreprise->setAbonnement($module->getCode() ?? 'EQUIPEE');
+            
+            $em->persist($abonnement);
+            $em->persist($entreprise);
+            $em->flush();
+
+            // --- ENVOI DE L'EMAIL DE NOTIFICATION ---
+            try {
+                $recipientEmail = $entreprise->getEmail();
+                if (!$recipientEmail) {
+                    // Fallback sur le premier administrateur de l'entreprise
+                    $admin = $em->getRepository(User::class)->findOneBy(['entreprise' => $entreprise]);
+                    $recipientEmail = $admin ? $admin->getLogin() : null;
+                }
+
+                if ($recipientEmail) {
+                    $this->mailService->send(
+                        'contact@motiplus.pro',
+                        $recipientEmail,
+                        "🚀 Votre abonnement Motiplus a été mis à jour !",
+                        'subscription_updated',
+                        [
+                            'entreprise' => $entreprise,
+                            'module' => $module,
+                            'expiration_date' => $newDateFin
+                        ]
+                    );
+                }
+            } catch (\Exception $e) {
+                error_log("Erreur envoi email mise à jour abonnement: " . $e->getMessage());
+            }
+
+            return $this->responseData([
+                'message' => 'L\'abonnement de l\'entreprise a été mis à jour et l\'email de notification a été envoyé.',
+                'nouvelleDateFin' => $entreprise->getDateFinAbonnement()->format('d/m/Y'),
+                'formule' => $entreprise->getAbonnement()
             ], 'group1');
 
         } catch (\Exception $exception) {

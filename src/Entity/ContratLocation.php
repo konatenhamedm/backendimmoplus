@@ -188,6 +188,10 @@ class ContratLocation
     private ?int $jourGenerationFacture = null;
 
     
+    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    #[Groups(['group1'])]
+    private ?bool $isAvanceConsommee = false;
+
     #[ORM\ManyToOne(targetEntity: Agence::class)] // reused same mappedBy vaguely or no inversedBy
     #[ORM\JoinColumn(nullable: true)]
     #[Groups(['group1'])]
@@ -660,6 +664,17 @@ class ContratLocation
     }
 
 
+    public function isAvanceConsommee(): ?bool
+    {
+        return $this->isAvanceConsommee;
+    }
+
+    public function setIsAvanceConsommee(?bool $isAvanceConsommee): static
+    {
+        $this->isAvanceConsommee = $isAvanceConsommee;
+        return $this;
+    }
+
     public function getAgence(): ?Agence
     {
         return $this->agence;
@@ -668,7 +683,6 @@ class ContratLocation
     public function setAgence(?Agence $agence): static
     {
         $this->agence = $agence;
-
         return $this;
     }
 
