@@ -6,6 +6,8 @@ use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\ContratLocation;
 use App\Entity\Locataire;
 use App\Entity\FactureLocation;
+use App\Entity\Nature;
+use App\Entity\Regime;
 use App\Repository\AppartementRepository;
 use App\Repository\CampagneRepository;
 use App\Repository\ContratLocationRepository;
@@ -136,27 +138,35 @@ class ApiMigrationController extends ApiInterface
             if (isset($ctrData['dateFin'])) $contrat->setDateFin(new \DateTime($ctrData['dateFin']));
             if (isset($ctrData['dateEntree'])) $contrat->setDateEntree(new \DateTime($ctrData['dateEntree']));
             
+            $isAvanceConsommee = $migData['avanceConsommee'] ?? false;
+            $contrat->setIsAvanceConsommee($isAvanceConsommee);
+            
+            if ($isAvanceConsommee) {
+                $contrat->setNbMoisAvance('0');
+                $contrat->setMntAvance('0');
+            } else {
+                $contrat->setNbMoisAvance($ctrData['nbMoisAvance'] ?? '0');
+                $contrat->setMntAvance($ctrData['mntAvance'] ?? '0');
+            }
+
             $contrat->setNbMoisCaution($ctrData['nbMoisCaution'] ?? '0');
             $contrat->setMntCaution($ctrData['mntCaution'] ?? '0');
-            $contrat->setNbMoisAvance($ctrData['nbMoisAvance'] ?? '0');
-            $contrat->setMntAvance($ctrData['mntAvance'] ?? '0');
             $contrat->setFraisanex($ctrData['fraisanex'] ?? '0');
             $contrat->setJourGenerationFacture($ctrData['jourGenerationFacture'] ?? 5);
-            $contrat->setIsAvanceConsommee($migData['avanceConsommee'] ?? false);
             
             if (isset($ctrData['nature_id'])) {
-                $nat = $this->em->getRepository(\App\Entity\Nature::class)->find($ctrData['nature_id']);
+                $nat = $this->em->getRepository(Nature::class)->find($ctrData['nature_id']);
                 if ($nat) $contrat->setNature($nat);
             }
             if (isset($ctrData['regime_id'])) {
-                $reg = $this->em->getRepository(\App\Entity\Regime::class)->find($ctrData['regime_id']);
+                $reg = $this->em->getRepository(Regime::class)->find($ctrData['regime_id']);
                 if ($reg) $contrat->setRegime($reg);
             }
             $contrat->setReglement($ctrData['reglement'] ?? '');
             $contrat->setIsEcheance($ctrData['isEcheance'] ?? false);
             $contrat->setNbEcheance((int)($ctrData['nbEcheance'] ?? 0));
             
-            // Calcul total versé
+            // Calcul total versé (caution + avance restante + frais)
             $somme = (float)$contrat->getMntCaution() + (float)$contrat->getMntAvance() + (float)$contrat->getFraisanex();
             $contrat->setTotVerse((string)$somme);
             $contrat->setEtat(1);
@@ -198,27 +208,51 @@ class ApiMigrationController extends ApiInterface
                             'entreprise' => $this->getUser()->getEntreprise()
                         ]);
 
-                        if ($campagne) {
-                            $facture = new FactureLocation();
-                            $facture->setLocataire($locataire);
-                            $facture->setContrat($contrat);
-                            $facture->setAppartement($appartement);
-                            $facture->setCompagne($campagne);
-                            $facture->setMois($mois);
-                            $facture->setLibFacture("Facture " . $mois->getLibMois() . " " . $annee->getLibelle() . " (Migration)");
-                            $facture->setMntFact($contrat->getMntLoyer());
-                            $facture->setSoldeFactLoc('0');
-                            $facture->setEncaisse($contrat->getMntLoyer());
-                            $facture->setStatut('payer');
-                            $facture->setIsValidated('oui');
-                            $facture->setDateEmission($dateFacture);
-                            $facture->setDateLimite((clone $dateFacture)->modify('+5 days'));
-                            $facture->setAgence($contrat->getAgence());
-                            $facture->setEntreprise($this->getUser()->getEntreprise());
-
-                            $this->updateAuditFields($facture, true);
-                            $this->em->persist($facture);
+                        // Si la campagne n'existe pas, on la crée automatiquement pour la migration
+                        if (!$campagne) {
+                            $campagne = new \App\Entity\Campagne();
+                            $campagne->setMois($mois);
+                            $campagne->setAnnee($annee);
+                            $campagne->setLibCampagne("Campagne " . $mois->getLibMois() . " " . $annee->getLibelle());
+                            $campagne->setEntreprise($this->getUser()->getEntreprise());
+                            $campagne->setAgence($agence);
+                            $campagne->setNbreProprio(0);
+                            $campagne->setNbreLocataire(0);
+                            $campagne->setMntTotal(0);
+                            $campagne->setMntPaye('0');
+                            $this->updateAuditFields($campagne, true);
+                            $this->em->persist($campagne);
                         }
+
+                        $facture = new FactureLocation();
+                        $facture->setLocataire($locataire);
+                        $facture->setContrat($contrat);
+                        $facture->setAppartement($appartement);
+                        $facture->setCompagne($campagne);
+                        $facture->setMois($mois);
+                        $facture->setLibFacture("Facture " . $mois->getLibMois() . " " . $annee->getLibelle() . " (Migration)");
+                        
+                        $mntLoyer = (int)($contrat->getMntLoyer() ?: 0);
+                        $facture->setMntFact($mntLoyer);
+                        $facture->setSoldeFactLoc(0);
+                        $facture->setEncaisse((string)$mntLoyer);
+                        $facture->setStatut('payer');
+                        $facture->setIsValidated('oui');
+                        
+                        $facture->setDateEmission($dateFacture);
+                        $facture->setDateLimite((clone $dateFacture)->modify('+5 days'));
+                        
+                        // Définir début et fin de mois pour la facture
+                        $dDebut = new \DateTime($dateFacture->format('Y-m-01'));
+                        $dFin = new \DateTime($dateFacture->format('Y-m-t'));
+                        $facture->setDateDebut($dDebut);
+                        $facture->setDateFin($dFin);
+
+                        $facture->setAgence($contrat->getAgence());
+                        $facture->setEntreprise($this->getUser()->getEntreprise());
+
+                        $this->updateAuditFields($facture, true);
+                        $this->em->persist($facture);
                     }
                 }
             }
