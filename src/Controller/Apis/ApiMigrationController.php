@@ -58,7 +58,27 @@ class ApiMigrationController extends ApiInterface
                 if (!$locataire) {
                     return $this->errorResponse(null, "Locataire existant non trouvé", 404);
                 }
-            } else {
+            }
+
+            // Détection de l'agence (priorité: data > appartement > user)
+            $agence = null;
+            if (isset($data['agence_id'])) {
+                $agence = $agenceRepository->find($data['agence_id']);
+            }
+
+            $appartement = null;
+            if (isset($ctrData['appartement_id'])) {
+                $appartement = $appartementRepository->find($ctrData['appartement_id']);
+                if ($appartement && !$agence) {
+                    $agence = $appartement->getMaisson() ? $appartement->getMaisson()->getAgence() : null;
+                }
+            }
+
+            if (!$agence && $this->getUser()) {
+                $agence = $this->getUser()->getAgence();
+            }
+
+            if (!$locataire) {
                 // 1. Création du Locataire
                 $locataire = new Locataire();
                 $locataire->setNom($locData['nom'] ?? '');
@@ -94,8 +114,9 @@ class ApiMigrationController extends ApiInterface
                 if ($this->getUser() && $this->getUser()->getEntreprise()) {
                     $locataire->setEntreprise($this->getUser()->getEntreprise());
                 }
-                if ($this->getUser() && $this->getUser()->getAgence()) {
-                    $locataire->setAgence($this->getUser()->getAgence());
+                
+                if ($agence) {
+                    $locataire->setAgence($agence);
                 }
 
                 $this->updateAuditFields($locataire, true);
@@ -106,13 +127,9 @@ class ApiMigrationController extends ApiInterface
             $contrat = new ContratLocation();
             $contrat->setLocataire($locataire);
 
-            $appartement = null;
-            if (isset($ctrData['appartement_id'])) {
-                $appartement = $appartementRepository->find($ctrData['appartement_id']);
-                if ($appartement) {
-                    $contrat->setAppart($appartement);
-                    $contrat->setMntLoyer($appartement->getLoyer());
-                }
+            if ($appartement) {
+                $contrat->setAppart($appartement);
+                $contrat->setMntLoyer($appartement->getLoyer());
             }
 
             if (isset($ctrData['dateDebut'])) $contrat->setDateDebut(new \DateTime($ctrData['dateDebut']));
@@ -147,8 +164,9 @@ class ApiMigrationController extends ApiInterface
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
                 $contrat->setEntreprise($this->getUser()->getEntreprise());
             }
-            if ($this->getUser() && $this->getUser()->getAgence()) {
-                $contrat->setAgence($this->getUser()->getAgence());
+
+            if ($agence) {
+                $contrat->setAgence($agence);
             }
 
             $this->updateAuditFields($contrat, true);

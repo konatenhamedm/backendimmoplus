@@ -28,7 +28,7 @@ class ApiEntrepriseController extends ApiInterface
     /**
      * @return \App\Entity\User|null
      */
-    protected function getUser(): ?\App\Entity\User
+    protected function getUser(): ?User
     {
         return parent::getUser();
     }
@@ -278,6 +278,16 @@ class ApiEntrepriseController extends ApiInterface
                 $currentDateFin = \DateTime::createFromInterface($currentDateFin);
             }
 
+            // 1. Désactiver les abonnements actifs précédents
+            $activeAbonnements = $em->getRepository(Abonnement::class)->findBy([
+                'entreprise' => $entreprise,
+                'etat' => 'ACTIF'
+            ]);
+            foreach ($activeAbonnements as $oldAb) {
+                $oldAb->setEtat('EXPIRE');
+                $em->persist($oldAb);
+            }
+
             $abonnementMode = '';
             $abonnement = new Abonnement();
             $abonnement->setEntreprise($entreprise);
@@ -354,6 +364,16 @@ class ApiEntrepriseController extends ApiInterface
 
             if (!$module) {
                 return $this->errorResponse(null, "Un module d'abonnement valide est requis pour cette opération administrative.", 400);
+            }
+
+            // 1. Désactiver les abonnements actifs précédents
+            $activeAbonnements = $em->getRepository(Abonnement::class)->findBy([
+                'entreprise' => $entreprise,
+                'etat' => 'ACTIF'
+            ]);
+            foreach ($activeAbonnements as $oldAb) {
+                $oldAb->setEtat('EXPIRE');
+                $em->persist($oldAb);
             }
 
             // Calculer la nouvelle date de fin (repart de la date actuelle ou prolonge)
