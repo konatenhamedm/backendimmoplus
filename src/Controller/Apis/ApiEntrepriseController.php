@@ -33,13 +33,8 @@ class ApiEntrepriseController extends ApiInterface
         return parent::getUser();
     }
 
-    private \App\Service\SendMailService $mailService;
+    // Parent sendMailService used instead of local property
 
-    public function __construct(
-        \App\Service\SendMailService $mailService
-    ) {
-        $this->mailService = $mailService;
-    }
 
     #[Route('/', methods: ['GET'])]
     #[OA\Get(
@@ -390,7 +385,7 @@ class ApiEntrepriseController extends ApiInterface
                 }
 
                 if ($recipientEmail) {
-                    $this->mailService->send(
+                    $this->sendMailService->send(
                         'contact@motiplus.pro',
                         $recipientEmail,
                         "🚀 Votre abonnement Motiplus a été mis à jour !",
