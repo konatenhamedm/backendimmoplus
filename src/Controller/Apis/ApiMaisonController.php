@@ -129,7 +129,10 @@ class ApiMaisonController extends ApiInterface
                 $maison->setTypeMaison($typeMaison);
             }
 
-            if ($this->getUser()) {
+            if (isset($data['agent_id'])) {
+                $agent = $this->em->getRepository(\App\Entity\User::class)->find((int)$data['agent_id']);
+                if ($agent) $maison->setIdAgent($agent);
+            } elseif ($this->getUser()) {
                 $maison->setIdAgent($this->getUser());
             }
 
@@ -196,6 +199,11 @@ class ApiMaisonController extends ApiInterface
                 $typeMaison = $typeMaisonRepository->find($data['type_maison_id']);
                 if (!$typeMaison) return $this->errorResponse(null, "Type de maison non trouvé", 404);
                 $maison->setTypeMaison($typeMaison);
+            }
+
+            if (isset($data['agent_id'])) {
+                $agent = $this->em->getRepository(\App\Entity\User::class)->find((int)$data['agent_id']);
+                if ($agent) $maison->setIdAgent($agent);
             }
 
             // Gestion des appartements inclus (Mise à jour ou Ajout)

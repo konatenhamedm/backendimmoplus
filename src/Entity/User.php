@@ -95,7 +95,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
    
     #[ORM\OneToOne(inversedBy: "user", cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(['group1'])]
+    #[Groups(['employe_id'])]
     private ?Employe $employe = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
