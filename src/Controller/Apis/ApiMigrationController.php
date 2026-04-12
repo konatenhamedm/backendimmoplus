@@ -187,19 +187,34 @@ class ApiMigrationController extends ApiInterface
             }
 
             // 3. Génération de l'historique
-            $nbFacturesPayees = (int)($migData['nbFacturesPayees'] ?? 0);
-            if ($nbFacturesPayees > 0) {
-                $dateDebut = $contrat->getDateDebut() ?: new \DateTime();
+            $dateDebutHist = $migData['dateDebutFactures'] ?? null;
+            $dateFinHist = $migData['dateFinFactures'] ?? null;
+
+            if ($dateDebutHist && $dateFinHist) {
+                $current = new \DateTime($dateDebutHist);
+                $end = new \DateTime($dateFinHist);
                 
-                for ($i = 0; $i < $nbFacturesPayees; $i++) {
-                    $dateFacture = new \DateTime($dateDebut->format('Y-m-d'));
-                    $dateFacture->modify("+$i month");
-                    
-                    $numMois = (int)$dateFacture->format('m');
-                    $anneeLibelle = $dateFacture->format('Y');
+                // On s'assure de prendre le mois complet de la fin
+                $end->modify('last day of this month');
+
+                while ($current <= $end) {
+                    $numMois = (int)$current->format('m');
+                    $anneeLibelle = $current->format('Y');
 
                     $mois = $moisRepository->findOneBy(['numMois' => $numMois]);
                     $annee = $anneeRepository->findOneBy(['libelle' => $anneeLibelle]);
+
+                    // Si l'année n'existe pas, on la crée
+                    if (!$annee) {
+                        $annee = new \App\Entity\Annee();
+                        $annee->setLibelle($anneeLibelle);
+                        $annee->setEtat(1);
+                        $annee->setDateDebut(new \DateTime($anneeLibelle . "-01-01"));
+                        $annee->setDateFin(new \DateTime($anneeLibelle . "-12-31"));
+                        $this->updateAuditFields($annee, true);
+                        $this->em->persist($annee);
+                        $this->em->flush(); // Nécessaire pour les relations suivantes
+                    }
 
                     if ($mois && $annee) {
                         $campagne = $campagneRepository->findOneBy([
@@ -208,7 +223,6 @@ class ApiMigrationController extends ApiInterface
                             'entreprise' => $this->getUser()->getEntreprise()
                         ]);
 
-                        // Si la campagne n'existe pas, on la crée automatiquement pour la migration
                         if (!$campagne) {
                             $campagne = new \App\Entity\Campagne();
                             $campagne->setMois($mois);
@@ -239,14 +253,11 @@ class ApiMigrationController extends ApiInterface
                         $facture->setStatut('payer');
                         $facture->setIsValidated('oui');
                         
-                        $facture->setDateEmission($dateFacture);
-                        $facture->setDateLimite((clone $dateFacture)->modify('+5 days'));
+                        $facture->setDateEmission(clone $current);
+                        $facture->setDateLimite((clone $current)->modify('+5 days'));
                         
-                        // Définir début et fin de mois pour la facture
-                        $dDebut = new \DateTime($dateFacture->format('Y-m-01'));
-                        $dFin = new \DateTime($dateFacture->format('Y-m-t'));
-                        $facture->setDateDebut($dDebut);
-                        $facture->setDateFin($dFin);
+                        $facture->setDateDebut(new \DateTime($current->format('Y-m-01')));
+                        $facture->setDateFin(new \DateTime($current->format('Y-m-t')));
 
                         $facture->setAgence($contrat->getAgence());
                         $facture->setEntreprise($this->getUser()->getEntreprise());
@@ -254,6 +265,8 @@ class ApiMigrationController extends ApiInterface
                         $this->updateAuditFields($facture, true);
                         $this->em->persist($facture);
                     }
+
+                    $current->modify('+1 month');
                 }
             }
 
