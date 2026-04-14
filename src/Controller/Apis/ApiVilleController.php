@@ -145,4 +145,62 @@ class ApiVilleController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
+    #[Route('/import', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/ville/import",
+        summary: "Importer plusieurs villes",
+        description: "Permet d'insérer une liste de noms de villes pour un pays donné.",
+        tags: ['Ville']
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: "object",
+            required: ["villes", "pays_id"],
+            properties: [
+                new OA\Property(property: "villes", type: "array", items: new OA\Items(type: "string"), example: ["Abidjan", "Bouaké"]),
+                new OA\Property(property: "pays_id", type: "integer", example: 1)
+            ]
+        )
+    )]
+    public function import(Request $request, VilleRepository $repository, PaysRepository $paysRepository): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $villesNames = $data['villes'] ?? [];
+            $paysId = $data['pays_id'] ?? null;
+
+            if (!$paysId) return $this->errorResponse(null, "ID du pays requis", 400);
+            
+            $pays = $paysRepository->find($paysId);
+            if (!$pays) return $this->errorResponse(null, "Pays non trouvé", 404);
+
+            $count = 0;
+            foreach ($villesNames as $name) {
+                // Vérifier si la ville existe déjà pour ce pays
+                $existing = $repository->findOneBy(['libVille' => $name, 'pays' => $pays]);
+                if (!$existing) {
+                    $ville = new Ville();
+                    $ville->setLibVille($name);
+                    // Générer un abrégé simple (ex: 3 premières lettres en majuscules)
+                    $abrege = strtoupper(substr(str_replace([' ', '-'], '', $name), 0, 3));
+                    $ville->setAbregeVille($abrege);
+                    $ville->setPays($pays);
+                    $ville->setCreatedBy($this->getUser());
+                    $repository->save($ville, false);
+                    $count++;
+                }
+            }
+
+            if ($count > 0) {
+                $repository->flush(); // Utilisons flush direct si possible, ou supposons que save() sans flush fonctionne
+            }
+
+            return $this->response(['message' => "$count villes importées avec succès"]);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
 }
+
