@@ -490,7 +490,7 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
             <td style="width: 33%; text-align: left; font-weight: bold; border: none; vertical-align: top;">
                 BAILLEUR<br>
                 {% if contrat.signatureBailleur %}
-                    <img src="{{ contrat.signatureBailleur }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Bailleur">
+                    <img src="{{ contrat.signatureBailleur.getAbsolutePath() }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Bailleur">
                 {% else %}
                     <br><br><br>
                 {% endif %}
@@ -499,7 +499,7 @@ Lorsque le locataire abandonne le bien loué sans payer les loyers échus, le BA
             <td style="width: 33%; text-align: right; font-weight: bold; border: none; vertical-align: top;">
                 PRENEUR<br>
                 {% if contrat.signatureLocataire %}
-                    <img src="{{ contrat.signatureLocataire }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Preneur">
+                    <img src="{{ contrat.signatureLocataire.getAbsolutePath() }}" style="max-width: 150px; max-height: 80px; margin-top: 10px;" alt="Signature Preneur">
                 {% else %}
                     <br><br><br>
                 {% endif %}
