@@ -34,6 +34,10 @@ class ModuleAbonnement
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?string $montant = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?string $montantReel = null;
+
     #[ORM\Column(length: 255)]
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?string $duree = null;
@@ -149,6 +153,18 @@ class ModuleAbonnement
     public function setMontant(string $montant): static
     {
         $this->montant = $montant;
+
+        return $this;
+    }
+
+    public function getMontantReel(): ?string
+    {
+        return $this->montantReel;
+    }
+
+    public function setMontantReel(?string $montantReel): static
+    {
+        $this->montantReel = $montantReel;
 
         return $this;
     }

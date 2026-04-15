@@ -49,6 +49,7 @@ class ApiModuleAbonnementController extends ApiInterface
                 new OA\Property(property: "code", type: "string"),
                 new OA\Property(property: "description", type: "string"),
                 new OA\Property(property: "montant", type: "string"),
+                new OA\Property(property: "montantReel", type: "string", nullable: true),
                 new OA\Property(property: "duree", type: "string", description: "Durée en jours"),
                 new OA\Property(property: "etat", type: "boolean"),
                 new OA\Property(property: "numero", type: "integer"),
@@ -69,6 +70,7 @@ class ApiModuleAbonnementController extends ApiInterface
             $module->setCode($data['code']);
             $module->setDescription($data['description'] ?? '');
             $module->setMontant($data['montant']);
+            $module->setMontantReel($data['montantReel'] ?? null);
             $module->setDuree($data['duree']);
             $module->setEtat($data['etat'] ?? true);
             $module->setMaxBiens((int)($data['maxBiens'] ?? 0));
@@ -132,6 +134,7 @@ class ApiModuleAbonnementController extends ApiInterface
                 new OA\Property(property: "code", type: "string"),
                 new OA\Property(property: "description", type: "string"),
                 new OA\Property(property: "montant", type: "string"),
+                new OA\Property(property: "montantReel", type: "string", nullable: true),
                 new OA\Property(property: "duree", type: "string"),
                 new OA\Property(property: "etat", type: "boolean"),
                 new OA\Property(property: "numero", type: "integer"),
@@ -149,6 +152,7 @@ class ApiModuleAbonnementController extends ApiInterface
             if (isset($data['code'])) $module->setCode($data['code']);
             if (isset($data['description'])) $module->setDescription($data['description']);
             if (isset($data['montant'])) $module->setMontant($data['montant']);
+            if (isset($data['montantReel'])) $module->setMontantReel($data['montantReel']);
             if (isset($data['duree'])) $module->setDuree($data['duree']);
             if (isset($data['etat'])) $module->setEtat($data['etat']);
             if (isset($data['numero'])) $module->setNumero($data['numero']);
