@@ -44,12 +44,15 @@ class ApiAppartementController extends ApiInterface
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
                 $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
+                $oqp = $request->get('oqp');
+                if ($oqp === 'null' || $oqp === '') $oqp = null;
                 
                 $appartements = $repository->findWithFilters(
                     $user->getEntreprise(),
                     $agence,
                     $maisonId,
-                    $search
+                    $search,
+                    $oqp
                 );
             } else {
                 $appartements = [];
