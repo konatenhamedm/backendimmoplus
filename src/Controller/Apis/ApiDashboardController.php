@@ -228,7 +228,22 @@ class ApiDashboardController extends AbstractController
                 }
             }
 
-            // === 4. Recent Activity ============================================
+            // === 4. Arrears (All unpaid before end of period) ===================
+            $qbArrears = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f')
+                ->select('SUM(f.soldeFactLoc)')
+                ->where('f.soldeFactLoc > 0')
+                ->andWhere('f.dateEmission <= :end')
+                ->setParameter('end', $periodEnd);
+            
+            if ($entreprise) {
+                $qbArrears->andWhere('f.entreprise = :ent')->setParameter('ent', $entreprise);
+            }
+            if ($agenceId) {
+                $qbArrears->andWhere('f.agence = :ag')->setParameter('ag', $agenceId);
+            }
+            $totalArrears = (float) $qbArrears->getQuery()->getSingleScalarResult();
+
+            // === 5. Recent Activity ============================================
             $recentActivity = $this->getRecentActivity($entreprise, $agenceId, 8);
 
             // === 5. Monthly chart =============================================
@@ -258,6 +273,7 @@ class ApiDashboardController extends AbstractController
                 'financials' => [
                     'totalRevenue'          => $totalRevenue,
                     'totalOutstanding'      => $totalOutstanding,
+                    'totalArrears'          => $totalArrears,
                     'totalBilled'           => $totalBilled,
                     'unpaidInvoicesCount'   => $unpaidCount,
                     'paidInvoicesCount'     => $paidCount,
