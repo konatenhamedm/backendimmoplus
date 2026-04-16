@@ -185,24 +185,27 @@ class ApiInterface extends AbstractController
         $serializer = new Serializer($normalizers, $encoders);
 
 
+        $responseMessage = $this->getMessage();
+        if (is_array($data) && isset($data['message'])) {
+            $responseMessage = $data['message'];
+            // Keep it in data too if preferred, or unset it. 
+            // Most catch blocks do ['message' => $e->getMessage()]
+        } elseif ($this->getStatusCode() >= 400 && $responseMessage === "Operation effectuée avec succes") {
+            $responseMessage = "Une erreur est survenue";
+        }
+
         if ($data == null) {
-            $arrayData = [
-                'data' => '[]',
-                'message' => $this->getMessage(),
-                'status' => $this->getStatusCode()
-            ];
             $response = $this->json([
                 'data' => $data,
-                'message' => $this->getMessage(),
+                'message' => $responseMessage,
                 'status' => $this->getStatusCode(),
                 'errors' => []
-
             ], 200);
             $response->headers->set('Access-Control-Allow-Origin', '*');
         } else {
             $arrayData = [
                 'data' => $data,
-                'message' => $this->getMessage(),
+                'message' => $responseMessage,
                 'status' => $this->getStatusCode()
             ];
             $jsonContent = $serializer->serialize($arrayData, 'json', [

@@ -24,6 +24,9 @@ doctrine:
                     agence_filter:
                         class: App\Filter\AgenceFilter
                         enabled: false
+                    isActive_filter:
+                        class: App\Filter\IsActiveFilter
+                        enabled: true
 
 when@test:
     doctrine:

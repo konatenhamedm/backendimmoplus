@@ -301,4 +301,26 @@ class ApiMaisonController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
+    #[Route('/delete/{id}', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: "/api/maison/delete/{id}",
+        summary: "Supprimer une maison (Logique)",
+        description: "Désactive une maison en mettant isActive à false.",
+        tags: ['Maison']
+    )]
+    public function delete(Maison $maison, MaisonRepository $repository): Response
+    {
+        try {
+            if (!$maison) return $this->errorResponse(null, "Maison non trouvée", 404);
+
+            $maison->setIsActive(false);
+            $this->updateAuditFields($maison);
+            $repository->save($maison, true);
+
+            return $this->response(['message' => 'Maison supprimée avec succès']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
 }
