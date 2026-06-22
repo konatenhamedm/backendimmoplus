@@ -61,6 +61,7 @@ class ApiTerrainController extends ApiInterface
             if (isset($data['prix'])) $terrain->setPrix($data['prix']);
             if (isset($data['etat'])) $terrain->setEtat($data['etat']);
             if (isset($data['dimensions'])) $terrain->setDimensions($data['dimensions']);
+            if (isset($data['coordonneesPolygone'])) $terrain->setCoordonneesPolygone($data['coordonneesPolygone']);
             
             if (isset($data['site_id'])) {
                 $site = $this->em->getRepository(\App\Entity\Site::class)->find($data['site_id']);
@@ -105,6 +106,7 @@ class ApiTerrainController extends ApiInterface
             if (isset($data['prix'])) $terrain->setPrix($data['prix']);
             if (isset($data['etat'])) $terrain->setEtat($data['etat']);
             if (isset($data['dimensions'])) $terrain->setDimensions($data['dimensions']);
+            if (isset($data['coordonneesPolygone'])) $terrain->setCoordonneesPolygone($data['coordonneesPolygone']);
             
             if (isset($data['site_id'])) {
                 $site = $this->em->getRepository(\App\Entity\Site::class)->find($data['site_id']);

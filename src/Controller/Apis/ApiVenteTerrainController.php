@@ -32,13 +32,20 @@ class ApiVenteTerrainController extends ApiInterface
 
             $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
             $agence = $isSuperAdmin ? null : $user->getAgence();
-            
-            $criteria = ['entreprise' => $user->getEntreprise()];
+            $qb = $em->getRepository(VenteTerrain::class)->createQueryBuilder('v')
+                ->innerJoin('v.client', 'c')
+                ->addSelect('c')
+                ->innerJoin('v.terrain', 't')
+                ->addSelect('t')
+                ->where('v.entreprise = :entreprise')
+                ->setParameter('entreprise', $user->getEntreprise());
+
             if ($agence) {
-                $criteria['agence'] = $agence;
+                $qb->andWhere('v.agence = :agence')
+                   ->setParameter('agence', $agence);
             }
 
-            $ventes = $em->getRepository(VenteTerrain::class)->findBy($criteria);
+            $ventes = $qb->getQuery()->getResult();
 
             return $this->responseData($ventes, 'group1');
         } catch (\Exception $exception) {

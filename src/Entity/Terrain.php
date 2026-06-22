@@ -62,6 +62,10 @@ class Terrain
     #[Groups(["group1"])]
     private ?Fichier $planTopographique = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $coordonneesPolygone = null;
+
     public function __construct()
     {
     }
@@ -172,6 +176,18 @@ class Terrain
     public function setPlanTopographique(?Fichier $planTopographique): static
     {
         $this->planTopographique = $planTopographique;
+        return $this;
+    }
+
+    public function getCoordonneesPolygone(): ?string
+    {
+        return $this->coordonneesPolygone;
+    }
+
+    public function setCoordonneesPolygone(?string $coordonneesPolygone): static
+    {
+        $this->coordonneesPolygone = $coordonneesPolygone;
+
         return $this;
     }
 

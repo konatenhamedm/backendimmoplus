@@ -192,18 +192,18 @@ class SeedTerrainDataCommand extends Command
 
         $terrainsData = [
             // Site 1 — Les Cocotiers
-            ['num' => 'C-01', 'superfice' => '500', 'prix' => '15000000', 'dimensions' => '20m x 25m', 'etat' => 'vendu',      'site_idx' => 0],
-            ['num' => 'C-02', 'superfice' => '600', 'prix' => '18000000', 'dimensions' => '20m x 30m', 'etat' => 'disponible',  'site_idx' => 0],
-            ['num' => 'C-03', 'superfice' => '450', 'prix' => '13500000', 'dimensions' => '18m x 25m', 'etat' => 'disponible',  'site_idx' => 0],
-            ['num' => 'C-04', 'superfice' => '520', 'prix' => '15600000', 'dimensions' => '20m x 26m', 'etat' => 'reserve',     'site_idx' => 0],
-            ['num' => 'C-05', 'superfice' => '700', 'prix' => '21000000', 'dimensions' => '25m x 28m', 'etat' => 'vendu',      'site_idx' => 0],
-            ['num' => 'C-06', 'superfice' => '480', 'prix' => '14400000', 'dimensions' => '20m x 24m', 'etat' => 'disponible',  'site_idx' => 0],
+            ['num' => 'C-01', 'superfice' => '500', 'prix' => '15000000', 'dimensions' => '20m x 25m', 'etat' => 'vendu',      'site_idx' => 0, 'coords' => '130,120 310,120 310,210 130,210'],
+            ['num' => 'C-02', 'superfice' => '600', 'prix' => '18000000', 'dimensions' => '20m x 30m', 'etat' => 'disponible',  'site_idx' => 0, 'coords' => '120,220 310,220 310,290 120,290'],
+            ['num' => 'C-03', 'superfice' => '450', 'prix' => '13500000', 'dimensions' => '18m x 25m', 'etat' => 'disponible',  'site_idx' => 0, 'coords' => '115,290 310,290 310,360 115,360'],
+            ['num' => 'C-04', 'superfice' => '520', 'prix' => '15600000', 'dimensions' => '20m x 26m', 'etat' => 'reserve',     'site_idx' => 0, 'coords' => '110,360 310,360 310,430 110,430'],
+            ['num' => 'C-05', 'superfice' => '700', 'prix' => '21000000', 'dimensions' => '25m x 28m', 'etat' => 'vendu',      'site_idx' => 0, 'coords' => '100,430 310,430 310,500 100,500'],
+            ['num' => 'C-06', 'superfice' => '480', 'prix' => '14400000', 'dimensions' => '20m x 24m', 'etat' => 'disponible',  'site_idx' => 0, 'coords' => '95,500 310,500 310,570 95,570'],
 
             // Site 2 — Étoile du Sud
-            ['num' => 'ES-01', 'superfice' => '800', 'prix' => '32000000', 'dimensions' => '32m x 25m', 'etat' => 'vendu',     'site_idx' => 1],
-            ['num' => 'ES-02', 'superfice' => '750', 'prix' => '30000000', 'dimensions' => '30m x 25m', 'etat' => 'disponible', 'site_idx' => 1],
-            ['num' => 'ES-03', 'superfice' => '650', 'prix' => '26000000', 'dimensions' => '26m x 25m', 'etat' => 'disponible', 'site_idx' => 1],
-            ['num' => 'ES-04', 'superfice' => '900', 'prix' => '36000000', 'dimensions' => '36m x 25m', 'etat' => 'reserve',    'site_idx' => 1],
+            ['num' => 'ES-01', 'superfice' => '800', 'prix' => '32000000', 'dimensions' => '32m x 25m', 'etat' => 'vendu',     'site_idx' => 1, 'coords' => null],
+            ['num' => 'ES-02', 'superfice' => '750', 'prix' => '30000000', 'dimensions' => '30m x 25m', 'etat' => 'disponible', 'site_idx' => 1, 'coords' => null],
+            ['num' => 'ES-03', 'superfice' => '650', 'prix' => '26000000', 'dimensions' => '26m x 25m', 'etat' => 'disponible', 'site_idx' => 1, 'coords' => null],
+            ['num' => 'ES-04', 'superfice' => '900', 'prix' => '36000000', 'dimensions' => '36m x 25m', 'etat' => 'reserve',    'site_idx' => 1, 'coords' => null],
         ];
 
         $terrains = [];
@@ -226,6 +226,10 @@ class SeedTerrainDataCommand extends Command
             $terrain->setSite($sites[$td['site_idx']]);
             $terrain->setAgence($agence);
             $terrain->setEntreprise($entreprise);
+            
+            if (!empty($td['coords'])) {
+                $terrain->setCoordonneesPolygone($td['coords']);
+            }
 
             // Dummy plan topographique
             $fichierTopo = new \App\Entity\Fichier();
@@ -301,6 +305,9 @@ class SeedTerrainDataCommand extends Command
             $client->setAdresse($cd['adresse']);
             $client->setPieceIdentite($cd['pieceIdentite']);
             $client->setEntreprise($entreprise);
+            if ($agence) {
+                $client->setAgence($agence);
+            }
             $this->em->persist($client);
             $clients[] = $client;
         }
