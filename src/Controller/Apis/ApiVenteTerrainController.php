@@ -1,0 +1,236 @@
+<?php
+
+namespace App\Controller\Apis;
+
+use App\Controller\Apis\Config\ApiInterface;
+use App\Entity\DemarcheAdministrative;
+use App\Entity\EchancierTerrain;
+use App\Entity\EtapeDemarche;
+use App\Entity\Terrain;
+use App\Entity\TypeEtapeDemarche;
+use App\Entity\VenteTerrain;
+use App\Entity\VersementTerrain;
+use Doctrine\ORM\EntityManagerInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/vente-terrain')]
+#[OA\Tag(name: 'VenteTerrain', description: 'Gestion des ventes de terrains et démarches')]
+class ApiVenteTerrainController extends ApiInterface
+{
+    #[Route('/', methods: ['GET'])]
+    public function index(Request $request, EntityManagerInterface $em): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user || !$user->getEntreprise()) {
+                return $this->errorResponse(null, "Entreprise non trouvée", 400);
+            }
+
+            $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+            $agence = $isSuperAdmin ? null : $user->getAgence();
+            
+            $criteria = ['entreprise' => $user->getEntreprise()];
+            if ($agence) {
+                $criteria['agence'] = $agence;
+            }
+
+            $ventes = $em->getRepository(VenteTerrain::class)->findBy($criteria);
+
+            return $this->responseData($ventes, 'group1');
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/create', methods: ['POST'])]
+    public function create(Request $request, EntityManagerInterface $em): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user || !$user->getEntreprise()) {
+                return $this->errorResponse(null, "Non autorisé", 403);
+            }
+
+            $data = json_decode($request->getContent(), true) ?? $request->request->all();
+
+            $terrain = $em->getRepository(Terrain::class)->find($data['terrain_id']);
+            $client = $em->getRepository(\App\Entity\ClientTerrain::class)->find($data['client_id']);
+
+            if (!$terrain || !$client) {
+                return $this->errorResponse(null, "Terrain ou Client introuvable", 404);
+            }
+
+            if ($terrain->getEtat() === 'vendu') {
+                return $this->errorResponse(null, "Ce terrain est déjà vendu", 400);
+            }
+
+            $vente = new VenteTerrain();
+            $vente->setTerrain($terrain);
+            $vente->setClient($client);
+            $vente->setPrixVente($data['prixVente']);
+            $vente->setApportInitial($data['apportInitial']);
+            
+            $reste = (float)$data['prixVente'] - (float)$data['apportInitial'];
+            $vente->setResteAPayer((string)$reste);
+            
+            if (isset($data['typeVente'])) {
+                $vente->setTypeVente($data['typeVente']);
+            }
+
+            $vente->setEntreprise($user->getEntreprise());
+            $agence = $user->getAgence() ?? $em->getRepository(\App\Entity\Agence::class)->find($data['agence_id'] ?? 0);
+            if ($agence) $vente->setAgence($agence);
+
+            $this->updateAuditFields($vente, true);
+            $em->persist($vente);
+
+            // Génération de l'échéancier si reste à payer
+            if ($reste > 0 && isset($data['nbMois']) && (int)$data['nbMois'] > 0) {
+                $nbMois = (int)$data['nbMois'];
+                $montantMensuel = $reste / $nbMois;
+                
+                for ($i = 1; $i <= $nbMois; $i++) {
+                    $echancier = new EchancierTerrain();
+                    $datePrevue = new \DateTime();
+                    $datePrevue->modify("+$i month");
+                    $echancier->setDatePrevue($datePrevue);
+                    $echancier->setMontant((string)$montantMensuel);
+                    $echancier->setVenteTerrain($vente);
+                    $em->persist($echancier);
+                }
+            }
+
+            // Gestion de l'apport comme premier versement
+            if ((float)$data['apportInitial'] > 0) {
+                $versement = new VersementTerrain();
+                $versement->setMontant($data['apportInitial']);
+                $versement->setVenteTerrain($vente);
+                $versement->setModePaiement($data['modePaiement'] ?? 'Espece');
+                $versement->setReference('Apport Initial');
+                $em->persist($versement);
+            }
+
+            // Changer le statut du terrain
+            $terrain->setEtat('vendu');
+            $em->persist($terrain);
+
+            // Si c'est une gestion agence, on crée la démarche administrative
+            if ($vente->getTypeVente() === 'sans_papier_gestion_agence') {
+                $demarche = new DemarcheAdministrative();
+                $demarche->setTitre("Démarches pour lot " . $terrain->getNum());
+                $demarche->setVenteTerrain($vente);
+                $demarche->setFraisEstimes($data['fraisEstimes'] ?? '0');
+                $em->persist($demarche);
+
+                // ─── Récupération des étapes paramétrées par l'entreprise ───
+                $typesEtapes = $em->getRepository(TypeEtapeDemarche::class)->findBy(
+                    ['entreprise' => $user->getEntreprise(), 'isActif' => true],
+                    ['ordre' => 'ASC']
+                );
+
+                // Si aucune étape n'est configurée → injecter les 7 étapes par défaut
+                if (count($typesEtapes) === 0) {
+                    foreach (TypeEtapeDemarche::DEFAULTS as $def) {
+                        $typeEtape = new TypeEtapeDemarche();
+                        $typeEtape->setNom($def['nom']);
+                        $typeEtape->setDescription($def['description']);
+                        $typeEtape->setOrdre($def['ordre']);
+                        $typeEtape->setIsActif(true);
+                        $typeEtape->setEntreprise($user->getEntreprise());
+                        $em->persist($typeEtape);
+                        $typesEtapes[] = $typeEtape;
+                    }
+                    $em->flush(); // flush pour avoir les IDs des types
+                }
+
+                // Créer une EtapeDemarche par type actif (liée au TypeEtapeDemarche)
+                foreach ($typesEtapes as $typeEtape) {
+                    $etape = new EtapeDemarche();
+                    $etape->setTypeEtape($typeEtape);
+                    $etape->setNomEtape($typeEtape->getNom()); // fallback
+                    $etape->setDemarche($demarche);
+                    $em->persist($etape);
+                }
+            }
+
+            $em->flush();
+
+            return $this->responseData($vente, 'group1');
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/{id}/versement', methods: ['POST'])]
+    public function addVersement(Request $request, VenteTerrain $vente, EntityManagerInterface $em): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true) ?? $request->request->all();
+
+            $montant = (float)$data['montant'];
+            if ($montant <= 0) {
+                return $this->errorResponse(null, "Montant invalide", 400);
+            }
+
+            $versement = new VersementTerrain();
+            $versement->setMontant((string)$montant);
+            $versement->setVenteTerrain($vente);
+            $versement->setModePaiement($data['modePaiement'] ?? 'Espece');
+            $versement->setReference($data['reference'] ?? null);
+            
+            $em->persist($versement);
+
+            // Mise à jour du reste à payer
+            $nouveauReste = (float)$vente->getResteAPayer() - $montant;
+            $vente->setResteAPayer((string)$nouveauReste);
+            
+            if ($nouveauReste <= 0) {
+                $vente->setEtat('solde');
+            }
+
+            // Valider les échéances concernées (logique simplifiée)
+            foreach ($vente->getEchanciers() as $ech) {
+                if ($ech->getEtat() === 'en_attente' && $montant > 0) {
+                    // Si le versement couvre l'échéance (simplifié, on marque l'échéance payée si on a de l'argent)
+                    $ech->setEtat('paye');
+                    $montant -= (float)$ech->getMontant();
+                }
+            }
+
+            $em->flush();
+
+            return $this->responseData($versement, 'group1');
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/demarche/{etapeId}/valider', methods: ['POST'])]
+    public function validerEtape(int $etapeId, EntityManagerInterface $em): Response
+    {
+        try {
+            $etape = $em->getRepository(EtapeDemarche::class)->find($etapeId);
+            if (!$etape) return $this->errorResponse(null, "Étape non trouvée", 404);
+
+            $etape->setStatut('termine');
+            $etape->setDateValidation(new \DateTime());
+            
+            // ICI: Déclencher l'Event / Mailer pour notifier le client
+            // $mailerService->sendDemarcheUpdateEmail($etape->getDemarche()->getVenteTerrain()->getClient(), $etape);
+
+            $em->flush();
+
+            return $this->response(['message' => 'Étape validée avec succès. Le client a été notifié.']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+}

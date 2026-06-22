@@ -6,12 +6,10 @@ use App\Repository\TerrainRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Gedmo\Mapping\Annotation as Gedmo; // gedmo annotations
-
-
-
 
 #[ORM\Entity(repositoryClass: TerrainRepository::class)]
 #[UniqueEntity(['num'], message: 'Ce numéro est déjà utilisé')]
@@ -19,53 +17,53 @@ use Gedmo\Mapping\Annotation as Gedmo; // gedmo annotations
 class Terrain
 {
     use TraitEntity;
+    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(["group1"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["group1"])]
     private ?string $num = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["group1"])]
     private ?string $superfice = null;
 
-
-
     #[ORM\Column(length: 255)]
+    #[Groups(["group1"])]
     private ?string $prix = null;
 
-    // #[ORM\Column(length: 255)]
-    // private ?string $justification = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nomcl = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $telcl = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $localisationClient = null;
-
-
-
-    #[ORM\OneToMany(mappedBy: 'terrain', targetEntity: CompteCltT::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
-    private Collection $compteCltTs;
-
     #[ORM\ManyToOne(inversedBy: 'terrain', cascade: ['persist'])]
+    #[Groups(["group1"])]
     private ?Site $site = null;
 
-
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(["group1"])]
     private string $etat = 'disponible';
 
-    #[ORM\OneToMany(mappedBy: 'terrain', targetEntity: Echancier::class, cascade: ['persist', 'remove'])]
-    private Collection $echancier;
+    #[ORM\ManyToOne(targetEntity: Agence::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["group1"])]
+    private ?Agence $agence = null;
+
+    #[ORM\ManyToOne(targetEntity: Entreprise::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["group1"])]
+    private ?Entreprise $entreprise = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $dimensions = null;
+
+    #[ORM\ManyToOne(targetEntity: Fichier::class, cascade: ['persist'])]
+    #[Groups(["group1"])]
+    private ?Fichier $planTopographique = null;
 
     public function __construct()
     {
-        $this->compteCltTs = new ArrayCollection();
-        $this->echancier = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -84,6 +82,7 @@ class Terrain
 
         return $this;
     }
+    
     public function getSuperfice(): ?string
     {
         return $this->superfice;
@@ -120,84 +119,6 @@ class Terrain
         return $this;
     }
 
-    // public function getJustification(): ?string
-    // {
-    //     return $this->justification;
-    // }
-
-    // public function setJustification(string $justification): static
-    // {
-    //     $this->justification = $justification;
-
-    //     return $this;
-    // }
-
-    public function getnomcl(): ?string
-    {
-        return $this->nomcl;
-    }
-
-    public function setnomcl(string $nomcl): static
-    {
-        $this->nomcl = $nomcl;
-
-        return $this;
-    }
-
-    public function gettelcl(): ?string
-    {
-        return $this->telcl;
-    }
-
-    public function settelcl(string $telcl): static
-    {
-        $this->telcl = $telcl;
-
-        return $this;
-    }
-
-    public function getLocalisationClient(): ?string
-    {
-        return $this->localisationClient;
-    }
-
-    public function setLocalisationClient(string $localisationClient): static
-    {
-        $this->localisationClient = $localisationClient;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CompteCltT>
-     */
-    public function getCompteCltTs(): Collection
-    {
-        return $this->compteCltTs;
-    }
-
-    public function addCompteCltT(CompteCltT $compteCltT): static
-    {
-        if (!$this->compteCltTs->contains($compteCltT)) {
-            $this->compteCltTs->add($compteCltT);
-            $compteCltT->setTerrain($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCompteCltT(CompteCltT $compteCltT): static
-    {
-        if ($this->compteCltTs->removeElement($compteCltT)) {
-            // set the owning side to null (unless already changed)
-            if ($compteCltT->getTerrain() === $this) {
-                $compteCltT->setTerrain(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getSite(): ?Site
     {
         return $this->site;
@@ -210,39 +131,52 @@ class Terrain
         return $this;
     }
 
-
-    /**
-     * @return Collection<int, Echancier>
-     */
-    public function getEchancier(): Collection
+    public function getAgence(): ?Agence
     {
-        return $this->echancier;
+        return $this->agence;
     }
 
-    public function addEchancier(Echancier $echancier): static
+    public function setAgence(?Agence $agence): static
     {
-        if (!$this->echancier->contains($echancier)) {
-            $this->echancier->add($echancier);
-            $echancier->setTerrain($this);
-        }
-
+        $this->agence = $agence;
         return $this;
     }
 
-    public function removeEchancier(Echancier $echancier): static
+    public function getEntreprise(): ?Entreprise
     {
-        if ($this->echancier->removeElement($echancier)) {
-            // set the owning side to null (unless already changed)
-            if ($echancier->getTerrain() === $this) {
-                $echancier->setTerrain(null);
-            }
-        }
+        return $this->entreprise;
+    }
 
+    public function setEntreprise(?Entreprise $entreprise): static
+    {
+        $this->entreprise = $entreprise;
+        return $this;
+    }
+
+    public function getDimensions(): ?string
+    {
+        return $this->dimensions;
+    }
+
+    public function setDimensions(?string $dimensions): static
+    {
+        $this->dimensions = $dimensions;
+        return $this;
+    }
+
+    public function getPlanTopographique(): ?Fichier
+    {
+        return $this->planTopographique;
+    }
+
+    public function setPlanTopographique(?Fichier $planTopographique): static
+    {
+        $this->planTopographique = $planTopographique;
         return $this;
     }
 
     public function __toString()
     {
-        return $this->num;
+        return $this->num ?? '';
     }
 }

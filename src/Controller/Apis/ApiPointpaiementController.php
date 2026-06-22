@@ -33,7 +33,7 @@ class ApiPointpaiementController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            
+
             $qb = $repository->createQueryBuilder('f')
                 ->select('f', 'l', 'a', 'm', 'c')
                 ->join('f.locataire', 'l')
@@ -43,7 +43,7 @@ class ApiPointpaiementController extends ApiInterface
 
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
                 $qb->andWhere('l.entreprise = :entreprise')
-                   ->setParameter('entreprise', $this->getUser()->getEntreprise());
+                    ->setParameter('entreprise', $this->getUser()->getEntreprise());
             }
 
             $factures = $qb->getQuery()->getResult();
@@ -52,7 +52,7 @@ class ApiPointpaiementController extends ApiInterface
                 $factures = $this->paginationService->paginate($factures);
             }
 
-            return $this->responseData($factures, 'group1', [], $withPagination == "true");
+            return $this->responseData($factures, 'group1', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -71,7 +71,7 @@ class ApiPointpaiementController extends ApiInterface
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
-            
+
             $qb = $repository->createQueryBuilder('f')
                 ->select('f', 'm', 'p', 'c')
                 ->join('f.appartement', 'a')
@@ -81,7 +81,7 @@ class ApiPointpaiementController extends ApiInterface
 
             if ($this->getUser() && $this->getUser()->getEntreprise()) {
                 $qb->andWhere('p.entreprise = :entreprise')
-                   ->setParameter('entreprise', $this->getUser()->getEntreprise());
+                    ->setParameter('entreprise', $this->getUser()->getEntreprise());
             }
 
             $factures = $qb->getQuery()->getResult();
@@ -92,7 +92,7 @@ class ApiPointpaiementController extends ApiInterface
 
             // Note: Grouping could be done here or on frontend. 
             // The original used DataTables grouping. We return flat list for now.
-            return $this->responseData($factures, 'group1', [], $withPagination == "true");
+            return $this->responseData($factures, 'group1', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);

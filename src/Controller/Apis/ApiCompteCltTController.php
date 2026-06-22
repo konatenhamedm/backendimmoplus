@@ -32,7 +32,7 @@ class ApiCompteCltTController extends ApiInterface
                 $comptes = $this->paginationService->paginate($comptes);
             }
 
-            return $this->responseData($comptes, 'group1', [], $withPagination == "true");
+            return $this->responseData($comptes, 'group1', [], $withPagination == "true" ? true : false);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -53,7 +53,7 @@ class ApiCompteCltTController extends ApiInterface
 
             if (isset($data['montant'])) $compte->setMontant($data['montant']);
             if (isset($data['solde'])) $compte->setSolde($data['solde']);
-            
+
             if (isset($data['terrain_id'])) {
                 $terrain = $terrainRepository->find($data['terrain_id']);
                 if ($terrain) $compte->setTerrain($terrain);
