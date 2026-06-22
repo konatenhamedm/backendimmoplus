@@ -78,11 +78,16 @@ class VenteTerrain
     #[Groups(["group1"])]
     private ?DemarcheAdministrative $demarcheAdministrative = null;
 
+    #[ORM\OneToMany(mappedBy: 'venteTerrain', targetEntity: FraisVenteTerrain::class, cascade: ['persist', 'remove'])]
+    #[Groups(["group1"])]
+    private Collection $fraisVenteTerrains;
+
     public function __construct()
     {
         $this->documents = new ArrayCollection();
         $this->echanciers = new ArrayCollection();
         $this->versements = new ArrayCollection();
+        $this->fraisVenteTerrains = new ArrayCollection();
         $this->dateVente = new \DateTime();
     }
 
@@ -174,6 +179,23 @@ class VenteTerrain
         $this->demarcheAdministrative = $demarcheAdministrative;
         if ($demarcheAdministrative !== null && $demarcheAdministrative->getVenteTerrain() !== $this) {
             $demarcheAdministrative->setVenteTerrain($this);
+        }
+        return $this;
+    }
+
+    public function getFraisVenteTerrains(): Collection { return $this->fraisVenteTerrains; }
+    public function addFraisVenteTerrain(FraisVenteTerrain $fraisVenteTerrain): static {
+        if (!$this->fraisVenteTerrains->contains($fraisVenteTerrain)) {
+            $this->fraisVenteTerrains->add($fraisVenteTerrain);
+            $fraisVenteTerrain->setVenteTerrain($this);
+        }
+        return $this;
+    }
+    public function removeFraisVenteTerrain(FraisVenteTerrain $fraisVenteTerrain): static {
+        if ($this->fraisVenteTerrains->removeElement($fraisVenteTerrain)) {
+            if ($fraisVenteTerrain->getVenteTerrain() === $this) {
+                $fraisVenteTerrain->setVenteTerrain(null);
+            }
         }
         return $this;
     }

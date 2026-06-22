@@ -61,6 +61,10 @@ class ApiTypeFraisTerrainController extends ApiInterface
             $type->setDescription($data['description'] ?? null);
             $type->setMontantDefaut($data['montantDefaut'] ?? '0');
             $type->setIsActif($data['isActif'] ?? true);
+            if (isset($data['typeEtapeDemarche_id'])) {
+                $etape = $em->getRepository(\App\Entity\TypeEtapeDemarche::class)->find($data['typeEtapeDemarche_id']);
+                $type->setTypeEtapeDemarche($etape);
+            }
             $type->setEntreprise($user->getEntreprise());
 
             $this->updateAuditFields($type, true);
@@ -85,6 +89,10 @@ class ApiTypeFraisTerrainController extends ApiInterface
             if (isset($data['description'])) $type->setDescription($data['description']);
             if (isset($data['montantDefaut'])) $type->setMontantDefaut($data['montantDefaut']);
             if (isset($data['isActif'])) $type->setIsActif((bool)$data['isActif']);
+            if (isset($data['typeEtapeDemarche_id'])) {
+                $etape = $em->getRepository(\App\Entity\TypeEtapeDemarche::class)->find($data['typeEtapeDemarche_id']);
+                $type->setTypeEtapeDemarche($etape);
+            }
 
             $this->updateAuditFields($type);
             $em->flush();

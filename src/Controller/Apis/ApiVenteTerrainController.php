@@ -124,6 +124,10 @@ class ApiVenteTerrainController extends ApiInterface
 
             // Changer le statut du terrain
             $terrain->setEtat('vendu');
+            if ($terrain->getSite()) {
+                $terrain->getSite()->updateEtatAutomatique();
+                $em->persist($terrain->getSite());
+            }
             $em->persist($terrain);
 
             // Si c'est une gestion agence, on crée la démarche administrative
@@ -167,6 +171,22 @@ class ApiVenteTerrainController extends ApiInterface
                     $etape->setNomEtape($typeEtape->getNom()); // fallback
                     $etape->setDemarche($demarche);
                     $em->persist($etape);
+
+                    // Générer les FraisVenteTerrain associés à ce TypeEtape
+                    $fraisTypes = $em->getRepository(\App\Entity\TypeFraisTerrain::class)->findBy([
+                        'typeEtapeDemarche' => $typeEtape,
+                        'isActif' => true
+                    ]);
+                    foreach ($fraisTypes as $fraisType) {
+                        $fraisVente = new \App\Entity\FraisVenteTerrain();
+                        $fraisVente->setVenteTerrain($vente);
+                        $fraisVente->setTypeFrais($fraisType);
+                        $fraisVente->setEtapeDemarche($etape);
+                        $fraisVente->setMontant($fraisType->getMontantDefaut() ?? '0');
+                        $fraisVente->setStatutPaiement('non_paye');
+                        $fraisVente->setEntreprise($vente->getEntreprise());
+                        $em->persist($fraisVente);
+                    }
                 }
             }
 

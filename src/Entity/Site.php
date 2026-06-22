@@ -293,4 +293,26 @@ class Site
 
         return $this;
     }
+
+    public function updateEtatAutomatique(): void
+    {
+        $terrains = $this->getTerrain();
+        if ($terrains->count() === 0) {
+            return;
+        }
+
+        $allVendu = true;
+        foreach ($terrains as $t) {
+            if ($t->getEtat() !== 'vendu') {
+                $allVendu = false;
+                break;
+            }
+        }
+
+        if ($allVendu) {
+            $this->setEtat('cloture');
+        } elseif ($this->getEtat() === 'cloture') {
+            $this->setEtat('disponible');
+        }
+    }
 }

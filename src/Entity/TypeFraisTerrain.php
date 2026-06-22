@@ -66,4 +66,12 @@ class TypeFraisTerrain
 
     public function getEntreprise(): ?Entreprise { return $this->entreprise; }
     public function setEntreprise(?Entreprise $entreprise): static { $this->entreprise = $entreprise; return $this; }
+
+    #[ORM\ManyToOne(targetEntity: TypeEtapeDemarche::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['group1'])]
+    private ?TypeEtapeDemarche $typeEtapeDemarche = null;
+
+    public function getTypeEtapeDemarche(): ?TypeEtapeDemarche { return $this->typeEtapeDemarche; }
+    public function setTypeEtapeDemarche(?TypeEtapeDemarche $typeEtapeDemarche): static { $this->typeEtapeDemarche = $typeEtapeDemarche; return $this; }
 }
