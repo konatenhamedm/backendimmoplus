@@ -169,6 +169,16 @@ class SeedTerrainDataCommand extends Command
             $site->setDescription($sd['description']);
             $site->setAgence($agence);
             $site->setEntreprise($entreprise);
+
+            // Dummy plan de lotissement
+            $fichierPlan = new \App\Entity\Fichier();
+            $fichierPlan->setPath('sites');
+            $fichierPlan->setAlt('demo_plan.jpg');
+            $fichierPlan->setUrl('jpg');
+            $fichierPlan->setSize(150000);
+            $this->em->persist($fichierPlan);
+            $site->setPlanLotissement($fichierPlan);
+
             $this->em->persist($site);
             $sites[] = $site;
         }
@@ -216,6 +226,16 @@ class SeedTerrainDataCommand extends Command
             $terrain->setSite($sites[$td['site_idx']]);
             $terrain->setAgence($agence);
             $terrain->setEntreprise($entreprise);
+
+            // Dummy plan topographique
+            $fichierTopo = new \App\Entity\Fichier();
+            $fichierTopo->setPath('terrains');
+            $fichierTopo->setAlt('demo_topo.jpg');
+            $fichierTopo->setUrl('jpg');
+            $fichierTopo->setSize(250000);
+            $this->em->persist($fichierTopo);
+            $terrain->setPlanTopographique($fichierTopo);
+
             $this->em->persist($terrain);
             $terrains[$td['num']] = $terrain;
         }
@@ -493,7 +513,7 @@ class SeedTerrainDataCommand extends Command
     // ═════════════════════════════════════════════════════════════════
     // Méthode de purge (option --purge)
     // ═════════════════════════════════════════════════════════════════
-    private function purgeExistingData(Entreprise $entreprise, Agence $agence, SymfonyStyle $io): void
+    private function purgeExistingData(Entreprise $entreprise, ?Agence $agence, SymfonyStyle $io): void
     {
         // Supprimer dans l'ordre des dépendances
         $conn = $this->em->getConnection();
