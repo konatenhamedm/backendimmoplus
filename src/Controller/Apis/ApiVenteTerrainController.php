@@ -177,12 +177,20 @@ class ApiVenteTerrainController extends ApiInterface
                         'typeEtapeDemarche' => $typeEtape,
                         'isActif' => true
                     ]);
+                    $fraisPersonnalises = $data['frais_personnalises'] ?? [];
+
                     foreach ($fraisTypes as $fraisType) {
                         $fraisVente = new \App\Entity\FraisVenteTerrain();
                         $fraisVente->setVenteTerrain($vente);
                         $fraisVente->setTypeFrais($fraisType);
                         $fraisVente->setEtapeDemarche($etape);
-                        $fraisVente->setMontant($fraisType->getMontantDefaut() ?? '0');
+                        
+                        $montantDefaut = $fraisType->getMontantDefaut() ?? '0';
+                        $montantFinal = isset($fraisPersonnalises[$fraisType->getId()]) 
+                            ? $fraisPersonnalises[$fraisType->getId()] 
+                            : $montantDefaut;
+                            
+                        $fraisVente->setMontant((string)$montantFinal);
                         $fraisVente->setStatutPaiement('non_paye');
                         $fraisVente->setEntreprise($vente->getEntreprise());
                         $em->persist($fraisVente);
