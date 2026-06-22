@@ -224,6 +224,23 @@ class ApiVenteTerrainController extends ApiInterface
         }
     }
 
+    #[Route('/demarche/{etapeId}/commencer', methods: ['POST'])]
+    public function commencerEtape(int $etapeId, EntityManagerInterface $em): Response
+    {
+        try {
+            $etape = $em->getRepository(EtapeDemarche::class)->find($etapeId);
+            if (!$etape) return $this->errorResponse(null, "Étape non trouvée", 404);
+
+            $etape->setStatut('en_cours');
+            $em->flush();
+
+            return $this->response(['message' => 'Étape passée en cours.']);
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
     #[Route('/demarche/{etapeId}/valider', methods: ['POST'])]
     public function validerEtape(int $etapeId, EntityManagerInterface $em): Response
     {
