@@ -61,6 +61,17 @@ class ApiSiteController extends ApiInterface
             if (isset($data['etat'])) $site->setEtat($data['etat']);
             if (isset($data['superficieTotale'])) $site->setSuperficieTotale($data['superficieTotale']);
             if (isset($data['situationGeographique'])) $site->setSituationGeographique($data['situationGeographique']);
+            if (isset($data['latitude'])) $site->setLatitude($data['latitude']);
+            if (isset($data['longitude'])) $site->setLongitude($data['longitude']);
+
+            if (isset($data['pays_id'])) {
+                $pays = $this->em->getRepository(\App\Entity\Pays::class)->find($data['pays_id']);
+                if ($pays) $site->setPays($pays);
+            }
+            if (isset($data['ville_id'])) {
+                $ville = $this->em->getRepository(\App\Entity\Ville::class)->find($data['ville_id']);
+                if ($ville) $site->setVille($ville);
+            }
 
             $site->setEntreprise($user->getEntreprise());
             if ($user->getAgence()) {
@@ -102,6 +113,17 @@ class ApiSiteController extends ApiInterface
             if (isset($data['etat'])) $site->setEtat($data['etat']);
             if (isset($data['superficieTotale'])) $site->setSuperficieTotale($data['superficieTotale']);
             if (isset($data['situationGeographique'])) $site->setSituationGeographique($data['situationGeographique']);
+            if (isset($data['latitude'])) $site->setLatitude($data['latitude']);
+            if (isset($data['longitude'])) $site->setLongitude($data['longitude']);
+
+            if (isset($data['pays_id'])) {
+                $pays = $this->em->getRepository(\App\Entity\Pays::class)->find($data['pays_id']);
+                if ($pays) $site->setPays($pays);
+            }
+            if (isset($data['ville_id'])) {
+                $ville = $this->em->getRepository(\App\Entity\Ville::class)->find($data['ville_id']);
+                if ($ville) $site->setVille($ville);
+            }
 
             $uploadedFile = $request->files->get('planLotissement');
             if ($uploadedFile) {

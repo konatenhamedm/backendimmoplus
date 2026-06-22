@@ -70,6 +70,24 @@ class Site
     #[Groups(["group1"])]
     private ?Fichier $planLotissement = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $latitude = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1"])]
+    private ?string $longitude = null;
+
+    #[ORM\ManyToOne(targetEntity: Pays::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["group1"])]
+    private ?Pays $pays = null;
+
+    #[ORM\ManyToOne(targetEntity: Ville::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["group1"])]
+    private ?Ville $ville = null;
+
     public function __construct()
     {
         $this->terrain = new ArrayCollection();
@@ -224,6 +242,55 @@ class Site
     public function setPlanLotissement(?Fichier $planLotissement): static
     {
         $this->planLotissement = $planLotissement;
+
+        return $this;
+    }
+
+    public function getLatitude(): ?string
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?string $latitude): static
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    public function getLongitude(): ?string
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?string $longitude): static
+    {
+        $this->longitude = $longitude;
+
+        return $this;
+    }
+
+    public function getPays(): ?Pays
+    {
+        return $this->pays;
+    }
+
+    public function setPays(?Pays $pays): static
+    {
+        $this->pays = $pays;
+
+        return $this;
+    }
+
+    public function getVille(): ?Ville
+    {
+        return $this->ville;
+    }
+
+    public function setVille(?Ville $ville): static
+    {
+        $this->ville = $ville;
+
         return $this;
     }
 }

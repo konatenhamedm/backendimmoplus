@@ -262,4 +262,127 @@ class ApiVenteTerrainController extends ApiInterface
             return $this->response(['message' => $exception->getMessage()]);
         }
     }
+    #[Route('/stats', methods: ['GET'])]
+    public function stats(Request $request, EntityManagerInterface $em): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user || !$user->getEntreprise()) {
+                return $this->errorResponse(null, "Entreprise non trouvée", 400);
+            }
+
+            $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
+            $agence = $isSuperAdmin ? null : $user->getAgence();
+
+            $year = $request->query->get('year', date('Y'));
+            $month = $request->query->get('month');
+            $semester = $request->query->get('semester');
+
+            // 1. Lots
+            $qbTerrain = $em->getRepository(Terrain::class)->createQueryBuilder('t')
+                ->where('t.entreprise = :entreprise')
+                ->setParameter('entreprise', $user->getEntreprise());
+            if ($agence) {
+                $qbTerrain->andWhere('t.agence = :agence')->setParameter('agence', $agence);
+            }
+            $terrains = $qbTerrain->getQuery()->getResult();
+            $totalTerrains = count($terrains);
+            $terrainsDispo = 0;
+            $terrainsVendus = 0;
+            foreach ($terrains as $t) {
+                if ($t->getEtat() === 'disponible') $terrainsDispo++;
+                elseif ($t->getEtat() === 'vendu') $terrainsVendus++;
+            }
+
+            // 2. Ventes
+            $qbVente = $em->getRepository(VenteTerrain::class)->createQueryBuilder('v')
+                ->where('v.entreprise = :entreprise')
+                ->setParameter('entreprise', $user->getEntreprise());
+            if ($agence) {
+                $qbVente->andWhere('v.agence = :agence')->setParameter('agence', $agence);
+            }
+            $ventes = $qbVente->getQuery()->getResult();
+            $totalVentes = count($ventes);
+            
+            $clientIds = [];
+            foreach ($ventes as $v) {
+                if ($v->getClient()) $clientIds[$v->getClient()->getId()] = true;
+            }
+            $totalClients = count($clientIds);
+
+            // Filtrage Ventes pour les KPIs financiers
+            $caGlobal = 0;
+            $resteARecouvrer = 0;
+            $ventesParMois = [];
+            
+            foreach ($ventes as $v) {
+                $dateVente = $v->getCreatedAt() ?: new \DateTime();
+                $vYear = $dateVente->format('Y');
+                $vMonth = $dateVente->format('m');
+                
+                // Mettre à jour les ventes du mois (seulement pour l'année sélectionnée)
+                if ($vYear === $year) {
+                    $mInt = (int)$vMonth;
+                    if (!isset($ventesParMois[$mInt])) {
+                        $ventesParMois[$mInt] = ['revenue' => 0, 'count' => 0];
+                    }
+                    $ventesParMois[$mInt]['count']++;
+                    $ventesParMois[$mInt]['revenue'] += (float)$v->getPrixVente();
+                }
+
+                // Filtrage Période pour les KPIs financiers
+                $keep = true;
+                if ($year && $vYear !== $year) $keep = false;
+                if ($keep && $month && $vMonth !== str_pad($month, 2, '0', STR_PAD_LEFT)) $keep = false;
+                if ($keep && $semester) {
+                    if ($semester == '1' && (int)$vMonth > 6) $keep = false;
+                    if ($semester == '2' && (int)$vMonth <= 6) $keep = false;
+                }
+
+                if ($keep) {
+                    $caGlobal += (float)$v->getPrixVente();
+                    $resteARecouvrer += (float)$v->getResteAPayer();
+                }
+            }
+            
+            $encaisse = $caGlobal - $resteARecouvrer;
+
+            // Formater charts
+            $monthlyRevenue = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $monthlyRevenue[] = [
+                    'month' => $i,
+                    'count' => $ventesParMois[$i]['count'] ?? 0,
+                    'revenue' => $ventesParMois[$i]['revenue'] ?? 0
+                ];
+            }
+
+            return $this->response([
+                'overview' => [
+                    'totalTerrains' => $totalTerrains,
+                    'terrainsDispo' => $terrainsDispo,
+                    'terrainsVendus' => $terrainsVendus,
+                    'totalVentes' => $totalVentes,
+                    'totalClients' => $totalClients
+                ],
+                'financials' => [
+                    'caGlobal' => $caGlobal,
+                    'encaisse' => $encaisse,
+                    'resteARecouvrer' => $resteARecouvrer
+                ],
+                'charts' => [
+                    'monthlyRevenue' => $monthlyRevenue,
+                    'lotsStatus' => [
+                        ['name' => 'Disponibles', 'value' => $terrainsDispo, 'color' => '#10B981'],
+                        ['name' => 'Vendus', 'value' => $terrainsVendus, 'color' => '#8B5CF6'],
+                        ['name' => 'Autres', 'value' => $totalTerrains - $terrainsDispo - $terrainsVendus, 'color' => '#F59E0B']
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $exception) {
+            $this->setStatusCode(500);
+            return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
 }
