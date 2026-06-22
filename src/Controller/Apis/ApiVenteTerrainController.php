@@ -156,7 +156,12 @@ class ApiVenteTerrainController extends ApiInterface
                 }
 
                 // Créer une EtapeDemarche par type actif (liée au TypeEtapeDemarche)
+                $selectedIds = $data['etapes_selectionnees'] ?? null;
+                
                 foreach ($typesEtapes as $typeEtape) {
+                    if ($selectedIds !== null && !in_array($typeEtape->getId(), $selectedIds)) {
+                        continue;
+                    }
                     $etape = new EtapeDemarche();
                     $etape->setTypeEtape($typeEtape);
                     $etape->setNomEtape($typeEtape->getNom()); // fallback
