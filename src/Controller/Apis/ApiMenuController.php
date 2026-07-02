@@ -4,6 +4,7 @@ namespace App\Controller\Apis;
 
 use App\Entity\Groupe;
 use App\Repository\ModuleGroupePermitionRepository;
+use App\Repository\ModuleAbonnementRepository;
 use App\Controller\Apis\Config\ApiInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -64,26 +65,48 @@ class ApiMenuController extends ApiInterface
             ]
         )
     )]
-    public function getMenu(Groupe $groupe, ModuleGroupePermitionRepository $repository, RouterInterface $router): Response
+    public function getMenu(Groupe $groupe, ModuleGroupePermitionRepository $repository, ModuleAbonnementRepository $abonnementRepository, RouterInterface $router): Response
     {
         try {
             if (!$groupe) {
                 return $this->errorResponse(null, "Groupe non trouvé", 404);
             }
 
-            $entrepriseId = ($this->getUser() && method_exists($this->getUser(), 'getEntreprise') && $this->getUser()->getEntreprise()) ? $this->getUser()->getEntreprise()->getId() : null;
+            $entreprise = $this->getUser() && method_exists($this->getUser(), 'getEntreprise') ? $this->getUser()->getEntreprise() : null;
+            $entrepriseId = $entreprise ? $entreprise->getId() : null;
             // Récupérer la structure complète du menu
             $menuData = $repository->getMenuStructure($groupe->getId(), $entrepriseId);
+
+            // Fetch the active ModuleAbonnement for the current entreprise
+            $activeAbonnement = null;
+            if ($entreprise && $entreprise->getAbonnement()) {
+                $activeAbonnement = $abonnementRepository->findOneBy(['code' => $entreprise->getAbonnement()]);
+            }
 
             // Organiser les données par module_id (grands titres)
             $menuByModule = [];
             
             foreach ($menuData as $item) {
                 $moduleId = $item['module_id'];
+                $moduleTitre = $item['module_titre'];
+
+                // Filtrage basé sur l'abonnement
+                if ($activeAbonnement) {
+                    if ($moduleTitre === 'Gestion Terrains' && !$activeAbonnement->isHasGestionTerrains()) {
+                        continue;
+                    }
+                    if ($moduleTitre === 'Gestion Immobilière' && !$activeAbonnement->isHasGestionImmobiliere()) {
+                        continue;
+                    }
+                    // Adapt the title to what you have in DB for "Gestion Résidence" or "Gestion Locative"
+                    if (($moduleTitre === 'Gestion Résidence' || $moduleTitre === 'Gestion Locative') && !$activeAbonnement->isHasGestionResidence()) {
+                        continue;
+                    }
+                }
                 
                 if (!isset($menuByModule[$moduleId])) {
                     $menuByModule[$moduleId] = [
-                        'title' => $item['module_titre'],
+                        'title' => $moduleTitre,
                         'icon' => $item['module_icon'], // Icône dynamique depuis la base !
                         'path' => '#', // Les modules sont des menus déroulants
                         'ordre' => $item['module_ordre'],
@@ -96,7 +119,8 @@ class ApiMenuController extends ApiInterface
                     'title' => $item['ressource_titre'],
                     'path' => $item['ressource_lien'] ?? '#',
                     'icon' => $item['ressource_icon'], // Les ressources ont aussi des icônes
-                    'ordre' => $item['ressource_ordre']
+                    'ordre' => $item['ressource_ordre'],
+                    'permission' => $item['permission_code'] ?? 'R'
                 ];
             }
 

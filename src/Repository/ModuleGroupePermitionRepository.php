@@ -94,6 +94,8 @@ class ModuleGroupePermitionRepository extends ServiceEntityRepository
         $tableModule = $this->getTableName(\App\Entity\Module::class, $em);
         $tablegIcon = $this->getTableName(Icon::class, $em);
 
+        $tablePermition = $this->getTableName(\App\Entity\Permition::class, $em);
+
         $sql = <<<SQL
             SELECT  
                 m.id as module_id,
@@ -105,13 +107,15 @@ class ModuleGroupePermitionRepository extends ServiceEntityRepository
                 gm.lien as ressource_lien,
                 i.code as ressource_icon,
                 mgp.ordre as ressource_ordre,
-                mgp.menu_principal
+                mgp.menu_principal,
+                p.code as permission_code
             FROM {$tableModuleGroupePermition} as mgp
             INNER JOIN {$tableModule} as m ON m.id = mgp.module_id
             INNER JOIN {$tablegGroupeModule} as gm ON gm.id = mgp.groupe_module_id
             INNER JOIN {$tablegGroupe} as gu ON gu.id = mgp.groupe_user_id
             LEFT JOIN {$tablegIcon} as i ON gm.icon_id = i.id
             LEFT JOIN {$tablegIcon} as mi ON m.icon_id = mi.id
+            LEFT JOIN {$tablePermition} as p ON p.id = mgp.permition_id
             WHERE gu.id = :groupe
             AND (mgp.entreprise_id IS NULL OR mgp.entreprise_id = :entreprise)
             ORDER BY m.ordre ASC, mgp.ordre ASC

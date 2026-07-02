@@ -110,6 +110,17 @@ class ModuleAbonnement
     #[ORM\Column]
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?int $maxResidences = 0;
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasGestionImmobiliere = true;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasGestionTerrains = false;
+
+    #[ORM\Column]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasGestionResidence = false;
 
     public function __construct()
     {
@@ -399,6 +410,42 @@ class ModuleAbonnement
     public function setMaxResidences(int $maxResidences): static
     {
         $this->maxResidences = $maxResidences;
+
+        return $this;
+    }
+
+    public function isHasGestionImmobiliere(): ?bool
+    {
+        return $this->hasGestionImmobiliere;
+    }
+
+    public function setHasGestionImmobiliere(bool $hasGestionImmobiliere): static
+    {
+        $this->hasGestionImmobiliere = $hasGestionImmobiliere;
+
+        return $this;
+    }
+
+    public function isHasGestionTerrains(): ?bool
+    {
+        return $this->hasGestionTerrains;
+    }
+
+    public function setHasGestionTerrains(bool $hasGestionTerrains): static
+    {
+        $this->hasGestionTerrains = $hasGestionTerrains;
+
+        return $this;
+    }
+
+    public function isHasGestionResidence(): ?bool
+    {
+        return $this->hasGestionResidence;
+    }
+
+    public function setHasGestionResidence(bool $hasGestionResidence): static
+    {
+        $this->hasGestionResidence = $hasGestionResidence;
 
         return $this;
     }

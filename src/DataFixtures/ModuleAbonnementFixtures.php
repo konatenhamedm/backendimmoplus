@@ -43,7 +43,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => false,
                 'signatureElectronique' => 'NONE',
                 'hasMultiAgences' => false,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => false,
+                'hasGestionResidence' => false
             ],
             [
                 'code' => 'BASIC (Semestriel)',
@@ -62,7 +65,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => false,
                 'signatureElectronique' => 'NONE',
                 'hasMultiAgences' => false,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => false,
+                'hasGestionResidence' => false
             ],
             [
                 'code' => 'BASIC (Annuel)',
@@ -81,7 +87,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => false,
                 'signatureElectronique' => 'NONE',
                 'hasMultiAgences' => false,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => false,
+                'hasGestionResidence' => false
             ],
 
             // --- PRO ---
@@ -102,7 +111,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'STANDARD',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ],
             [
                 'code' => 'PRO (Semestriel)',
@@ -121,7 +133,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'STANDARD',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ],
             [
                 'code' => 'PRO (Annuel)',
@@ -140,7 +155,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'STANDARD',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => false
+                'hasApiIntegrations' => false,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ],
 
             // --- ENTERPRISE ---
@@ -161,7 +179,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'AVANCEE',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => true
+                'hasApiIntegrations' => true,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ],
             [
                 'code' => 'ENTERPRISE (Semestriel)',
@@ -180,7 +201,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'AVANCEE',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => true
+                'hasApiIntegrations' => true,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ],
             [
                 'code' => 'ENTERPRISE (Annuel)',
@@ -199,7 +223,10 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 'hasGestionDepenses' => true,
                 'signatureElectronique' => 'AVANCEE',
                 'hasMultiAgences' => true,
-                'hasApiIntegrations' => true
+                'hasApiIntegrations' => true,
+                'hasGestionImmobiliere' => true,
+                'hasGestionTerrains' => true,
+                'hasGestionResidence' => true
             ]
         ];
 
@@ -229,6 +256,9 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 $module->setSignatureElectronique($data['signatureElectronique']);
                 $module->setHasMultiAgences($data['hasMultiAgences']);
                 $module->setHasApiIntegrations($data['hasApiIntegrations']);
+                $module->setHasGestionImmobiliere($data['hasGestionImmobiliere']);
+                $module->setHasGestionTerrains($data['hasGestionTerrains']);
+                $module->setHasGestionResidence($data['hasGestionResidence']);
 
                 if ($pays) {
                     $module->setPays($pays);
@@ -254,6 +284,9 @@ class ModuleAbonnementFixtures extends Fixture implements FixtureGroupInterface
                 $existing->setSignatureElectronique($data['signatureElectronique']);
                 $existing->setHasMultiAgences($data['hasMultiAgences']);
                 $existing->setHasApiIntegrations($data['hasApiIntegrations']);
+                $existing->setHasGestionImmobiliere($data['hasGestionImmobiliere']);
+                $existing->setHasGestionTerrains($data['hasGestionTerrains']);
+                $existing->setHasGestionResidence($data['hasGestionResidence']);
             }
         }
 
