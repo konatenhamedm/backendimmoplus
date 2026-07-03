@@ -27,7 +27,7 @@ class ApiPlanningRecouvrementController extends ApiInterface
             if ($user->getEntreprise()) {
                 $plannings = $repository->findAllByEntreprise($user->getEntreprise());
             } else {
-                $plannings = $repository->findAll();
+                $plannings = $repository->findAllPlannings();
             }
 
             return $this->responseData($plannings, 'group1');

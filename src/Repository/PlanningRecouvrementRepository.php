@@ -35,8 +35,24 @@ class PlanningRecouvrementRepository extends ServiceEntityRepository
     public function findAllByEntreprise($entreprise)
     {
         return $this->createQueryBuilder('p')
+            ->leftJoin('p.locataire', 'l')
+            ->addSelect('l')
+            ->leftJoin('p.agent', 'a')
+            ->addSelect('a')
             ->andWhere('p.entreprise = :entreprise')
             ->setParameter('entreprise', $entreprise)
+            ->orderBy('p.startDate', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+    
+    public function findAllPlannings()
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.locataire', 'l')
+            ->addSelect('l')
+            ->leftJoin('p.agent', 'a')
+            ->addSelect('a')
             ->orderBy('p.startDate', 'ASC')
             ->getQuery()
             ->getResult();

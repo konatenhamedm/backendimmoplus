@@ -4,6 +4,7 @@ namespace App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\Site;
+use App\Entity\Terrain;
 use App\Repository\SiteRepository;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
@@ -54,6 +55,10 @@ class ApiSiteController extends ApiInterface
 
             $data = json_decode($request->getContent(), true) ?? $request->request->all();
 
+            if (empty($data['nom'])) {
+                return $this->errorResponse(null, "Le nom du site est requis", 400);
+            }
+
             $site = new Site();
             if (isset($data['nom'])) $site->setNom($data['nom']);
             if (isset($data['localisation'])) $site->setLocalisation($data['localisation']);
@@ -88,6 +93,34 @@ class ApiSiteController extends ApiInterface
                 $filePath = $this->getUploadDir('sites', true);
                 if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, 'sites')) {
                     $site->setPlanLotissement($fichier);
+                }
+            }
+
+            // Génération groupée des lots/terrains du site
+            $terrainsData = $data['terrains'] ?? null;
+            if (is_string($terrainsData)) {
+                $terrainsData = json_decode($terrainsData, true);
+            }
+            if (is_array($terrainsData)) {
+                foreach ($terrainsData as $terrainData) {
+                    if (empty($terrainData['num']) || empty($terrainData['superfice']) || empty($terrainData['prix'])) {
+                        continue;
+                    }
+                    $terrain = new Terrain();
+                    $terrain->setNum($terrainData['num']);
+                    $terrain->setSuperfice($terrainData['superfice']);
+                    $terrain->setPrix($terrainData['prix']);
+                    if (isset($terrainData['dimensions'])) $terrain->setDimensions($terrainData['dimensions']);
+                    if (isset($terrainData['etat'])) $terrain->setEtat($terrainData['etat']);
+
+                    $terrain->setEntreprise($user->getEntreprise());
+                    if ($site->getAgence()) {
+                        $terrain->setAgence($site->getAgence());
+                    }
+
+                    $site->addTerrain($terrain);
+                    $this->updateAuditFields($terrain, true);
+                    $this->em->persist($terrain);
                 }
             }
 

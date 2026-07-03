@@ -59,7 +59,7 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->setParameter('entreprise', $entreprise);
 
         if ($agence && $agence !== 'all' && $agence !== 'null') {
-            $qb->andWhere('l.agence = :agence')
+            $qb->andWhere('f.agence = :agence')
                ->setParameter('agence', $agence);
         }
 
