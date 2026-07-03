@@ -51,7 +51,7 @@ class FactureLocationRepository extends ServiceEntityRepository
     /**
      * Centralized query for rent invoices with filters
      */
-    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null, $locataireId = null)
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null, $locataireId = null, $startDate = null, $endDate = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -66,6 +66,16 @@ class FactureLocationRepository extends ServiceEntityRepository
         if ($locataireId && $locataireId !== 'all' && $locataireId !== 'null') {
             $qb->andWhere('l.id = :locataireId')
                ->setParameter('locataireId', $locataireId);
+        }
+
+        if ($startDate) {
+            $qb->andWhere('f.dateEmission >= :startDate')
+               ->setParameter('startDate', new \DateTime($startDate));
+        }
+
+        if ($endDate) {
+            $qb->andWhere('f.dateEmission <= :endDate')
+               ->setParameter('endDate', (new \DateTime($endDate))->setTime(23, 59, 59));
         }
 
         if ($proprioId && $proprioId !== 'all' && $proprioId !== 'null') {

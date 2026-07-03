@@ -54,6 +54,8 @@ class ApiFactureLocationController extends ApiInterface
                 $statut = $request->get('statut');
                 $isValidated = $request->get('is_validated');
                 $locataireId = $request->get('locataire_id');
+                $startDate = $request->get('start_date');
+                $endDate = $request->get('end_date');
                 
                 $factures = $repository->findWithFilters(
                     $user->getEntreprise(),
@@ -62,7 +64,9 @@ class ApiFactureLocationController extends ApiInterface
                     $search,
                     $statut,
                     $isValidated,
-                    $locataireId
+                    $locataireId,
+                    $startDate,
+                    $endDate
                 );
             } else {
                 $factures = $repository->findAll();
