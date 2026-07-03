@@ -53,6 +53,7 @@ class ApiFactureLocationController extends ApiInterface
                 $proprioId = $request->get('proprio_id');
                 $statut = $request->get('statut');
                 $isValidated = $request->get('is_validated');
+                $locataireId = $request->get('locataire_id');
                 
                 $factures = $repository->findWithFilters(
                     $user->getEntreprise(),
@@ -60,7 +61,8 @@ class ApiFactureLocationController extends ApiInterface
                     $proprioId,
                     $search,
                     $statut,
-                    $isValidated
+                    $isValidated,
+                    $locataireId
                 );
             } else {
                 $factures = $repository->findAll();
@@ -101,6 +103,7 @@ class ApiFactureLocationController extends ApiInterface
             $search = $request->get('search');
             $statut = $request->get('statut') ?: 'impayer';
             $maisonId = $request->get('maison_id');
+            $locataireId = $request->get('locataire_id');
             
             $factures = $repository->findRelancesByAgentWithFilters(
                 $user,
@@ -108,7 +111,8 @@ class ApiFactureLocationController extends ApiInterface
                 $agence,
                 $search,
                 $statut,
-                $maisonId
+                $maisonId,
+                $locataireId
             );
 
             if ($withPagination == "true") {

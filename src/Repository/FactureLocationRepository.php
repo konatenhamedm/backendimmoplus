@@ -51,7 +51,7 @@ class FactureLocationRepository extends ServiceEntityRepository
     /**
      * Centralized query for rent invoices with filters
      */
-    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null)
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null, $locataireId = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -61,6 +61,11 @@ class FactureLocationRepository extends ServiceEntityRepository
         if ($agence && $agence !== 'all' && $agence !== 'null') {
             $qb->andWhere('f.agence = :agence')
                ->setParameter('agence', $agence);
+        }
+
+        if ($locataireId && $locataireId !== 'all' && $locataireId !== 'null') {
+            $qb->andWhere('l.id = :locataireId')
+               ->setParameter('locataireId', $locataireId);
         }
 
         if ($proprioId && $proprioId !== 'all' && $proprioId !== 'null') {
@@ -104,7 +109,7 @@ class FactureLocationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findRelancesByAgentWithFilters($agent, $entreprise, $agence = null, $search = null, $statut = 'impayer', $maisonId = null)
+    public function findRelancesByAgentWithFilters($agent, $entreprise, $agence = null, $search = null, $statut = 'impayer', $maisonId = null, $locataireId = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -128,6 +133,11 @@ class FactureLocationRepository extends ServiceEntityRepository
         if ($maisonId && $maisonId !== 'all' && $maisonId !== 'null') {
             $qb->andWhere('m.id = :maisonId')
                ->setParameter('maisonId', $maisonId);
+        }
+
+        if ($locataireId && $locataireId !== 'all' && $locataireId !== 'null') {
+            $qb->andWhere('l.id = :locataireId')
+               ->setParameter('locataireId', $locataireId);
         }
 
         if ($search) {

@@ -50,13 +50,15 @@ class ApiContratLocationController extends ApiInterface
                 $agence = $isSuperAdmin ? $agenceId : $user->getAgence();
                 $search = $request->get('search');
                 $proprioId = $request->get('proprio_id');
+                $locataireId = $request->get('locataire_id');
                 
                 $contrats = $repository->findWithFilters(
                     $user->getEntreprise(),
                     $agence,
                     $proprioId,
                     $search,
-                    $etat
+                    $etat,
+                    $locataireId
                 );
             } else {
                 $contrats = [];

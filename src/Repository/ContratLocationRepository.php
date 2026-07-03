@@ -52,7 +52,7 @@ class ContratLocationRepository extends ServiceEntityRepository
     /**
      * Centralized query for lease contracts with filters
      */
-    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $etat = null)
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $etat = null, $locataireId = null)
     {
         $qb = $this->createQueryBuilder('c')
             ->innerJoin('c.locataire', 'l')
@@ -62,6 +62,11 @@ class ContratLocationRepository extends ServiceEntityRepository
         if ($agence && $agence !== 'all' && $agence !== 'null') {
             $qb->andWhere('l.agence = :agence')
                ->setParameter('agence', $agence);
+        }
+
+        if ($locataireId && $locataireId !== 'all' && $locataireId !== 'null') {
+            $qb->andWhere('l.id = :locataireId')
+               ->setParameter('locataireId', $locataireId);
         }
 
         if ($proprioId && $proprioId !== 'all' && $proprioId !== 'null') {
