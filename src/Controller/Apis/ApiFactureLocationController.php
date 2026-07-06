@@ -39,12 +39,13 @@ class ApiFactureLocationController extends ApiInterface
         tags: ['FactureLocation']
     )]
     #[OA\Parameter(name: "with_pagination", in: "query", description: "Activer la pagination (true/false, défaut: false)", schema: new OA\Schema(type: "string"))]
+    #[OA\Parameter(name: "type", in: "query", description: "Type de facture : 'soldee' (factures payées) ou 'impayee' (factures non soldées)", schema: new OA\Schema(type: "string"))]
     public function index(Request $request, FactureLocationRepository $repository): Response
     {
         try {
             $withPagination = $request->get('with_pagination', "false");
             $user = $this->getUser();
-            
+
             if ($user && $user->getEntreprise()) {
                 $isSuperAdmin = ($user->getGroupe() && $user->getGroupe()->getCode() === 'ADMIN');
                 $agenceId = $request->get('agence_id');
@@ -56,7 +57,8 @@ class ApiFactureLocationController extends ApiInterface
                 $locataireId = $request->get('locataire_id');
                 $startDate = $request->get('start_date');
                 $endDate = $request->get('end_date');
-                
+                $type = $request->get('type');
+
                 $factures = $repository->findWithFilters(
                     $user->getEntreprise(),
                     $agence,
@@ -66,7 +68,8 @@ class ApiFactureLocationController extends ApiInterface
                     $isValidated,
                     $locataireId,
                     $startDate,
-                    $endDate
+                    $endDate,
+                    $type
                 );
             } else {
                 $factures = $repository->findAll();

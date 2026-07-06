@@ -51,7 +51,10 @@ class FactureLocationRepository extends ServiceEntityRepository
     /**
      * Centralized query for rent invoices with filters
      */
-    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null, $locataireId = null, $startDate = null, $endDate = null)
+    // Statuts considérés comme "soldés" — la casse historique du code contient à la fois 'payer' et 'paye'.
+    private const STATUTS_SOLDEE = ['payer', 'paye'];
+
+    public function findWithFilters($entreprise, $agence = null, $proprioId = null, $search = null, $statut = null, $isValidated = null, $locataireId = null, $startDate = null, $endDate = null, $type = null)
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.locataire', 'l')
@@ -88,6 +91,14 @@ class FactureLocationRepository extends ServiceEntityRepository
         if ($statut) {
             $qb->andWhere('f.statut = :statut')
                ->setParameter('statut', $statut);
+        }
+
+        if ($type === 'soldee') {
+            $qb->andWhere('f.statut IN (:statutsSoldee)')
+               ->setParameter('statutsSoldee', self::STATUTS_SOLDEE);
+        } elseif ($type === 'impayee') {
+            $qb->andWhere('f.statut NOT IN (:statutsSoldee)')
+               ->setParameter('statutsSoldee', self::STATUTS_SOLDEE);
         }
 
         if ($isValidated && $isValidated !== 'all') {
