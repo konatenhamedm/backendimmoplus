@@ -48,7 +48,8 @@ class ModulesMetierInitCommand extends Command
             'icone' => 'Hotel',
             'ordre' => 2,
             'description' => 'Résidences meublées : réservations, loyers et dépenses de résidence.',
-            'sections' => ['Résidences', 'Gestion Résidence', 'Gestion Résidences'],
+            'sections' => ['Résidences', 'Gestion Résidence', 'Gestion Résidences', 'Gestion des résidences'],
+            'liens' => ['/residence', '/reservation', '/depense-residence', '/loyer-residence'],
             'prefixes' => ['/api/residence', '/api/reservation-residence', '/api/loyer-residence', '/api/depense-residence'],
         ],
         ModuleMetier::TERRAINS => [
@@ -56,7 +57,8 @@ class ModulesMetierInitCommand extends Command
             'icone' => 'MapPin',
             'ordre' => 3,
             'description' => 'Sites, lots, clients, ventes de terrains et démarches.',
-            'sections' => ['Gestion Terrains'],
+            'sections' => ['Gestion Terrains', 'Gestion des terrains', 'Terrains'],
+            'liens' => ['/gestion-terrains'],
             'prefixes' => [
                 '/api/site', '/api/terrain', '/api/client-terrain', '/api/vente-terrain',
                 '/api/compte-clt-t', '/api/type-etape-demarche', '/api/type-frais-terrain',
@@ -155,6 +157,12 @@ class ModulesMetierInitCommand extends Command
     private function creerMenuTerrains(): void
     {
         $this->io->section('Menu « Gestion Terrains »');
+        foreach ($this->em->getRepository(Module::class)->findAll() as $existante) {
+            if ($this->contientLien($existante, ['/gestion-terrains'])) {
+                $this->io->text("= Section « {$existante->getTitre()} » contient déjà les écrans Terrains : pas de nouvelle section.");
+                return;
+            }
+        }
         $section = $this->em->getRepository(Module::class)->findOneBy(['titre' => 'Gestion Terrains']);
         if (!$section) {
             $ordre = (int) $this->em->createQueryBuilder()->select('MAX(m.ordre)')->from(Module::class, 'm')->getQuery()->getSingleScalarResult();
@@ -205,10 +213,13 @@ class ModulesMetierInitCommand extends Command
                 $this->io->text("= {$section->getTitre()} → {$section->getModuleMetier()->getCode()} (déjà rattachée)");
                 continue;
             }
+            $titre = $this->normaliser($section->getTitre());
             foreach (self::MODULES as $code => $config) {
-                if (in_array($section->getTitre(), $config['sections'], true)) {
+                $parTitre = in_array($titre, array_map(fn ($t) => $this->normaliser($t), $config['sections']), true);
+                $parLien = !$parTitre && isset($config['liens']) && $this->contientLien($section, $config['liens']);
+                if ($parTitre || $parLien) {
                     $section->setModuleMetier($modules[$code]);
-                    $this->io->text("+ {$section->getTitre()} → $code");
+                    $this->io->text("+ {$section->getTitre()} → $code" . ($parLien ? ' (détectée par ses écrans)' : ''));
                     continue 2;
                 }
             }
@@ -236,6 +247,41 @@ class ModulesMetierInitCommand extends Command
             $formule->setModulesMetier(array_values($inclus));
             $this->io->text("+ {$formule->getCode()} : " . implode(', ', array_map(fn (ModuleMetier $m) => $m->getCode(), $inclus)));
         }
+    }
+
+    /** Vrai si un écran de la section (pour n'importe quel groupe) a un lien commençant par l'un des préfixes. */
+    private function contientLien(Module $section, array $prefixes): bool
+    {
+        if (!$section->getId()) {
+            return false;
+        }
+        $liens = $this->em->createQueryBuilder()
+            ->select('DISTINCT gm.lien')
+            ->from(ModuleGroupePermition::class, 'mgp')
+            ->join('mgp.groupeModule', 'gm')
+            ->where('mgp.module = :section')
+            ->setParameter('section', $section)
+            ->getQuery()
+            ->getSingleColumnResult();
+
+        foreach ($liens as $lien) {
+            foreach ($prefixes as $prefixe) {
+                if ($lien === $prefixe || str_starts_with((string) $lien, $prefixe . '/') || str_starts_with((string) $lien, $prefixe . '-')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /** Minuscules, sans accents ni espaces superflus : « Gestion Résidence » = « gestion residence ». */
+    private function normaliser(?string $texte): string
+    {
+        $texte = mb_strtolower(trim((string) $texte));
+        $texte = strtr($texte, ['é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'à' => 'a', 'â' => 'a', 'î' => 'i', 'ï' => 'i', 'ô' => 'o', 'ù' => 'u', 'û' => 'u', 'ç' => 'c']);
+
+        return preg_replace('/\s+/', ' ', $texte);
     }
 
     private function icone(string $code): Icon
