@@ -82,6 +82,11 @@ class ApiModuleAbonnementController extends ApiInterface
             $module->setHasRelancesAuto((bool)($data['hasRelancesAuto'] ?? false));
             $module->setHasSms((bool)($data['hasSms'] ?? false));
             $module->setSmsQuota((int)($data['smsQuota'] ?? 0));
+            if (isset($data['modulesMetier']) && is_array($data['modulesMetier'])) {
+                // Grands modules inclus (IDs ou objets {id}) ; met aussi à jour les anciens indicateurs hasGestion…
+                $ids = array_map(fn ($m) => (int) (is_array($m) ? ($m['id'] ?? 0) : $m), $data['modulesMetier']);
+                $module->setModulesMetier($ids ? $em->getRepository(\App\Entity\ModuleMetier::class)->findBy(['id' => $ids]) : []);
+            }
             $module->setHasMobileMoney((bool)($data['hasMobileMoney'] ?? false));
             $module->setHasRapportsAvances((bool)($data['hasRapportsAvances'] ?? false));
             $module->setHasGestionDepenses((bool)($data['hasGestionDepenses'] ?? false));
@@ -167,6 +172,11 @@ class ApiModuleAbonnementController extends ApiInterface
             if (isset($data['hasRelancesAuto'])) $module->setHasRelancesAuto((bool)$data['hasRelancesAuto']);
             if (isset($data['hasSms'])) $module->setHasSms((bool)$data['hasSms']);
             if (isset($data['smsQuota'])) $module->setSmsQuota((int)$data['smsQuota']);
+            if (isset($data['modulesMetier']) && is_array($data['modulesMetier'])) {
+                // Grands modules inclus (IDs ou objets {id}) ; met aussi à jour les anciens indicateurs hasGestion…
+                $ids = array_map(fn ($m) => (int) (is_array($m) ? ($m['id'] ?? 0) : $m), $data['modulesMetier']);
+                $module->setModulesMetier($ids ? $em->getRepository(\App\Entity\ModuleMetier::class)->findBy(['id' => $ids]) : []);
+            }
             if (isset($data['hasMobileMoney'])) $module->setHasMobileMoney((bool)$data['hasMobileMoney']);
             if (isset($data['hasRapportsAvances'])) $module->setHasRapportsAvances((bool)$data['hasRapportsAvances']);
             if (isset($data['hasGestionDepenses'])) $module->setHasGestionDepenses((bool)$data['hasGestionDepenses']);

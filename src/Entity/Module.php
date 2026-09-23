@@ -38,6 +38,12 @@ class Module
     #[Ignore]
     private Collection $moduleGroupePermitions;
 
+    /** Grand module d'abonnement auquel appartient cette section du menu (null = section commune, toujours visible). */
+    #[ORM\ManyToOne(inversedBy: 'sections')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Ignore]
+    private ?ModuleMetier $moduleMetier = null;
+
     public function __construct()
     {
         $this->moduleGroupePermitions = new ArrayCollection();
@@ -110,6 +116,18 @@ class Module
                 $moduleGroupePermition->setModule(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getModuleMetier(): ?ModuleMetier
+    {
+        return $this->moduleMetier;
+    }
+
+    public function setModuleMetier(?ModuleMetier $moduleMetier): self
+    {
+        $this->moduleMetier = $moduleMetier;
 
         return $this;
     }

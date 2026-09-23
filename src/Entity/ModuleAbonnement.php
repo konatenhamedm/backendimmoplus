@@ -132,9 +132,16 @@ class ModuleAbonnement
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?int $smsQuota = 0;
 
+    /** @var Collection<int, ModuleMetier> grands modules inclus dans la formule */
+    #[ORM\ManyToMany(targetEntity: ModuleMetier::class)]
+    #[ORM\JoinTable(name: 'module_abonnement_module_metier')]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private Collection $modulesMetier;
+
     public function __construct()
     {
         $this->abonnements = new ArrayCollection();
+        $this->modulesMetier = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -482,5 +489,32 @@ class ModuleAbonnement
         $this->smsQuota = $smsQuota;
 
         return $this;
+    }
+
+    /** @return Collection<int, ModuleMetier> */
+    public function getModulesMetier(): Collection
+    {
+        return $this->modulesMetier;
+    }
+
+    /**
+     * Remplace les grands modules inclus et garde les anciens indicateurs (hasGestion…) cohérents.
+     *
+     * @param ModuleMetier[] $modules
+     */
+    public function setModulesMetier(array $modules): static
+    {
+        $this->modulesMetier = new ArrayCollection(array_values($modules));
+        $codes = array_map(fn (ModuleMetier $m) => $m->getCode(), $modules);
+        $this->hasGestionImmobiliere = in_array(ModuleMetier::LOYERS, $codes, true);
+        $this->hasGestionResidence = in_array(ModuleMetier::RESIDENCES, $codes, true);
+        $this->hasGestionTerrains = in_array(ModuleMetier::TERRAINS, $codes, true);
+
+        return $this;
+    }
+
+    public function inclutModuleMetier(string $code): bool
+    {
+        return $this->modulesMetier->exists(fn ($k, ModuleMetier $m) => $m->getCode() === $code);
     }
 }

@@ -65,7 +65,7 @@ class ApiMenuController extends ApiInterface
             ]
         )
     )]
-    public function getMenu(Groupe $groupe, ModuleGroupePermitionRepository $repository, ModuleAbonnementRepository $abonnementRepository, RouterInterface $router): Response
+    public function getMenu(Groupe $groupe, ModuleGroupePermitionRepository $repository, ModuleAbonnementRepository $abonnementRepository, RouterInterface $router, \App\Service\AccesModulesService $accesModules): Response
     {
         try {
             if (!$groupe) {
@@ -77,33 +77,33 @@ class ApiMenuController extends ApiInterface
             // Récupérer la structure complète du menu
             $menuData = $repository->getMenuStructure($groupe->getId(), $entrepriseId);
 
-            // Fetch the active ModuleAbonnement for the current entreprise
-            $activeAbonnement = null;
-            if ($entreprise && $entreprise->getAbonnement()) {
-                $activeAbonnement = $abonnementRepository->findOneBy(['code' => $entreprise->getAbonnement()]);
+            // Grands modules autorisés par l'abonnement (null = aucune restriction)
+            $codesAutorises = $accesModules->getCodesAutorises($this->getUser());
+            $moduleMetierParSection = [];
+            if ($codesAutorises !== null) {
+                foreach ($this->em->createQueryBuilder()
+                    ->select('m.id', 'mm.code')
+                    ->from(\App\Entity\Module::class, 'm')
+                    ->join('m.moduleMetier', 'mm', 'WITH', 'mm.isActive = true')
+                    ->getQuery()
+                    ->getArrayResult() as $ligne) {
+                    $moduleMetierParSection[(int) $ligne['id']] = $ligne['code'];
+                }
             }
 
             // Organiser les données par module_id (grands titres)
             $menuByModule = [];
-            
+
             foreach ($menuData as $item) {
                 $moduleId = $item['module_id'];
                 $moduleTitre = $item['module_titre'];
 
-                // Filtrage basé sur l'abonnement
-                if ($activeAbonnement) {
-                    if ($moduleTitre === 'Gestion Terrains' && !$activeAbonnement->isHasGestionTerrains()) {
-                        continue;
-                    }
-                    if ($moduleTitre === 'Gestion Immobilière' && !$activeAbonnement->isHasGestionImmobiliere()) {
-                        continue;
-                    }
-                    // Adapt the title to what you have in DB for "Gestion Résidence" or "Gestion Locative"
-                    if (($moduleTitre === 'Gestion Résidence' || $moduleTitre === 'Gestion Locative') && !$activeAbonnement->isHasGestionResidence()) {
-                        continue;
-                    }
+                // Section rattachée à un grand module non inclus dans l'abonnement : masquée
+                $codeModuleMetier = $moduleMetierParSection[(int) $moduleId] ?? null;
+                if ($codeModuleMetier !== null && !in_array($codeModuleMetier, $codesAutorises, true)) {
+                    continue;
                 }
-                
+
                 if (!isset($menuByModule[$moduleId])) {
                     $menuByModule[$moduleId] = [
                         'title' => $moduleTitre,
