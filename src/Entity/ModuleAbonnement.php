@@ -122,6 +122,16 @@ class ModuleAbonnement
     #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
     private ?bool $hasGestionResidence = false;
 
+    /** Offre SMS : envoi des rappels / relances par SMS. */
+    #[ORM\Column(options: ['default' => false])]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?bool $hasSms = false;
+
+    /** Nombre de SMS inclus par période d'abonnement (-1 = illimité). */
+    #[ORM\Column(options: ['default' => 0])]
+    #[Groups(["group1", "group_type", "group_abonnement", "group_auth"])]
+    private ?int $smsQuota = 0;
+
     public function __construct()
     {
         $this->abonnements = new ArrayCollection();
@@ -446,6 +456,30 @@ class ModuleAbonnement
     public function setHasGestionResidence(bool $hasGestionResidence): static
     {
         $this->hasGestionResidence = $hasGestionResidence;
+
+        return $this;
+    }
+
+    public function isHasSms(): ?bool
+    {
+        return $this->hasSms;
+    }
+
+    public function setHasSms(bool $hasSms): static
+    {
+        $this->hasSms = $hasSms;
+
+        return $this;
+    }
+
+    public function getSmsQuota(): ?int
+    {
+        return $this->smsQuota;
+    }
+
+    public function setSmsQuota(int $smsQuota): static
+    {
+        $this->smsQuota = $smsQuota;
 
         return $this;
     }

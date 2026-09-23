@@ -284,6 +284,16 @@ class SubscriptionService
     }
 
     /**
+     * L'abonnement actuel autorise-t-il l'envoi automatique des rappels / relances ?
+     */
+    public function hasRelancesAuto(Entreprise $entreprise): bool
+    {
+        $activeAbonnement = $this->abonnementRepo->findOneBy(['entreprise' => $entreprise, 'etat' => 'ACTIF']);
+
+        return (bool) $activeAbonnement?->getModuleAbonnement()?->isHasRelancesAuto();
+    }
+
+    /**
      * Retourne le nom de l'abonnement actuel de l'entreprise.
      */
     public function getCurrentPlanName(Entreprise $entreprise): string

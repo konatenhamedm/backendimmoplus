@@ -6,6 +6,7 @@ use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\Relance;
 use App\Repository\FactureLocationRepository;
 use App\Repository\RelanceRepository;
+use App\Service\RelanceService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Request;
@@ -146,6 +147,115 @@ class ApiRelanceController extends ApiInterface
             $this->em->flush();
 
             return $this->response(['message' => 'Email envoyé et relance enregistrée']);
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
+        }
+    }
+
+    #[Route('/a-envoyer', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/relances/a-envoyer",
+        summary: "Rappels et relances dus aujourd'hui",
+        description: "Liste les factures de l'agence pour lesquelles un rappel ou une relance est dû et pas encore envoyé, avec le message personnalisé.",
+        tags: ['Relance']
+    )]
+    #[OA\Parameter(name: "agence_id", in: "query", schema: new OA\Schema(type: "integer"))]
+    public function aEnvoyer(Request $request, RelanceService $relanceService): Response
+    {
+        try {
+            $agence = $relanceService->resolveAgence($this->getUser(), $request->query->get('agence_id'));
+            if (!$agence) {
+                return $this->errorResponse(null, "Agence introuvable", 404);
+            }
+
+            $parametres = $relanceService->getParametres($agence);
+            $lignes = array_map(function (array $echeance) use ($relanceService, $parametres) {
+                $facture = $echeance['facture'];
+                $message = $relanceService->construireMessage($facture, $echeance['etape']);
+
+                return [
+                    'facture_id' => $facture->getId(),
+                    'libFacture' => $facture->getLibFacture(),
+                    'locataire' => $facture->getLocataire()?->getNPrenoms(),
+                    'montant' => $facture->getSoldeFactLoc(),
+                    'dateLimite' => $facture->getDateLimite()?->format('Y-m-d'),
+                    'etape' => $echeance['etape'],
+                    'jours' => $echeance['jours'],
+                    'canaux' => $relanceService->getCanauxDisponibles($parametres, $facture),
+                    'modele' => $message['modele'],
+                    'sujet' => $message['sujet'],
+                    'message' => $message['message'],
+                    'sms' => $message['sms'],
+                ];
+            }, $relanceService->getEcheances($parametres));
+
+            return $this->response(['mode' => $parametres->getMode(), 'lignes' => $lignes]);
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
+        }
+    }
+
+    #[Route('/lancer', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/relances/lancer",
+        summary: "Lancer les rappels et relances dus",
+        description: "Envoie maintenant les rappels / relances dus de l'agence (tous, ou seulement les factures indiquées dans facture_ids).",
+        tags: ['Relance']
+    )]
+    public function lancer(Request $request, RelanceService $relanceService): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true) ?? [];
+            $agence = $relanceService->resolveAgence($this->getUser(), $data['agence_id'] ?? null);
+            if (!$agence) {
+                return $this->errorResponse(null, "Agence introuvable", 404);
+            }
+
+            $parametres = $relanceService->getParametres($agence);
+            $selection = isset($data['facture_ids']) && is_array($data['facture_ids']) ? array_map('intval', $data['facture_ids']) : null;
+            $envoyes = 0;
+            $echecs = [];
+
+            foreach ($relanceService->getEcheances($parametres) as $echeance) {
+                $facture = $echeance['facture'];
+                if ($selection !== null && !in_array($facture->getId(), $selection, true)) {
+                    continue;
+                }
+
+                $resultat = $relanceService->envoyer($parametres, $facture, $echeance['etape'], RelanceService::ORIGINE_MANUEL, $this->getUser());
+                if ($resultat['envoyes']) {
+                    $envoyes++;
+                }
+                if ($resultat['erreurs']) {
+                    $echecs[] = ['facture_id' => $facture->getId(), 'locataire' => $facture->getLocataire()?->getNPrenoms(), 'erreurs' => $resultat['erreurs']];
+                }
+            }
+
+            $this->em->flush();
+
+            return $this->response(['envoyes' => $envoyes, 'echecs' => $echecs]);
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
+        }
+    }
+
+    #[Route('/message/{id}', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/relances/message/{id}",
+        summary: "Message de relance personnalisé d'une facture",
+        description: "Sujet, message et texte SMS issus du modèle du contrat (ou du modèle par défaut de l'agence), prêts à envoyer.",
+        tags: ['Relance']
+    )]
+    public function message(int $id, FactureLocationRepository $factureRepository, RelanceService $relanceService): Response
+    {
+        try {
+            $facture = $factureRepository->find($id);
+            $user = $this->getUser();
+            if (!$facture || !$facture->getAgence() || $facture->getAgence()->getEntreprise() !== $user?->getEntreprise()) {
+                return $this->errorResponse(null, "Facture non trouvée", 404);
+            }
+
+            return $this->response($relanceService->construireMessage($facture));
         } catch (\Exception $e) {
             return $this->errorResponse(null, $e->getMessage(), 500);
         }

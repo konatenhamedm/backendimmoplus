@@ -50,6 +50,16 @@ class Relance
     #[Groups(['group1_relance'])]
     private ?Agence $agence = null;
 
+    /** MANUEL (saisie d'un agent) ou AUTOMATIQUE (tâche planifiée / lancement groupé). */
+    #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['group1', 'group1_relance'])]
+    private ?string $origine = 'MANUEL';
+
+    /** Étape du cycle : RAPPEL, ou RELANCE_J{n} (n = palier de retard en jours). */
+    #[ORM\Column(length: 30, nullable: true)]
+    #[Groups(['group1', 'group1_relance'])]
+    private ?string $etape = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -135,6 +145,30 @@ class Relance
     public function setAgence(?Agence $agence): static
     {
         $this->agence = $agence;
+
+        return $this;
+    }
+
+    public function getOrigine(): ?string
+    {
+        return $this->origine;
+    }
+
+    public function setOrigine(?string $origine): static
+    {
+        $this->origine = $origine;
+
+        return $this;
+    }
+
+    public function getEtape(): ?string
+    {
+        return $this->etape;
+    }
+
+    public function setEtape(?string $etape): static
+    {
+        $this->etape = $etape;
 
         return $this;
     }

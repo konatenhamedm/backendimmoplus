@@ -52,13 +52,11 @@ class Locataire
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $prenoms = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateNaiss')]
-    #[Assert\NotNull(message: "Le champs date de naissance est requis")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, name: 'dateNaiss')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?DateTimeInterface $dateNaiss = null;
 
-    #[ORM\Column(length: 255, name: 'lieuNaiss')]
-    #[Assert\NotNull(message: "Le champs  lieu de naissance est requis")]
+    #[ORM\Column(length: 255, nullable: true, name: 'lieuNaiss')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $lieuNaiss = null;
 
@@ -69,8 +67,7 @@ class Locataire
     private ?Fichier $infoPiece = null;
 
 
-    #[ORM\Column(length: 255, name: 'profession')]
-    #[Assert\NotNull(message: "Le champs profession est requis")]
+    #[ORM\Column(length: 255, nullable: true, name: 'profession')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $profession = null;
 
@@ -94,8 +91,7 @@ class Locataire
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $mere = null;
 
-    #[ORM\Column(length: 255, name: 'contacts')]
-    #[Assert\NotNull(message: "Le champs contact est requis")]
+    #[ORM\Column(length: 255, nullable: true, name: 'contacts')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $contacts = null;
 
@@ -119,8 +115,7 @@ class Locataire
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $contactConj = null;
 
-    #[ORM\Column(length: 255, name: 'genre')]
-    #[Assert\NotNull(message: "Le champs genre est requis")]
+    #[ORM\Column(length: 255, nullable: true, name: 'genre')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $genre = null;
 
@@ -151,8 +146,7 @@ class Locataire
     #[Groups(['group1', 'group1_facture_location'])]
     private ?Entreprise $entreprise = null;
 
-    #[ORM\Column(length: 255, name: 'numpiece')]
-    #[Assert\NotNull(message: "Le champs numéro de pièce est requis")]
+    #[ORM\Column(length: 255, nullable: true, name: 'numpiece')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?string $numpiece = null;
 

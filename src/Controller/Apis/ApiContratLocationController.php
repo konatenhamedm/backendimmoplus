@@ -118,6 +118,14 @@ class ApiContratLocationController extends ApiInterface
             if (isset($data['nbMoisCaution'])) $contrat->setNbMoisCaution($data['nbMoisCaution']);
             if (isset($data['mntCaution'])) $contrat->setMntCaution($data['mntCaution']);
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
+            if (array_key_exists('modele_relance_id', $data)) {
+                // Vide = modèle par défaut de l'agence
+                $modele = $data['modele_relance_id'] ? $this->em->getRepository(\App\Entity\ModeleRelance::class)->find((int) $data['modele_relance_id']) : null;
+                if ($modele && $modele->getAgence()->getEntreprise() !== $this->getUser()?->getEntreprise()) {
+                    return $this->errorResponse(null, "Modèle de relance introuvable", 404);
+                }
+                $contrat->setModeleRelance($modele);
+            }
 
             if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);
             if (isset($data['mntAvance'])) $contrat->setMntAvance($data['mntAvance']);
@@ -216,6 +224,14 @@ class ApiContratLocationController extends ApiInterface
             if (isset($data['dateFin'])) $contrat->setDateFin(new \DateTime($data['dateFin']));
             if (isset($data['dateEntree'])) $contrat->setDateEntree(new \DateTime($data['dateEntree']));
             if (isset($data['jourGenerationFacture'])) $contrat->setJourGenerationFacture($data['jourGenerationFacture']);
+            if (array_key_exists('modele_relance_id', $data)) {
+                // Vide = modèle par défaut de l'agence
+                $modele = $data['modele_relance_id'] ? $this->em->getRepository(\App\Entity\ModeleRelance::class)->find((int) $data['modele_relance_id']) : null;
+                if ($modele && $modele->getAgence()->getEntreprise() !== $this->getUser()?->getEntreprise()) {
+                    return $this->errorResponse(null, "Modèle de relance introuvable", 404);
+                }
+                $contrat->setModeleRelance($modele);
+            }
             if (isset($data['nbMoisCaution'])) $contrat->setNbMoisCaution($data['nbMoisCaution']);
             if (isset($data['mntCaution'])) $contrat->setMntCaution($data['mntCaution']);
             if (isset($data['nbMoisAvance'])) $contrat->setNbMoisAvance($data['nbMoisAvance']);

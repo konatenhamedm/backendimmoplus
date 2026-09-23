@@ -197,6 +197,12 @@ class ContratLocation
     #[Groups(['group1'])]
     private ?Agence $agence = null;
 
+    /** Modèle de rappel / relance propre à ce contrat ; à défaut, le modèle par défaut de l'agence. */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    #[Groups(['group1'])]
+    private ?ModeleRelance $modeleRelance = null;
+
     public function __construct()
     {
         $this->facturelocs = new ArrayCollection();
@@ -686,4 +692,15 @@ class ContratLocation
         return $this;
     }
 
+    public function getModeleRelance(): ?ModeleRelance
+    {
+        return $this->modeleRelance;
+    }
+
+    public function setModeleRelance(?ModeleRelance $modeleRelance): static
+    {
+        $this->modeleRelance = $modeleRelance;
+
+        return $this;
+    }
 }

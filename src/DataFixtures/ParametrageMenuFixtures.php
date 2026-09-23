@@ -154,6 +154,8 @@ class ParametrageMenuFixtures extends Fixture
             42 => ['titre' => 'Fiscalite', 'ordre' => 1, 'lien' => '/compta/fiscalite', 'icon' => 1],
             43 => ['titre' => 'Rapprochement', 'ordre' => 1, 'lien' => '/compta/rapprochement', 'icon' => 1],
             44 => ['titre' => 'Validation', 'ordre' => 1, 'lien' => '/compta/validation', 'icon' => 1],
+            45 => ['titre' => 'Modèles de relance', 'ordre' => 2, 'lien' => '/relances/modeles', 'icon' => 4],
+            46 => ['titre' => 'Paramètres relances', 'ordre' => 3, 'lien' => '/relances/parametres', 'icon' => 3],
         ];
 
         $items = [];
@@ -225,6 +227,13 @@ class ParametrageMenuFixtures extends Fixture
             ['perm' => 3, 'module' => 5, 'item' => 37, 'group' => 2],
             ['perm' => 3, 'module' => 6, 'item' => 25, 'group' => 2],
             ['perm' => 3, 'module' => 6, 'item' => 31, 'group' => 2],
+            // Relances : centre de relances, modèles de messages et paramètres d'envoi
+            ['perm' => 3, 'module' => 4, 'item' => 38, 'group' => 2],
+            ['perm' => 3, 'module' => 4, 'item' => 45, 'group' => 2],
+            ['perm' => 3, 'module' => 4, 'item' => 46, 'group' => 2],
+            ['perm' => 3, 'module' => 4, 'item' => 38, 'group' => 7],
+            ['perm' => 3, 'module' => 4, 'item' => 45, 'group' => 7],
+            ['perm' => 3, 'module' => 4, 'item' => 46, 'group' => 7],
         ];
 
         foreach ($mappings as $m) {
