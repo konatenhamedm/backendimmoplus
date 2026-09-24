@@ -409,7 +409,7 @@ class ApiFactureLocationController extends ApiInterface
             $transaction->setDescription($data['description'] ?? "Paiement encaissé par " . $this->getUser()->getNomPrenoms());
             
             $this->updateAuditFields($transaction, true);
-            $transactionRepository->save($transaction, true);
+            $transactionRepository->save($transaction); // enregistré avec la facture, en une seule écriture
 
             // 2. Mettre à jour la Facture
             $nouveauSolde = $facture->getSoldeFactLoc() - $amount;

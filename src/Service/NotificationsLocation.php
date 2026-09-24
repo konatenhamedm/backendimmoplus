@@ -21,6 +21,7 @@ use Psr\Log\LoggerInterface;
  *  - les gestionnaires : administrateur d'entreprise (ADMIN) et admin de l'agence concernée (ADMINAG) ;
  *  - l'agent de recouvrement du site.
  * L'auteur de l'action n'est jamais notifié de sa propre action.
+ * Les envois (base, push, e-mail) partent après la réponse HTTP pour ne pas ralentir l'action.
  */
 class NotificationsLocation
 {
@@ -29,6 +30,7 @@ class NotificationsLocation
         private SendMailService $mail,
         private EntityManagerInterface $em,
         private LoggerInterface $logger,
+        private TachesDifferees $differe,
     ) {
     }
 
@@ -209,11 +211,13 @@ class NotificationsLocation
             }
             $this->notifier($gestionnaire, $entreprise, $titre, $message, $data);
             if ($email !== null) {
-                try {
-                    $this->mail->send('no-reply@immoplus.com', $gestionnaire->getLogin(), $titre, 'payment_collected_agent', $email + ['admin_name' => $gestionnaire->getNomPrenoms()]);
-                } catch (\Throwable $e) {
-                    $this->logger->error("E-mail « $titre » à #{$gestionnaire->getId()} impossible : {$e->getMessage()}");
-                }
+                $this->differe->ajouter(function () use ($gestionnaire, $titre, $email) {
+                    try {
+                        $this->mail->send('no-reply@immoplus.com', $gestionnaire->getLogin(), $titre, 'payment_collected_agent', $email + ['admin_name' => $gestionnaire->getNomPrenoms()]);
+                    } catch (\Throwable $e) {
+                        $this->logger->error("E-mail « $titre » à #{$gestionnaire->getId()} impossible : {$e->getMessage()}");
+                    }
+                });
             }
         }
     }
@@ -224,12 +228,14 @@ class NotificationsLocation
         if (!$entreprise) {
             return;
         }
-        try {
-            $this->notifications->notify($user->getId(), $entreprise, $titre, $message, $data);
-        } catch (\Throwable $e) {
-            // Une notification ratée ne doit jamais bloquer l'action métier
-            $this->logger->error("Notification « $titre » à l'utilisateur #{$user->getId()} impossible : {$e->getMessage()}");
-        }
+        $this->differe->ajouter(function () use ($user, $entreprise, $titre, $message, $data) {
+            try {
+                $this->notifications->notify($user->getId(), $entreprise, $titre, $message, $data);
+            } catch (\Throwable $e) {
+                // Une notification ratée ne doit jamais bloquer l'action métier
+                $this->logger->error("Notification « $titre » à l'utilisateur #{$user->getId()} impossible : {$e->getMessage()}");
+            }
+        });
     }
 
     private function logement(ContratLocation $contrat): string
