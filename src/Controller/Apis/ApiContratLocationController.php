@@ -342,7 +342,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Met fin au contrat et libère l'appartement. Permet l'upload du fichier de résiliation.",
         tags: ['ContratLocation']
     )]
-    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, MotifRepository $motifRepository): Response
+    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, MotifRepository $motifRepository, \App\Service\FinContratNotifier $finContratNotifier): Response
     {
         try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
@@ -353,14 +353,22 @@ class ApiContratLocationController extends ApiInterface
                 $data = $request->request->all();
             }
 
-            $contrat->setEtat(0); // 0 = Résilié
-
-            if (isset($data['motif_id'])) {
-                $motif = $motifRepository->find($data['motif_id']);
-                if ($motif) {
-                    $contrat->setMotif($motif);
-                }
+            $user = $this->getUser();
+            if ($contrat->getEntreprise() && $contrat->getEntreprise() !== $user?->getEntreprise()) {
+                return $this->errorResponse(null, "Contrat non trouvé", 404);
             }
+            if ($contrat->getEtat() === 0) {
+                return $this->errorResponse(null, "Ce contrat est déjà résilié", 400);
+            }
+
+            // Une résiliation a toujours un motif
+            $motif = !empty($data['motif_id']) ? $motifRepository->find((int) $data['motif_id']) : null;
+            if (!$motif || ($motif->getEntreprise() && $motif->getEntreprise() !== $user?->getEntreprise())) {
+                return $this->errorResponse(null, "Le motif de résiliation est obligatoire", 400);
+            }
+
+            $contrat->setEtat(0); // 0 = Résilié
+            $contrat->setMotif($motif);
 
             if (isset($data['dateResiliation'])) {
                 $contrat->setDateFin(new \DateTime($data['dateResiliation']));
@@ -390,6 +398,9 @@ class ApiContratLocationController extends ApiInterface
                 $appartement->setOqp(0); // Libérer l'appartement
                 $appartementRepository->save($appartement, true);
             }
+
+            // Prévenir l'agent de recouvrement de la maison (sans jamais bloquer la résiliation)
+            $finContratNotifier->notifierAgent($contrat, \App\Service\FinContratNotifier::RESILIATION);
 
             return $this->response(['message' => 'Contrat résilié avec succès']);
         } catch (\Exception $exception) {

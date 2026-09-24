@@ -68,6 +68,16 @@ class FactureLocation
     #[Groups(['group1', 'group1_facture_location'])]
     private ?int $soldeFactLoc = null;
 
+    /** Pénalités de retard ajoutées au reste à payer (déjà incluses dans soldeFactLoc). */
+    #[ORM\Column(name: 'mntPenalite', options: ['default' => 0])]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private int $mntPenalite = 0;
+
+    /** Nombre de pénalités appliquées (1 par mois de retard si la récurrence est activée). */
+    #[ORM\Column(name: 'nbPenalites', options: ['default' => 0])]
+    #[Groups(['group1', 'group1_facture_location'])]
+    private int $nbPenalites = 0;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, name: 'dateEmission')]
     #[Groups(['group1', 'group1_facture_location'])]
     private ?\DateTimeInterface $dateEmission = null;
@@ -426,6 +436,30 @@ class FactureLocation
     public function setIsValidated(?string $isValidated): static
     {
         $this->isValidated = $isValidated;
+        return $this;
+    }
+
+    public function getMntPenalite(): int
+    {
+        return $this->mntPenalite;
+    }
+
+    public function setMntPenalite(int $mntPenalite): static
+    {
+        $this->mntPenalite = $mntPenalite;
+
+        return $this;
+    }
+
+    public function getNbPenalites(): int
+    {
+        return $this->nbPenalites;
+    }
+
+    public function setNbPenalites(int $nbPenalites): static
+    {
+        $this->nbPenalites = $nbPenalites;
+
         return $this;
     }
 }

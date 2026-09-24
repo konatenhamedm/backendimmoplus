@@ -270,6 +270,56 @@ class RelanceService
         return $resultat;
     }
 
+    /**
+     * Envoi manuel d'un message à un locataire (application mobile de l'administrateur) :
+     * texte fourni ou, à défaut, modèle de la facture. Enregistre une Relance d'origine MANUEL.
+     *
+     * @throws \RuntimeException avec un message affichable si l'envoi est impossible
+     */
+    public function envoyerMessageManuel(FactureLocation $facture, string $canal, ?string $sujet, ?string $texte, ?User $agent): Relance
+    {
+        $contenu = $this->construireMessage($facture);
+        $locataire = $facture->getLocataire();
+        $agence = $facture->getAgence();
+        $entreprise = $facture->getEntreprise() ?? $agence?->getEntreprise();
+
+        if ($canal === ParametreRelance::CANAL_SMS) {
+            $telephone = $this->telephone($facture);
+            if (!$telephone) {
+                throw new \RuntimeException("Ce locataire n'a pas de numéro de téléphone.");
+            }
+            $sms = $this->smsService->envoyer($entreprise, $agence, $telephone, trim($texte ?: $contenu['sms']), $facture);
+            if ($sms->getErreur()) {
+                throw new \RuntimeException($sms->getErreur());
+            }
+            $observation = "SMS envoyé au {$sms->getDestinataire()}";
+        } elseif ($canal === ParametreRelance::CANAL_EMAIL) {
+            $email = $locataire?->getEmail();
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new \RuntimeException("Ce locataire n'a pas d'adresse e-mail valide.");
+            }
+            $from = $agence?->getEmail() ?: $entreprise?->getEmail() ?: 'noreply@immoplus.pro';
+            $this->mailService->sendCustom($from, $email, trim($sujet ?: $contenu['sujet']), nl2br(htmlspecialchars(trim($texte ?: $contenu['message']))));
+            $observation = "E-mail envoyé à $email";
+        } else {
+            throw new \RuntimeException('Canal inconnu : EMAIL ou SMS.');
+        }
+
+        $relance = (new Relance())
+            ->setFacture($facture)
+            ->setType($canal)
+            ->setOrigine(self::ORIGINE_MANUEL)
+            ->setObservation("Message manuel – $observation")
+            ->setAgent($agent)
+            ->setAgence($agence)
+            ->setEntreprise($entreprise)
+            ->setDateEffective(new \DateTime());
+        $this->em->persist($relance);
+        $this->em->flush();
+
+        return $relance;
+    }
+
     private function telephone(FactureLocation $facture): ?string
     {
         $locataire = $facture->getLocataire();

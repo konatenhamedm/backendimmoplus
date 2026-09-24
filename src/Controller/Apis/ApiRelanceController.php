@@ -239,6 +239,39 @@ class ApiRelanceController extends ApiInterface
         }
     }
 
+    #[Route('/envoyer', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/relances/envoyer",
+        summary: "Envoyer un message à un locataire (e-mail ou SMS)",
+        description: "facture_id, canal (EMAIL ou SMS), et en option sujet / message ; sans message, le modèle de relance de la facture est utilisé.",
+        tags: ['Relance']
+    )]
+    public function envoyer(Request $request, FactureLocationRepository $factureRepository, RelanceService $relanceService): Response
+    {
+        try {
+            $data = json_decode($request->getContent(), true) ?? [];
+            $facture = isset($data['facture_id']) ? $factureRepository->find((int) $data['facture_id']) : null;
+            $user = $this->getUser();
+            if (!$facture || $facture->getEntreprise() !== $user?->getEntreprise()) {
+                return $this->errorResponse(null, "Facture introuvable", 404);
+            }
+
+            $relanceService->envoyerMessageManuel(
+                $facture,
+                strtoupper((string) ($data['canal'] ?? '')),
+                $data['sujet'] ?? null,
+                $data['message'] ?? null,
+                $user
+            );
+
+            return $this->response(['message' => 'Message envoyé']);
+        } catch (\RuntimeException $e) {
+            return $this->errorResponse(null, $e->getMessage(), 400);
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
+        }
+    }
+
     #[Route('/message/{id}', methods: ['GET'])]
     #[OA\Get(
         path: "/api/relances/message/{id}",
