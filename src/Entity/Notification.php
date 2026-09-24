@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
+#[ORM\HasLifecycleCallbacks] // renseigne createdAt (date affichée et tri dans l'application)
 class Notification
 {use TraitEntity;
     #[ORM\Id]
