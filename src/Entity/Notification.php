@@ -20,6 +20,7 @@ class Notification
  
 
     #[ORM\Column]
+    /** true = non lue, false = lue (convention partagée par le web et l'application mobile) */
      #[Groups(["group1", "group_type"])]
     private ?bool $etat = null;
 

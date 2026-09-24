@@ -52,7 +52,7 @@ class NotificationService
             ->setLibelle($message)
             ->setUpdatedBy($user)
             ->setCreatedBy($user)
-            ->setEtat(false);
+            ->setEtat(true); // true = non lue
 
         $this->em->persist($notification);
         $this->em->flush();
@@ -121,7 +121,7 @@ class NotificationService
                 ->setUpdatedBy($admin)
                 ->setCreatedAt(new \DateTimeImmutable())
                 ->setCreatedBy($admin)
-                ->setEtat(false); // Non lu initialement
+                ->setEtat(true); // true = non lue
             
             $this->em->persist($notification);
             $this->em->flush();

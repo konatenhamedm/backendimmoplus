@@ -31,6 +31,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
  *   php bin/console app:notifications:exemples --utilisateur=12 # un seul utilisateur
  *   php bin/console app:notifications:exemples --push           # + notification push sur le téléphone
  *   php bin/console app:notifications:exemples --supprimer      # efface les notifications d'exemple
+ *   php bin/console app:notifications:exemples --supprimer --par-titre  # + celles non notées (même titre exact)
  */
 #[AsCommand(
     name: 'app:notifications:exemples',
@@ -39,6 +40,13 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 class NotificationsExemplesCommand extends Command
 {
     private const PAIES = ['payer', 'paye', 'solde'];
+    /** Titres exacts des exemples (les vraies notifications commencent par un émoji ou « Rappel : » / « Relance : »). */
+    private const TITRES = [
+        'Nouvelle facture de loyer', "Rappel d'échéance", 'Paiement reçu', 'Message de votre agence',
+        'Factures à encaisser', 'Locataire en retard', 'Nouveau site à suivre', 'Encaissement enregistré',
+        'Paiement encaissé', 'Loyers en retard', 'Nouveau contrat', 'Bilan du mois',
+        'Bienvenue sur Motiplus', 'Nouveauté', 'Conseil', 'Maintenance terminée',
+    ];
     private const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
     public function __construct(
@@ -56,6 +64,7 @@ class NotificationsExemplesCommand extends Command
     {
         $this
             ->addOption('supprimer', null, InputOption::VALUE_NONE, "Supprime les notifications d'exemple créées par cette commande")
+            ->addOption('par-titre', null, InputOption::VALUE_NONE, "Avec --supprimer : supprime aussi les exemples non notés, reconnus à leur titre exact")
             ->addOption('utilisateur', null, InputOption::VALUE_REQUIRED, "Id d'un seul utilisateur")
             ->addOption('push', null, InputOption::VALUE_NONE, 'Envoie aussi la plus récente en push aux appareils enregistrés')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Affiche les messages sans rien enregistrer');
@@ -65,7 +74,7 @@ class NotificationsExemplesCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        return $input->getOption('supprimer') ? $this->supprimer($io) : $this->creer($io, $input);
+        return $input->getOption('supprimer') ? $this->supprimer($io, (bool) $input->getOption('par-titre')) : $this->creer($io, $input);
     }
 
     // ---------- Création ----------
@@ -88,12 +97,13 @@ class NotificationsExemplesCommand extends Command
         $total = 0;
 
         foreach ($users as $user) {
-            $messages = match ($user->getGroupe()?->getCode()) {
-                'LOCATAIRE' => $this->pourLocataire($user),
-                'AGENT', 'CAISSE' => $this->pourAgent($user),
-                'ADMIN', 'ADMINAG' => $this->pourGestionnaire($user),
-                default => $this->pourAutre($user),
-            };
+            try {
+                $messages = $this->messages($user, true);
+            } catch (\Throwable $e) {
+                // Donnée liée introuvable (fiche désactivée ou supprimée) : messages d'exemple sans données réelles
+                $io->note("Données de {$user->getNomPrenoms()} incomplètes ({$e->getMessage()}) : messages génériques.");
+                $messages = $this->messages($user, false);
+            }
 
             $io->section(sprintf('%s · %s', $user->getNomPrenoms(), $user->getGroupe()?->getCode() ?? 'sans groupe'));
             $creees = [];
@@ -108,7 +118,7 @@ class NotificationsExemplesCommand extends Command
                     ->setEntreprise($user->getEntreprise())
                     ->setTitre($titre)
                     ->setLibelle($texte)
-                    ->setEtat($i >= 2)
+                    ->setEtat($i < 2) // true = non lue : les 2 plus récentes
                     ->setCreatedBy($user)
                     ->setUpdatedBy($user)
                     ->setCreatedAt(new \DateTimeImmutable(['-8 minutes', '-3 hours', '-1 day -2 hours', '-3 days -5 hours'][$i] ?? '-5 days'));
@@ -122,6 +132,8 @@ class NotificationsExemplesCommand extends Command
             foreach ($creees as $n) {
                 $ids[] = $n->getId();
             }
+            // Noté après chaque utilisateur : une erreur plus loin n'empêche pas de les supprimer
+            file_put_contents($this->fichierIds, json_encode(array_values(array_unique($ids))));
             $total += count($creees);
 
             if ($input->getOption('push') && $user->getFcmToken() && $creees) {
@@ -138,7 +150,6 @@ class NotificationsExemplesCommand extends Command
             return Command::SUCCESS;
         }
 
-        file_put_contents($this->fichierIds, json_encode(array_values(array_unique($ids))));
         $io->success(sprintf(
             "%d notification(s) d'exemple créées pour %d utilisateur(s). Pour les effacer : php bin/console app:notifications:exemples --supprimer",
             $total,
@@ -150,20 +161,26 @@ class NotificationsExemplesCommand extends Command
 
     // ---------- Suppression ----------
 
-    private function supprimer(SymfonyStyle $io): int
+    private function supprimer(SymfonyStyle $io, bool $parTitre): int
     {
         $ids = $this->idsEnregistres();
-        if (!$ids) {
-            $io->success("Aucune notification d'exemple à supprimer.");
-            return Command::SUCCESS;
+        $supprimees = 0;
+        if ($ids) {
+            $supprimees += $this->em->createQueryBuilder()
+                ->delete(Notification::class, 'n')
+                ->where('n.id IN (:ids)')
+                ->setParameter('ids', $ids)
+                ->getQuery()
+                ->execute();
         }
-
-        $supprimees = $this->em->createQueryBuilder()
-            ->delete(Notification::class, 'n')
-            ->where('n.id IN (:ids)')
-            ->setParameter('ids', $ids)
-            ->getQuery()
-            ->execute();
+        if ($parTitre) {
+            $supprimees += $this->em->createQueryBuilder()
+                ->delete(Notification::class, 'n')
+                ->where('n.titre IN (:titres)')
+                ->setParameter('titres', self::TITRES)
+                ->getQuery()
+                ->execute();
+        }
         @unlink($this->fichierIds);
 
         $io->success("$supprimees notification(s) d'exemple supprimée(s).");
@@ -185,10 +202,21 @@ class NotificationsExemplesCommand extends Command
     // ---------- Messages par rôle ----------
 
     /** @return array<int, array{0: string, 1: string}> */
-    private function pourLocataire(User $user): array
+    private function messages(User $user, bool $avecDonnees): array
+    {
+        return match ($user->getGroupe()?->getCode()) {
+            'LOCATAIRE' => $this->pourLocataire($user, $avecDonnees),
+            'AGENT', 'CAISSE' => $avecDonnees ? $this->pourAgent($user) : $this->pourAutre($user),
+            'ADMIN', 'ADMINAG' => $avecDonnees ? $this->pourGestionnaire($user) : $this->pourAutre($user),
+            default => $this->pourAutre($user),
+        };
+    }
+
+    /** @return array<int, array{0: string, 1: string}> */
+    private function pourLocataire(User $user, bool $avecDonnees = true): array
     {
         $prenom = $this->prenom($user);
-        $locataire = $user->getLocataire();
+        $locataire = $avecDonnees ? $user->getLocataire() : null;
         /** @var FactureLocation|null $facture */
         $facture = $locataire ? $this->em->getRepository(FactureLocation::class)->findOneBy(['locataire' => $locataire], ['dateLimite' => 'DESC']) : null;
         $contrat = $locataire ? $this->em->getRepository(ContratLocation::class)->findOneBy(['locataire' => $locataire, 'etat' => 1]) : null;

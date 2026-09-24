@@ -157,7 +157,7 @@ class ApiNotificationController extends ApiInterface
     /**
      * Marque une notification comme lue
      */
-    #[Route('/{id}/read', methods: ['POST'])]
+    #[Route('/{id}/read', methods: ['POST'], requirements: ['id' => '\d+'])]
     #[OA\Put(
         path: "/api/notification/{id}/mark-as-read",
         summary: "Marquer une notification comme lue",
@@ -190,14 +190,12 @@ class ApiNotificationController extends ApiInterface
             $notification = $notificationRepository->find($id);
 
             if (!$notification) {
-                $this->setMessage("Notification non trouvée");
-                return $this->response('[]', 404);
+                return $this->errorResponse(null, "Notification non trouvée", 404);
             }
 
             // Vérifier que la notification appartient à l'utilisateur connecté
             if ($notification->getUser() !== $this->getUser()) {
-                $this->setMessage("Vous n'êtes pas autorisé à modifier cette notification");
-                return $this->response('[]', 403);
+                return $this->errorResponse(null, "Vous n'êtes pas autorisé à modifier cette notification", 403);
             }
 
             // Marquer comme lue (etat = false signifie "lue")
@@ -216,6 +214,45 @@ class ApiNotificationController extends ApiInterface
     /**
      * Marque toutes les notifications comme lues
      */
+    #[Route('/{id}/unread', methods: ['POST'], requirements: ['id' => '\d+'])]
+    #[OA\Post(
+        path: "/api/notification/{id}/unread",
+        summary: "Marquer une notification comme non lue",
+        tags: ['Notification']
+    )]
+    public function markAsUnread(int $id, NotificationRepository $notificationRepository): Response
+    {
+        $notification = $notificationRepository->find($id);
+        if (!$notification || $notification->getUser() !== $this->getUser()) {
+            return $this->errorResponse(null, "Notification non trouvée", 404);
+        }
+        $notification->setEtat(true);
+        $notificationRepository->add($notification, true);
+        $this->setMessage("Notification marquée comme non lue");
+
+        return $this->response([]);
+    }
+
+    #[Route('/lues', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: "/api/notification/lues",
+        summary: "Supprimer toutes les notifications lues de l'utilisateur",
+        tags: ['Notification']
+    )]
+    public function deleteRead(NotificationRepository $notificationRepository): Response
+    {
+        $supprimees = $notificationRepository->createQueryBuilder('n')
+            ->delete()
+            ->where('n.user = :user')
+            ->andWhere('n.etat = false')
+            ->setParameter('user', $this->getUser())
+            ->getQuery()
+            ->execute();
+        $this->setMessage("$supprimees notification(s) supprimée(s)");
+
+        return $this->response(['supprimees' => $supprimees]);
+    }
+
     #[Route('/read-all', methods: ['POST'])]
     #[OA\Post(
         path: "/api/notification/read-all",
@@ -390,7 +427,7 @@ class ApiNotificationController extends ApiInterface
     /**
      * Supprime une notification
      */
-    #[Route('/{id}', methods: ['DELETE'])]
+    #[Route('/{id}', methods: ['DELETE'], requirements: ['id' => '\d+'])]
     #[OA\Delete(
         path: "/api/notification/{id}",
         summary: "Supprimer une notification",
@@ -423,14 +460,12 @@ class ApiNotificationController extends ApiInterface
             $notification = $notificationRepository->find($id);
 
             if (!$notification) {
-                $this->setMessage("Notification non trouvée");
-                return $this->response('[]', 404);
+                return $this->errorResponse(null, "Notification non trouvée", 404);
             }
 
             // Vérifier que la notification appartient à l'utilisateur connecté
             if ($notification->getUser() !== $this->getUser()) {
-                $this->setMessage("Vous n'êtes pas autorisé à supprimer cette notification");
-                return $this->response('[]', 403);
+                return $this->errorResponse(null, "Vous n'êtes pas autorisé à supprimer cette notification", 403);
             }
 
             $notificationRepository->remove($notification, true);
