@@ -249,6 +249,22 @@ class ApiCampagneController extends ApiInterface
                 }
                 $this->updateAuditFields($facture, true);
                 $em->persist($facture);
+
+                // Part réglée par l'avance du locataire : trace du paiement (visible dans le détail de la facture)
+                $regleParAvance = $avance > 0 ? min((int) $avance, (int) $loyer) : 0;
+                if ($regleParAvance > 0) {
+                    $em->persist((new \App\Entity\Transaction())
+                        ->setReference('TRX-AVANCE-' . strtoupper(bin2hex(random_bytes(5))))
+                        ->setAmount((string) $regleParAvance)
+                        ->setDate(new \DateTime())
+                        ->setStatus('SUCCESS')
+                        ->setType('RENTRÉE')
+                        ->setMode('AVANCE')
+                        ->setDescription("Déduit de l'avance versée à la signature")
+                        ->setLocataire($locataire)
+                        ->setEntreprise($this->getUser()?->getEntreprise())
+                        ->setFactureLocation($facture));
+                }
             }
 
             $campagne->setMntTotal((string)$sommeTotal);

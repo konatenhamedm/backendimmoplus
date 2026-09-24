@@ -404,7 +404,7 @@ class ApiFactureLocationController extends ApiInterface
             $transaction->setMode($mode);
             $transaction->setType('RENTRÉE');
             $transaction->setStatus('SUCCESS');
-            $transaction->setReference('TRX-COLLECT-' . time());
+            $transaction->setReference('TRX-COLLECT-' . date('YmdHis') . '-' . strtoupper(bin2hex(random_bytes(3)))); // unique même à la même seconde
             $transaction->setAgent($this->getUser());
             $transaction->setDate(new \DateTime());
             $transaction->setDescription($data['description'] ?? "Paiement encaissé par " . $this->getUser()->getNomPrenoms());

@@ -264,6 +264,23 @@ class ApiMigrationController extends ApiInterface
 
                         $this->updateAuditFields($facture, true);
                         $this->em->persist($facture);
+
+                        // Le loyer repris est réglé : on garde la trace du paiement (visible dans le détail de la facture)
+                        if ($mntLoyer > 0) {
+                            $transaction = (new \App\Entity\Transaction())
+                                ->setReference('TRX-REPRISE-' . strtoupper(bin2hex(random_bytes(5))))
+                                ->setAmount((string) $mntLoyer)
+                                ->setDate($facture->getDateLimite())
+                                ->setStatus('SUCCESS')
+                                ->setType('RENTRÉE')
+                                ->setMode('REPRISE')
+                                ->setDescription('Paiement antérieur repris lors de la migration')
+                                ->setLocataire($locataire)
+                                ->setEntreprise($this->getUser()->getEntreprise())
+                                ->setAgent($this->getUser())
+                                ->setFactureLocation($facture);
+                            $this->em->persist($transaction);
+                        }
                     }
 
                     $current->modify('+1 month');
