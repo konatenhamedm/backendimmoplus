@@ -132,7 +132,7 @@ class ApiLocataireController extends ApiInterface
                 $locataire->setEntreprise($user->getEntreprise());
                 
                 // Set Agence
-                if (isset($data['agence_id'])) {
+                if (isset($data['agence_id']) && $user->getGroupe()?->getCode() === 'ADMIN') {
                     $agenceId = (int)$data['agence_id'];
                     $agence = $this->em->getRepository(\App\Entity\Agence::class)->find($agenceId);
                     if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {

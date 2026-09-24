@@ -24,7 +24,10 @@ class GenerateRentInvoicesCommand extends Command
 {
     private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    /** @var FactureLocation[] factures créées pendant l'exécution, notifiées après l'enregistrement */
+    private array $creees = [];
+
+    public function __construct(EntityManagerInterface $entityManager, private \App\Service\NotificationsLocation $notifications)
     {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -103,6 +106,11 @@ class GenerateRentInvoicesCommand extends Command
         }
 
         $this->entityManager->flush();
+
+        // Chaque locataire est prévenu de sa nouvelle facture
+        foreach ($this->creees as $facture) {
+            $this->notifications->nouvelleFacture($facture);
+        }
 
         $io->success('Génération des factures terminée.');
 
@@ -228,6 +236,7 @@ class GenerateRentInvoicesCommand extends Command
         $facture->setDateFin($dateFin);
 
         $this->entityManager->persist($facture);
+        $this->creees[] = $facture;
     }
 
     private function getMonthName(int $monthNum): string

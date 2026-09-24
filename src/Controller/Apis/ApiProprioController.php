@@ -41,9 +41,11 @@ class ApiProprioController extends ApiInterface
             $user = $this->getUser();
             
             if ($user && $user->getEntreprise()) {
+                $isSuperAdmin = $user->getGroupe()?->getCode() === 'ADMIN';
                 $proprios = $repository->findWithFilters(
                     $user->getEntreprise(),
-                    $search
+                    $search,
+                    $isSuperAdmin ? $request->get('agence_id') : $user->getAgence()
                 );
             } else {
                 $proprios = $repository->findBy([], ['id' => 'DESC']);
@@ -142,12 +144,8 @@ class ApiProprioController extends ApiInterface
                 $proprio->setEntreprise($this->getUser()->getEntreprise());
             }
 
-            if (isset($data['agence_id'])) {
-                $agence = $agenceRepository->find($data['agence_id']);
-                if ($agence) $proprio->setAgence($agence);
-            } elseif ($this->getUser() && $this->getUser()->getAgence()) {
-                $proprio->setAgence($this->getUser()->getAgence());
-            }
+            $agence = $this->agenceAutorisee($agenceRepository, $data['agence_id'] ?? null);
+            if ($agence) $proprio->setAgence($agence);
 
             $this->updateAuditFields($proprio, true);
 
@@ -263,5 +261,19 @@ class ApiProprioController extends ApiInterface
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
         }
+    }
+
+    /** Agence demandée si l'utilisateur est administrateur d'entreprise, sinon la sienne. */
+    private function agenceAutorisee(\App\Repository\AgenceRepository $agenceRepository, mixed $agenceId): ?\App\Entity\Agence
+    {
+        $user = $this->getUser();
+        if ($agenceId && $user?->getGroupe()?->getCode() === 'ADMIN') {
+            $agence = $agenceRepository->find($agenceId);
+            if ($agence && $agence->getEntreprise() === $user->getEntreprise()) {
+                return $agence;
+            }
+        }
+
+        return $user?->getAgence();
     }
 }

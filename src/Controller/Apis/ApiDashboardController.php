@@ -85,6 +85,10 @@ class ApiDashboardController extends AbstractController
                 $headerAgenceId = null;
             }
             $agenceId = $headerAgenceId ? (int) $headerAgenceId : ($user->getAgence() ? $user->getAgence()->getId() : null);
+            // Seul l'administrateur d'entreprise peut consulter une autre agence que la sienne
+            if ($user->getGroupe()?->getCode() !== 'ADMIN' && $user->getAgence()) {
+                $agenceId = $user->getAgence()->getId();
+            }
 
             $criteria = [];
             if ($entreprise) {

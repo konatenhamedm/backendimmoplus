@@ -98,9 +98,12 @@ class ApiQuartierController extends ApiInterface
                 $quartier->setVille($ville);
             }
 
-            if (isset($data['agence_id'])) {
+            $user = $this->getUser();
+            if ($user && $user->getGroupe()?->getCode() !== 'ADMIN' && $user->getAgence()) {
+                $quartier->setAgence($user->getAgence());
+            } elseif (isset($data['agence_id'])) {
                 $agence = $agenceRepository->find($data['agence_id']);
-                if ($agence) $quartier->setAgence($agence);
+                if ($agence && $agence->getEntreprise() === $user?->getEntreprise()) $quartier->setAgence($agence);
             }
 
             // Récupérer l'entreprise de l'utilisateur connecté
@@ -128,8 +131,12 @@ class ApiQuartierController extends ApiInterface
     {
         try {
             if (!$quartier) return $this->errorResponse(null, "Quartier non trouvé", 404);
+            if ($this->getUser()?->getEntreprise() && $quartier->getEntreprise() !== $this->getUser()->getEntreprise()) {
+                return $this->errorResponse(null, "Quartier non trouvé", 404);
+            }
 
             $data = json_decode($request->getContent(), true);
+            unset($data['entreprise_id']);
             
             if (isset($data['libQuartier'])) $quartier->setLibQuartier($data['libQuartier']);
 

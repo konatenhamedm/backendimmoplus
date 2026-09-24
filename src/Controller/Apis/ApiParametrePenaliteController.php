@@ -58,7 +58,7 @@ class ApiParametrePenaliteController extends ApiInterface
             }
 
             $agenceId = $request->query->get('agence_id');
-            $global = in_array($user->getGroupe()?->getCode(), self::GROUPES_ADMIN, true) && in_array($agenceId, [null, '', 'all', 'null'], true);
+            $global = in_array($user->getGroupe()?->getCode(), ['SADM', 'ADMIN'], true) && in_array($agenceId, [null, '', 'all', 'null'], true);
             $agence = $global ? null : $relanceService->resolveAgence($user, $agenceId);
             if (!$global && !$agence) {
                 return $this->errorResponse(null, "Choisissez une agence", 404);
@@ -95,6 +95,9 @@ class ApiParametrePenaliteController extends ApiInterface
                 return $this->errorResponse(null, "Le pourcentage ne peut pas dépasser 100 %", 400);
             }
 
+            if (!empty($data['toutes']) && !in_array($user->getGroupe()?->getCode(), ['SADM', 'ADMIN'], true)) {
+                return $this->errorResponse(null, "Seul l'administrateur de l'entreprise peut régler toutes les agences", 403);
+            }
             if (!empty($data['toutes'])) {
                 $agences = $this->em->getRepository(Agence::class)->findBy(['entreprise' => $user->getEntreprise()]);
             } else {

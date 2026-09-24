@@ -66,6 +66,11 @@ class RelanceService
             return null;
         }
 
+        // Hors administrateur d'entreprise, on reste dans sa propre agence
+        if ($user->getGroupe()?->getCode() !== 'ADMIN' && $user->getAgence()) {
+            return $user->getAgence();
+        }
+
         if ($agenceId && $agenceId !== 'all' && $agenceId !== 'null') {
             $agence = $this->em->getRepository(Agence::class)->find((int) $agenceId);
             return $agence && $agence->getEntreprise() === $user->getEntreprise() ? $agence : null;

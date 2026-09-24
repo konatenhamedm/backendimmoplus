@@ -94,6 +94,9 @@ class ApiTypeMaisonController extends ApiInterface
     {
         try {
             if (!$typeMaison) return $this->errorResponse(null, "Type de maison non trouvé", 404);
+            if ($this->getUser()?->getEntreprise() && $typeMaison->getEntreprise() !== $this->getUser()->getEntreprise()) {
+                return $this->errorResponse(null, "Type de maison non trouvé", 404);
+            }
 
             $data = json_decode($request->getContent(), true);
             

@@ -20,6 +20,7 @@ class PenaliteService
     public function __construct(
         private EntityManagerInterface $em,
         private ParametrePenaliteRepository $repository,
+        private NotificationsLocation $notifications,
     ) {
     }
 
@@ -97,6 +98,7 @@ class PenaliteService
 
         $nbFactures = 0;
         $montant = 0;
+        $majorees = [];
         foreach ($factures as $facture) {
             $du = $this->penaliteDue($p, $facture, $aujourdhui);
             $ecart = $du['total'] - $facture->getMntPenalite();
@@ -108,8 +110,14 @@ class PenaliteService
                 ->setSoldeFactLoc((int) $facture->getSoldeFactLoc() + $ecart);
             $nbFactures++;
             $montant += $ecart;
+            $majorees[] = [$facture, $ecart];
         }
         $this->em->flush();
+
+        // Le locataire est prévenu de chaque nouvelle pénalité
+        foreach ($majorees as [$facture, $ecart]) {
+            $this->notifications->penaliteAppliquee($facture, $ecart);
+        }
 
         return ['factures' => $nbFactures, 'montant' => $montant];
     }

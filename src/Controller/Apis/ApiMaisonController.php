@@ -75,7 +75,7 @@ class ApiMaisonController extends ApiInterface
         description: "Ajoute une nouvelle maison.",
         tags: ['Maison']
     )]
-    public function create(Request $request, MaisonRepository $repository, QuartierRepository $quartierRepository, ProprioRepository $proprioRepository, TypeMaisonRepository $typeMaisonRepository, SubscriptionService $subscriptionService): Response
+    public function create(Request $request, MaisonRepository $repository, QuartierRepository $quartierRepository, ProprioRepository $proprioRepository, TypeMaisonRepository $typeMaisonRepository, SubscriptionService $subscriptionService, \App\Service\NotificationsLocation $notificationsLocation): Response
     {
         try {
             $user = $this->getUser();
@@ -92,7 +92,10 @@ class ApiMaisonController extends ApiInterface
             $data = json_decode($request->getContent(), true);
             $maison = new Maison();
             
-            // Set Agence
+            // Set Agence (seul l'administrateur d'entreprise choisit une autre agence que la sienne)
+            if (isset($data['agence_id']) && $user->getGroupe()?->getCode() !== 'ADMIN' && $user->getAgence()) {
+                $data['agence_id'] = $user->getAgence()->getId();
+            }
             if (isset($data['agence_id'])) {
                 $agence = $this->em->getRepository(\App\Entity\Agence::class)->find((int)$data['agence_id']);
                 if ($agence && $agence->getEntreprise() && $user->getEntreprise() && $agence->getEntreprise()->getId() === $user->getEntreprise()->getId()) {
@@ -120,7 +123,9 @@ class ApiMaisonController extends ApiInterface
             }
             if (isset($data['proprio_id'])) {
                 $proprio = $proprioRepository->find($data['proprio_id']);
-                if (!$proprio) return $this->errorResponse(null, "Propriétaire non trouvé", 404);
+                if (!$proprio || $proprio->getEntreprise() !== $user->getEntreprise()) {
+                    return $this->errorResponse(null, "Propriétaire non trouvé", 404);
+                }
                 $maison->setProprio($proprio);
             }
             if (isset($data['type_maison_id'])) {
@@ -131,7 +136,7 @@ class ApiMaisonController extends ApiInterface
 
             if (isset($data['agent_id'])) {
                 $agent = $this->em->getRepository(\App\Entity\User::class)->find((int)$data['agent_id']);
-                if ($agent) $maison->setIdAgent($agent);
+                if ($agent && $agent->getEntreprise() === $user->getEntreprise()) $maison->setIdAgent($agent);
             } elseif ($this->getUser()) {
                 $maison->setIdAgent($this->getUser());
             }
@@ -144,6 +149,7 @@ class ApiMaisonController extends ApiInterface
                     if (isset($appartData['nbrePieces'])) $appartement->setNbrePieces($appartData['nbrePieces']);
                     if (isset($appartData['numEtage'])) $appartement->setNumEtage($appartData['numEtage']);
                     if (isset($appartData['loyer'])) $appartement->setLoyer($appartData['loyer']);
+                    if (isset($appartData['caution'])) $appartement->setCaution((int) $appartData['caution']);
                     if (isset($appartData['details'])) $appartement->setDetails($appartData['details']);
                     //if (isset($appartData['oqp'])) $appartement->setOqp($appartData['oqp']);
                     
@@ -156,6 +162,7 @@ class ApiMaisonController extends ApiInterface
             $this->updateAuditFields($maison, true);
 
             $repository->save($maison, true);
+            $notificationsLocation->siteConfie($maison, $user);
 
             return $this->responseData($maison, 'group1');
         } catch (\Exception $exception) {
@@ -257,7 +264,7 @@ class ApiMaisonController extends ApiInterface
         description: "Associe un agent à une maison pour la collecte des loyers.",
         tags: ['Maison']
     )]
-    public function affecterAgent(Request $request, Maison $maison, MaisonRepository $repository, \App\Repository\UserRepository $userRepository): Response
+    public function affecterAgent(Request $request, Maison $maison, MaisonRepository $repository, \App\Repository\UserRepository $userRepository, \App\Service\NotificationsLocation $notificationsLocation): Response
     {
         try {
             if (!$maison) return $this->errorResponse(null, "Maison non trouvée", 404);
@@ -274,11 +281,53 @@ class ApiMaisonController extends ApiInterface
 
             $maison->setIdAgent($agent);
             $repository->save($maison, true);
+            $notificationsLocation->siteConfie($maison, $this->getUser());
 
             return $this->responseData($maison, 'group1');
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
+        }
+    }
+
+    #[Route('/agents', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/maison/agents",
+        summary: "Agents de recouvrement de l'agence",
+        description: "Utilisateurs des groupes AGENT et CAISSE à qui confier un site (agence de l'utilisateur, ou agence_id pour l'administrateur d'entreprise).",
+        tags: ['Maison']
+    )]
+    public function agents(Request $request): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user || !$user->getEntreprise()) {
+                return $this->response([]);
+            }
+            $estAdmin = $user->getGroupe()?->getCode() === 'ADMIN';
+            $agenceId = $estAdmin ? $request->query->get('agence_id') : $user->getAgence()?->getId();
+
+            $qb = $this->em->getRepository(\App\Entity\User::class)->createQueryBuilder('u')
+                ->join('u.groupe', 'g')
+                ->where('u.entreprise = :entreprise')
+                ->andWhere('g.code IN (:groupes)')
+                ->setParameter('entreprise', $user->getEntreprise())
+                ->setParameter('groupes', ['AGENT', 'CAISSE']);
+            if ($agenceId && $agenceId !== 'null') {
+                $qb->andWhere('u.agence = :agence')->setParameter('agence', (int) $agenceId);
+            }
+
+            $agents = array_map(fn (\App\Entity\User $u) => [
+                'id' => $u->getId(),
+                'nom' => $u->getNom(),
+                'prenoms' => $u->getPrenoms(),
+                'login' => $u->getLogin(),
+                'groupe' => $u->getGroupe()?->getCode(),
+            ], $qb->orderBy('u.nom', 'ASC')->getQuery()->getResult());
+
+            return $this->response($agents);
+        } catch (\Exception $exception) {
+            return $this->errorResponse(null, $exception->getMessage(), 500);
         }
     }
 

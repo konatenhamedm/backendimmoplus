@@ -42,11 +42,16 @@ class ProprioRepository extends ServiceEntityRepository
     /**
      * Centralized query for owners with filters
      */
-    public function findWithFilters($entreprise, $search = null)
+    public function findWithFilters($entreprise, $search = null, $agence = null)
     {
         $qb = $this->createQueryBuilder('p')
             ->where('p.entreprise = :entreprise')
             ->setParameter('entreprise', $entreprise);
+
+        // Propriétaires de l'agence, plus ceux qui ne sont rattachés à aucune agence
+        if ($agence) {
+            $qb->andWhere('p.agence = :agence OR p.agence IS NULL')->setParameter('agence', $agence);
+        }
 
         if ($search) {
             $qb->andWhere('p.nom LIKE :search OR p.prenoms LIKE :search OR p.contacts LIKE :search OR p.email LIKE :search')

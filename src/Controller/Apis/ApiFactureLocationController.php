@@ -367,10 +367,21 @@ class ApiFactureLocationController extends ApiInterface
         Request $request, 
         FactureLocation $facture, 
         FactureLocationRepository $repository,
-        TransactionRepository $transactionRepository
+        TransactionRepository $transactionRepository,
+        \App\Service\NotificationsLocation $notificationsLocation
     ): Response {
         try {
             if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
+
+            // Seules les factures de son entreprise (et de son agence pour un admin d'agence) s'encaissent
+            $user = $this->getUser();
+            $entrepriseFacture = $facture->getEntreprise() ?? $facture->getContrat()?->getEntreprise();
+            if (!$user || $entrepriseFacture !== $user->getEntreprise()) {
+                return $this->errorResponse(null, "Facture non trouvée", 404);
+            }
+            if ($user->getGroupe()?->getCode() === 'ADMINAG' && $user->getAgence() && $facture->getAgence() !== $user->getAgence()) {
+                return $this->errorResponse(null, "Cette facture n'appartient pas à votre agence", 403);
+            }
 
             $data = json_decode($request->getContent(), true);
             $amount = $data['amount'] ?? null;
@@ -414,29 +425,8 @@ class ApiFactureLocationController extends ApiInterface
             $this->updateAuditFields($facture);
             $repository->save($facture, true);
 
-            // 3. Notifier les Admins
-            if ($this->notificationService) {
-                $title = "💰 Nouveau Paiement Encaissé";
-                $message = sprintf(
-                    "L'agent %s a encaissé %s FCFA pour la facture %s (Locataire: %s).",
-                    $this->getUser()->getNomPrenoms(),
-                    number_format($amount, 0, ',', ' '),
-                    $facture->getLibFacture(),
-                    $facture->getLocataire()->getNom() . ' ' . $facture->getLocataire()->getPrenoms()
-                );
-                $this->notificationService->notifyAdmins($facture->getEntreprise(), $title, $message, [
-                    'facture_id' => $facture->getId(),
-                    'transaction_id' => $transaction->getId(),
-                    'send_email' => true,
-                    'amount' => $amount,
-                    'agent_name' => $this->getUser()->getNomPrenoms(),
-                    'locataire_name' => $facture->getLocataire()->getNom() . ' ' . $facture->getLocataire()->getPrenoms(),
-                    'facture_libelle' => $facture->getLibFacture(),
-                    'mode' => $mode,
-                    'date' => new \DateTime(),
-                    'email_template' => 'payment_collected_agent'
-                ]);
-            }
+            // 3. Notifier le locataire et les gestionnaires (admin entreprise + admin de l'agence)
+            $notificationsLocation->paiementEncaisse($facture, (int) $amount, $this->getUser());
 
             return $this->responseData($facture, 'group1_facture_location');
         } catch (\Exception $exception) {

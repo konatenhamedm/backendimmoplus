@@ -82,7 +82,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Crée un nouveau contrat de location.",
         tags: ['ContratLocation']
     )]
-    public function create(Request $request, ContratLocationRepository $repository, AppartementRepository $appartementRepository, LocataireRepository $locataireRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository, \App\Repository\AgenceRepository $agenceRepository): Response
+    public function create(Request $request, ContratLocationRepository $repository, AppartementRepository $appartementRepository, LocataireRepository $locataireRepository, NatureRepository $natureRepository, RegimeRepository $regimeRepository, \App\Repository\AgenceRepository $agenceRepository, \App\Service\NotificationsLocation $notificationsLocation): Response
     {
         try {
             $data = json_decode($request->getContent(), true);
@@ -94,13 +94,18 @@ class ApiContratLocationController extends ApiInterface
 
             if (isset($data['locataire_id'])) {
                 $locataire = $locataireRepository->find($data['locataire_id']);
-                if (!$locataire) return $this->errorResponse(null, "Locataire non trouvé", 404);
+                if (!$locataire || $locataire->getEntreprise() !== $this->getUser()?->getEntreprise()) {
+                    return $this->errorResponse(null, "Locataire non trouvé", 404);
+                }
                 $contrat->setLocataire($locataire);
             }
 
             $appartement = null;
             if (isset($data['appartement_id'])) {
                 $appartement = $appartementRepository->find($data['appartement_id']);
+                if ($appartement && (int) $appartement->getOqp() === 1) {
+                    return $this->errorResponse(null, "Ce logement est déjà occupé", 409);
+                }
                 if ($appartement) {
                     $contrat->setAppart($appartement);
                     $contrat->setMntLoyer($appartement->getLoyer()); // Set rent from apartment
@@ -172,11 +177,18 @@ class ApiContratLocationController extends ApiInterface
                 $contrat->setEntreprise($this->getUser()->getEntreprise());
             }
 
-            if (isset($data['agence_id'])) {
-                $agence = $agenceRepository->find($data['agence_id']);
-                if ($agence) $contrat->setAgence($agence);
+            $estAdmin = $this->getUser()?->getGroupe()?->getCode() === 'ADMIN';
+            $agence = isset($data['agence_id']) && $estAdmin ? $agenceRepository->find($data['agence_id']) : null;
+            if ($agence && $agence->getEntreprise() === $this->getUser()?->getEntreprise()) {
+                $contrat->setAgence($agence);
+            } elseif ($appartement?->getMaisson()?->getAgence()) {
+                // L'agence du logement fait foi
+                $contrat->setAgence($appartement->getMaisson()->getAgence());
             } elseif ($this->getUser() && $this->getUser()->getAgence()) {
                 $contrat->setAgence($this->getUser()->getAgence());
+            }
+            if (!$estAdmin && $this->getUser()?->getAgence() && $contrat->getAgence() !== $this->getUser()->getAgence()) {
+                return $this->errorResponse(null, "Ce logement n'appartient pas à votre agence", 403);
             }
 
             $this->updateAuditFields($contrat, true);
@@ -188,6 +200,8 @@ class ApiContratLocationController extends ApiInterface
                 $appartement->setOqp(1);
                 $appartementRepository->save($appartement, true);
             }
+
+            $notificationsLocation->contratCree($contrat, $this->getUser());
 
             return $this->responseData($contrat, 'group1');
         } catch (\Throwable $exception) {
@@ -342,7 +356,7 @@ class ApiContratLocationController extends ApiInterface
         description: "Met fin au contrat et libère l'appartement. Permet l'upload du fichier de résiliation.",
         tags: ['ContratLocation']
     )]
-    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, MotifRepository $motifRepository, \App\Service\FinContratNotifier $finContratNotifier): Response
+    public function resilier(Request $request, ContratLocation $contrat, ContratLocationRepository $repository, AppartementRepository $appartementRepository, MotifRepository $motifRepository, \App\Service\FinContratNotifier $finContratNotifier, \App\Service\NotificationsLocation $notificationsLocation): Response
     {
         try {
             if (!$contrat) return $this->errorResponse(null, "Contrat non trouvé", 404);
@@ -401,6 +415,7 @@ class ApiContratLocationController extends ApiInterface
 
             // Prévenir l'agent de recouvrement de la maison (sans jamais bloquer la résiliation)
             $finContratNotifier->notifierAgent($contrat, \App\Service\FinContratNotifier::RESILIATION);
+            $notificationsLocation->contratResilie($contrat, $this->getUser());
 
             return $this->response(['message' => 'Contrat résilié avec succès']);
         } catch (\Exception $exception) {
