@@ -368,7 +368,8 @@ class ApiFactureLocationController extends ApiInterface
         FactureLocation $facture, 
         FactureLocationRepository $repository,
         TransactionRepository $transactionRepository,
-        \App\Service\NotificationsLocation $notificationsLocation
+        \App\Service\NotificationsLocation $notificationsLocation,
+        \Psr\Log\LoggerInterface $logger
     ): Response {
         try {
             if (!$facture) return $this->errorResponse(null, "Facture non trouvée", 404);
@@ -425,11 +426,16 @@ class ApiFactureLocationController extends ApiInterface
             $this->updateAuditFields($facture);
             $repository->save($facture, true);
 
-            // 3. Notifier le locataire et les gestionnaires (admin entreprise + admin de l'agence)
-            $notificationsLocation->paiementEncaisse($facture, (int) $amount, $this->getUser());
+            // 3. Notifier le locataire et les gestionnaires (admin entreprise + admin de l'agence).
+            // Le paiement est déjà enregistré : une notification ratée ne doit jamais faire croire à un échec.
+            try {
+                $notificationsLocation->paiementEncaisse($facture, (int) $amount, $this->getUser());
+            } catch (\Throwable $e) {
+                $logger->error("Notifications du paiement de la facture #{$facture->getId()} : {$e->getMessage()}");
+            }
 
             return $this->responseData($facture, 'group1_facture_location');
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
         }
