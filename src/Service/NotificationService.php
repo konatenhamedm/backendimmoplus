@@ -36,14 +36,6 @@ class NotificationService
             return;
         }
 
-        // Enrichir la data pour le mobile
-        $data = array_merge($data, [
-            'notification_id' => uniqid('notif_'),
-            'user_id' => $user->getId(),
-            'entreprise_id' => $entreprise->getId(),
-            'timestamp' => time(),
-        ]);
-
         // Enregistrer en base
         $notification = (new Notification())
             ->setUser($user)
@@ -56,6 +48,22 @@ class NotificationService
 
         $this->em->persist($notification);
         $this->em->flush();
+
+        // Données du push : notification_id = id en base, pour que l'application la marque comme lue quand on la touche
+        // FCM n'accepte que des chaînes : valeurs simples converties, dates formatées, le reste encodé en JSON
+        $data = array_map(
+            fn ($v) => match (true) {
+                is_scalar($v) || $v === null => (string) $v,
+                $v instanceof \DateTimeInterface => $v->format(\DateTimeInterface::ATOM),
+                default => (string) json_encode($v),
+            },
+            array_merge($data, [
+                'notification_id' => $notification->getId(),
+                'user_id' => $user->getId(),
+                'entreprise_id' => $entreprise->getId(),
+                'timestamp' => time(),
+            ])
+        );
 
         // Envoyer push si un token FCM existe
         $token = $user->getFcmToken();
