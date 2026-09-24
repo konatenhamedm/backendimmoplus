@@ -22,7 +22,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 #[AsCommand(
     name: 'app:menu:relances',
-    description: 'Met à jour le menu dynamique : Relances, Modèles de relance et Paramètres relances pour les groupes concernés',
+    description: 'Met à jour le menu dynamique : Relances, Modèles de relance, Paramètres relances et Pénalités de retard pour les groupes concernés',
 )]
 class MenuRelancesCommand extends Command
 {
@@ -31,6 +31,7 @@ class MenuRelancesCommand extends Command
         '/relances' => ['Rélances', 'Send', 0],
         '/relances/modeles' => ['Modèles de relance', 'FileText', 1],
         '/relances/parametres' => ['Paramètres relances', 'Settings', 2],
+        '/relances/penalites' => ['Pénalités de retard', 'Receipt', 3],
     ];
 
     /** Groupes qui gèrent les relances : tous les écrans */
