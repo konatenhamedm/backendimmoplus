@@ -65,18 +65,25 @@ class ApiMotifController extends ApiInterface
     public function create(Request $request, MotifRepository $repository): Response
     {
         try {
-            $data = json_decode($request->getContent(), true);
-            $motif = new Motif();
-            
-            if (isset($data['libMotif'])) $motif->setLibMotif($data['libMotif']);
-            
-            if ($this->getUser() && $this->getUser()->getEntreprise()) {
-                $motif->setEntreprise($this->getUser()->getEntreprise());
+            $data = json_decode($request->getContent(), true) ?? [];
+            $libelle = trim((string) ($data['libMotif'] ?? ''));
+            if ($libelle === '') {
+                return $this->errorResponse(null, "Le libellé du motif est obligatoire", 400);
+            }
+
+            $entreprise = $this->getUser()?->getEntreprise();
+            if ($this->existeDeja($repository, $libelle, $entreprise)) {
+                return $this->errorResponse(null, "Ce motif existe déjà", 409);
+            }
+
+            $motif = (new Motif())->setLibMotif($libelle);
+            if ($entreprise) {
+                $motif->setEntreprise($entreprise);
             }
 
             $repository->save($motif, true);
 
-            return $this->responseData($motif);
+            return $this->response(['id' => $motif->getId(), 'libMotif' => $motif->getLibMotif()]);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -93,15 +100,25 @@ class ApiMotifController extends ApiInterface
     public function update(Request $request, Motif $motif, MotifRepository $repository): Response
     {
         try {
-            if (!$motif) return $this->errorResponse(null, "Motif non trouvé", 404);
+            if (!$this->estAMonEntreprise($motif)) {
+                return $this->errorResponse(null, "Motif non trouvé", 404);
+            }
 
-            $data = json_decode($request->getContent(), true);
-            
-            if (isset($data['libMotif'])) $motif->setLibMotif($data['libMotif']);
+            $data = json_decode($request->getContent(), true) ?? [];
+            if (isset($data['libMotif'])) {
+                $libelle = trim((string) $data['libMotif']);
+                if ($libelle === '') {
+                    return $this->errorResponse(null, "Le libellé du motif est obligatoire", 400);
+                }
+                if ($this->existeDeja($repository, $libelle, $motif->getEntreprise(), $motif)) {
+                    return $this->errorResponse(null, "Ce motif existe déjà", 409);
+                }
+                $motif->setLibMotif($libelle);
+            }
 
             $repository->save($motif, true);
 
-            return $this->responseData($motif);
+            return $this->response(['id' => $motif->getId(), 'libMotif' => $motif->getLibMotif()]);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
@@ -118,12 +135,37 @@ class ApiMotifController extends ApiInterface
     public function delete(Motif $motif, MotifRepository $repository): Response
     {
         try {
-            if (!$motif) return $this->errorResponse(null, "Motif non trouvé", 404);
+            if (!$this->estAMonEntreprise($motif)) {
+                return $this->errorResponse(null, "Motif non trouvé", 404);
+            }
+            if (!$motif->getContratLocations()->isEmpty() || !$motif->getFincontrats()->isEmpty()) {
+                return $this->errorResponse(null, "Ce motif est déjà utilisé par des contrats résiliés : vous pouvez le renommer, pas le supprimer", 409);
+            }
             $repository->remove($motif, true);
             return $this->response(['message' => 'Motif supprimé avec succès']);
         } catch (\Exception $exception) {
             $this->setStatusCode(500);
             return $this->response(['message' => $exception->getMessage()]);
         }
+    }
+
+    /** Un utilisateur d'entreprise ne gère que les motifs de son entreprise. */
+    private function estAMonEntreprise(Motif $motif): bool
+    {
+        $entreprise = $this->getUser()?->getEntreprise();
+
+        return !$entreprise || $motif->getEntreprise() === $entreprise;
+    }
+
+    private function existeDeja(MotifRepository $repository, string $libelle, $entreprise, ?Motif $saufMotif = null): bool
+    {
+        $motifs = $entreprise ? $repository->findBy(['entreprise' => $entreprise]) : [];
+        foreach ($motifs as $m) {
+            if ($m !== $saufMotif && mb_strtolower(trim((string) $m->getLibMotif())) === mb_strtolower($libelle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
