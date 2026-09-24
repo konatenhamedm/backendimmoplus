@@ -233,6 +233,33 @@ class ApiNotificationController extends ApiInterface
         return $this->response([]);
     }
 
+    #[Route('/supprimer', methods: ['POST'])]
+    #[OA\Post(
+        path: "/api/notification/supprimer",
+        summary: "Supprimer plusieurs notifications",
+        description: "Corps : {\"ids\": [1, 2, 3]}. Seules les notifications de l'utilisateur connecté sont supprimées.",
+        tags: ['Notification']
+    )]
+    public function deleteMany(Request $request, NotificationRepository $notificationRepository): Response
+    {
+        $ids = array_filter(array_map('intval', (array) (json_decode($request->getContent(), true)['ids'] ?? [])));
+        if (!$ids) {
+            return $this->errorResponse(null, "Aucune notification sélectionnée", 400);
+        }
+
+        $supprimees = $notificationRepository->createQueryBuilder('n')
+            ->delete()
+            ->where('n.user = :user')
+            ->andWhere('n.id IN (:ids)')
+            ->setParameter('user', $this->getUser())
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->execute();
+        $this->setMessage("$supprimees notification(s) supprimée(s)");
+
+        return $this->response(['supprimees' => $supprimees]);
+    }
+
     #[Route('/lues', methods: ['DELETE'])]
     #[OA\Delete(
         path: "/api/notification/lues",
