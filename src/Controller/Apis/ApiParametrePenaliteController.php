@@ -40,6 +40,38 @@ class ApiParametrePenaliteController extends ApiInterface
         }
     }
 
+    #[Route('/bilan', methods: ['GET'])]
+    #[OA\Get(
+        path: "/api/parametre-penalite/bilan",
+        summary: "Pénalités appliquées sur une année, mois par mois",
+        description: "Pour l'agence agence_id, ou pour toute l'entreprise (administrateurs) sans agence_id.",
+        tags: ['Penalite']
+    )]
+    #[OA\Parameter(name: "agence_id", in: "query", schema: new OA\Schema(type: "integer"))]
+    #[OA\Parameter(name: "annee", in: "query", schema: new OA\Schema(type: "integer"))]
+    public function bilan(Request $request, RelanceService $relanceService, PenaliteService $penalites): Response
+    {
+        try {
+            $user = $this->getUser();
+            if (!$user?->getEntreprise()) {
+                return $this->errorResponse(null, "Accès refusé", 403);
+            }
+
+            $agenceId = $request->query->get('agence_id');
+            $global = in_array($user->getGroupe()?->getCode(), self::GROUPES_ADMIN, true) && in_array($agenceId, [null, '', 'all', 'null'], true);
+            $agence = $global ? null : $relanceService->resolveAgence($user, $agenceId);
+            if (!$global && !$agence) {
+                return $this->errorResponse(null, "Choisissez une agence", 404);
+            }
+
+            $annee = (int) ($request->query->get('annee') ?: date('Y'));
+
+            return $this->response($penalites->bilan($user->getEntreprise(), $agence, $annee));
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, $e->getMessage(), 500);
+        }
+    }
+
     #[Route('/', methods: ['PUT', 'POST'])]
     #[OA\Put(
         path: "/api/parametre-penalite/",

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Agence;
+use App\Entity\Entreprise;
 use App\Entity\FactureLocation;
 use App\Entity\ParametrePenalite;
 use App\Repository\ParametrePenaliteRepository;
@@ -111,6 +112,66 @@ class PenaliteService
         $this->em->flush();
 
         return ['factures' => $nbFactures, 'montant' => $montant];
+    }
+
+    /**
+     * Pénalités appliquées sur une année, mois par mois (mois de la date limite de la facture),
+     * pour une agence ou toute l'entreprise.
+     *
+     * @return array{annee: int, annees: int[], total: int, paye: int, du: int, factures: int, mois: array<int, array{mois: int, montant: int, factures: int}>}
+     */
+    public function bilan(Entreprise $entreprise, ?Agence $agence, int $annee): array
+    {
+        $qb = $this->em->getRepository(FactureLocation::class)->createQueryBuilder('f')
+            ->where('f.entreprise = :entreprise')
+            ->andWhere('f.mntPenalite > 0')
+            ->setParameter('entreprise', $entreprise);
+        if ($agence) {
+            $qb->andWhere('f.agence = :agence')->setParameter('agence', $agence);
+        }
+
+        /** @var FactureLocation[] $factures */
+        $factures = $qb->getQuery()->getResult();
+
+        $annees = [(int) date('Y')];
+        $mois = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $mois[$m] = ['mois' => $m, 'montant' => 0, 'factures' => 0];
+        }
+        $total = $paye = $nb = 0;
+
+        foreach ($factures as $f) {
+            $date = $f->getDateLimite() ?? $f->getDateEmission();
+            if (!$date) {
+                continue;
+            }
+            $annees[] = (int) $date->format('Y');
+            if ((int) $date->format('Y') !== $annee) {
+                continue;
+            }
+            $montant = $f->getMntPenalite();
+            $m = (int) $date->format('n');
+            $mois[$m]['montant'] += $montant;
+            $mois[$m]['factures']++;
+            $total += $montant;
+            $nb++;
+            // Les paiements soldent d'abord le loyer : la pénalité est réglée pour ce qui dépasse le loyer
+            $regle = max(0, $f->getMntFact() + $montant - (int) $f->getSoldeFactLoc());
+            $paye += min($montant, max(0, $regle - (int) $f->getMntFact()));
+        }
+
+        $annees = array_values(array_unique($annees));
+        rsort($annees);
+
+        return [
+            'annee' => $annee,
+            'annees' => $annees,
+            'total' => $total,
+            'paye' => $paye,
+            'du' => $total - $paye,
+            'factures' => $nb,
+            'mois' => array_values($mois),
+        ];
     }
 
     /** Phrase d'exemple affichée dans les écrans de réglage. */
