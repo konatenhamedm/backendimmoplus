@@ -66,3 +66,15 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            # Fixtures : le bundle n'est installé qu'en dev/test (composer install --no-dev en prod)
+            - '../src/DataFixtures/'
+
+when@dev: &fixtures
+    services:
+        _defaults:
+            autowire: true
+            autoconfigure: true
+        App\DataFixtures\:
+            resource: '../src/DataFixtures/'
+
+when@test: *fixtures
